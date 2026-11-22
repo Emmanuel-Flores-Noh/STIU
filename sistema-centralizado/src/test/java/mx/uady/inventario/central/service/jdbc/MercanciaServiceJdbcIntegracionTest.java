@@ -13,6 +13,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,6 +26,7 @@ import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 
 /** Requiere MariaDB con el esquema y las variables {@code DB_*}; no modifica los datos del seed. */
+@Tag("mariadb")
 @EnabledIfEnvironmentVariable(named = "DB_PASSWORD", matches = ".+",
         disabledReason = "Requiere MariaDB real y las variables DB_* definidas")
 class MercanciaServiceJdbcIntegracionTest {

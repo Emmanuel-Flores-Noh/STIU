@@ -40,6 +40,11 @@
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+
+        <!-- Pruebas: por defecto solo se ejecutan las unitarias. Las que necesitan
+             MariaDB llevan @Tag("mariadb") y se ejecutan con el perfil integracion.
+             Se definen como propiedades para poder sobrescribirlas con -D. -->
+        <excludedGroups>mariadb</excludedGroups>
     </properties>
 
     <dependencyManagement>
@@ -125,4 +130,16 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <!-- mvn -Pintegracion test: ejecuta solo las pruebas contra MariaDB real
+             (requiere docker compose up y las variables DB_*, incluida DB_PASSWORD). -->
+        <profile>
+            <id>integracion</id>
+            <properties>
+                <excludedGroups>ninguno</excludedGroups>
+                <groups>mariadb</groups>
+            </properties>
+        </profile>
+    </profiles>
 </project>

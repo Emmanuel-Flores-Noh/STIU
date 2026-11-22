@@ -1,5 +1,6 @@
 package mx.uady.inventario.central.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * normal (`mvn test`) siga funcionando sin base de datos. Con MariaDB levantada
  * se ejecuta con las mismas variables {@code DB_*} que usa el Sistema 1.</p>
  */
+@Tag("mariadb")
 @EnabledIfEnvironmentVariable(named = "DB_PASSWORD", matches = ".+",
         disabledReason = "Requiere MariaDB real y las variables DB_* definidas")
 class ConexionBDIntegracionTest {

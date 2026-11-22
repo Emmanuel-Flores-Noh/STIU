@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -17,6 +18,7 @@ import mx.uady.inventario.central.repository.VentaRepository;
 import mx.uady.inventario.central.repository.VentaRepositoryException;
 
 /** Requiere MariaDB con el esquema y las variables {@code DB_*}; no modifica los datos del seed. */
+@Tag("mariadb")
 @EnabledIfEnvironmentVariable(named = "DB_PASSWORD", matches = ".+",
         disabledReason = "Requiere MariaDB real y las variables DB_* definidas")
 class ConsultasVentaJdbcIntegracionTest {
