@@ -1,6 +1,0 @@
-# Permite que Puppeteer ejecute su script de instalación.
-# pnpm 10 usa onlyBuiltDependencies y pnpm 12+ usa allowBuilds.
-onlyBuiltDependencies:
-  - puppeteer
-allowBuilds:
-  puppeteer: true
