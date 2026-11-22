@@ -1,0 +1,45 @@
+flowchart TB
+    %% Diagrama de bloques - Sistema de Inventario UADY (Patrón Broker)
+
+    subgraph S2["Sistema 2 (Cliente)"]
+        direction TB
+        UI["Interfaz de usuario"]
+        CLI["Cliente<br/>Construye solicitudes JSON<br/>y traduce códigos de error"]
+        UI --> CLI
+    end
+
+    subgraph BR["Broker (Intermediario)"]
+        direction TB
+        REC["Recepción y deserialización<br/>(unmarshalling)"]
+        REG["Registro de proveedores<br/>servicio -> host:puerto"]
+        ENR["Enrutamiento de solicitudes"]
+        BIT["Bitácora<br/>[REGISTRO] / [BROKER]"]
+        REC --> ENR
+        ENR <--> REG
+        ENR --> BIT
+        REG --> BIT
+    end
+
+    subgraph S1["Sistema 1 (Proveedor Centralizado)"]
+        direction TB
+        SRV["Servidor TCP<br/>(SERVICE_PORT)"]
+        GT["Servicio gestorTiendas"]
+        INV["Servicio inventario"]
+        GP["Servicio gestorPrecios"]
+        QR["Generador de QR<br/>(ZXing -> PNG / Base64)"]
+        ALM[("Almacenamiento<br/>de QR")]
+        SRV --> GT
+        SRV --> INV
+        SRV --> GP
+        INV --> QR
+        QR --> ALM
+    end
+
+    DB[("MariaDB<br/>Persistencia")]
+
+    CLI <-->|"JSON / TCP"| REC
+    ENR <-->|"JSON / TCP"| SRV
+    S1 -.->|"registrarProveedor<br/>JSON / TCP"| REG
+    GT -->|JDBC| DB
+    INV -->|JDBC| DB
+    GP -->|JDBC| DB
