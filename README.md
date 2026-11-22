@@ -1,4 +1,4 @@
-# Sistema de Trazabilidad e Inventarios UADY
+# Sistema de Trazabilidad e Inventarios UADY (STIU)
 
 Integración distribuida de dos sistemas de inventario de los almacenes de la UADY mediante el **patrón Broker**.
 
@@ -10,15 +10,30 @@ La comunicación usa Sockets TCP con mensajes JSON (Gson), atención concurrente
 
 ## Documentación
 
-- 📄 [Documentos compilados a PDF](docs/02_documentacion_final/out/docs/)
-  - [Portada](docs/02_documentacion_final/out/docs/06_portada.pdf)
-  - [Preguntas de la actividad](docs/02_documentacion_final/out/docs/00_preguntas_actividad.pdf)
-  - [Diagrama de componentes](docs/02_documentacion_final/out/docs/01_diagrama_componentes.pdf)
-  - [Diagramas de secuencia](docs/02_documentacion_final/out/docs/02_diagramas_secuencia.pdf)
-  - [Despliegue y estructura](docs/02_documentacion_final/out/docs/03_despliegue_estructura.pdf)
-  - [Evidencias de pruebas](docs/02_documentacion_final/out/docs/04_evidencias_pruebas.pdf)
-  - [Documento técnico final](docs/02_documentacion_final/out/docs/05_documento_tecnico_final.pdf)
-- 🎞️ [Presentación](docs/02_documentacion_final/extras/Presentacion.pdf)
+Se separan por etapas de desarrollo.
+
+### [Documentación inicial](./docs/01_documentacion_inicial/)
+La documentación inicial requerida para iniciar el proyecto
+
+contiene:
+* Diagrama entidad relacion
+* Diagrama de interacciones
+* Definicion inicial del proyecto
+* Requisitos iniciales
+* Casos de uso
+* Definicion de tecnologias
+* Contrato de interacciones
+
+### [Entrega arquitectura](./docs/02_entrega_arquitectura/)
+La documentación para la entrega de la asignatura arquitectura de software contiene lo siguiente:
+
+* Diagrama de componentes
+* Diagramas de secuencia
+* Estructura y despligue del proyecto
+
+### [Entrega construccion de software](./docs/03_entrega_construccion/)
+La documentacion formal del proyecto.
+
 
 ## Estructura
 
