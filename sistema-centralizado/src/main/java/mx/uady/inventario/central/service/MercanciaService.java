@@ -29,6 +29,13 @@ public interface MercanciaService {
     Mercancia registrar(int idProducto, String numeroSerie);
 
     /**
+     * Historial de cambio de precios de unidad, filtradas y ordenadas
+     * @param idProducto producto a filtrar, o {@code null} para todos
+     * @param numeroSerie estado a filtrar, o {@code null} para todos
+     * @return Lista de cambios en los precios de la unidad
+     */
+    Mercancia historialPrecio(int idProducto, String numeroSerie);
+    /**
      * Garantiza que la unidad tenga su PNG de QR: si no tiene ruta o el archivo ya no existe,
      * lo genera y guarda la nueva ruta. Si ya existe, no hace nada.
      *

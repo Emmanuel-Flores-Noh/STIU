@@ -1,4 +1,4 @@
-package mx.uady.inventario.cliente.view;
+package mx.uady.inventario.cliente.view.components;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

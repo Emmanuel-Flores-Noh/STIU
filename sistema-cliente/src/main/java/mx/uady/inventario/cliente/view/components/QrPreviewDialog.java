@@ -1,12 +1,28 @@
 package mx.uady.inventario.cliente.view.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import mx.uady.inventario.cliente.model.QrDTO;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -14,110 +30,125 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 /**
- * Diálogo modal independiente diseñado para previsualizar el código QR y los datos básicos
- * de identificación de una unidad de mercancía seleccionada.
- *
- * <p>La imagen llega como bytes PNG desde el Sistema 1 (operación {@code obtenerQr} a través
- * del Broker), por lo que no depende de archivos locales. Permite guardarla como PNG.</p>
+ * Ventana «Código QR»: muestra la imagen del QR, el número de serie y el nombre del producto, y
+ * permite guardar la imagen como PNG. Si la imagen no puede mostrarse, lo indica en la misma ventana.
  */
 public class QrPreviewDialog extends JDialog {
 
+    /** Texto que se muestra cuando la imagen no puede mostrarse. */
+    public static final String TEXTO_SIN_IMAGEN = "No se pudo mostrar la imagen del código QR.";
+
     private static final int TAMANO_IMAGEN = 250;
 
+    private final QrDTO qr;
     private final byte[] png;
-    private final String numeroSerie;
+    private final OperacionDialog mensajes;
 
     /**
-     * Constructor que inicializa el diálogo modal de previsualización del QR.
+     * Crea la ventana modal.
      *
-     * @param parent         Ventana contenedora propietaria de este diálogo.
-     * @param numeroSerie    Número de serie único de la unidad de mercancía.
-     * @param idProducto     Identificador numérico del producto asociado.
-     * @param nombreProducto Nombre del producto asociado; puede ser nulo.
-     * @param png            Bytes de la imagen PNG del código QR.
+     * @param parent ventana propietaria
+     * @param qr     datos del QR a mostrar
      */
-    public QrPreviewDialog(Window parent, String numeroSerie, int idProducto, String nombreProducto, byte[] png) {
-        super(parent, "Código QR - " + numeroSerie, ModalityType.APPLICATION_MODAL);
-        this.png = png;
-        this.numeroSerie = numeroSerie;
-        configurarVentana();
-        inicializarComponentes(idProducto, nombreProducto);
-    }
-
-    /**
-     * Configura los parámetros dimensionales, de centrado, de operación de cierre y redimensionamiento del diálogo modal.
-     */
-    private void configurarVentana() {
+    public QrPreviewDialog(Window parent, QrDTO qr) {
+        super(parent, "Código QR", ModalityType.APPLICATION_MODAL);
+        this.qr = qr;
+        this.png = qr.decodificarPng();
+        this.mensajes = new OperacionDialog(this);
         setSize(400, 500);
         setLocationRelativeTo(getOwner());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
+        BufferedImage imagen = leerImagen(png);
+        JPanel principal = new JPanel(new BorderLayout(15, 15));
+        principal.setBorder(new EmptyBorder(20, 20, 20, 20));
+        principal.add(crearPanelInfo(), BorderLayout.NORTH);
+        principal.add(crearPanelImagen(imagen), BorderLayout.CENTER);
+        principal.add(crearPanelBotones(imagen != null), BorderLayout.SOUTH);
+        add(principal);
     }
 
-    /**
-     * Inicializa, organiza y aplica diseño moderno con FlatLaf a los componentes internos del diálogo,
-     * incluyendo el panel de metadatos, el contenedor de la imagen QR y los botones de guardar y cerrar.
-     *
-     * @param idProducto     ID del producto asociado.
-     * @param nombreProducto Nombre del producto asociado; puede ser nulo.
-     */
-    private void inicializarComponentes(int idProducto, String nombreProducto) {
-        JPanel panelPrincipal = new JPanel(new BorderLayout(15, 15));
-        panelPrincipal.setBorder(new EmptyBorder(20, 20, 20, 20));
-
-        // Panel de descripción superior
-        JPanel panelInfo = new JPanel(new GridLayout(2, 1, 5, 5));
-        JLabel lblSerie = new JLabel("N° Serie: " + numeroSerie);
+    private JPanel crearPanelInfo() {
+        JPanel info = new JPanel(new GridLayout(2, 1, 5, 5));
+        JLabel lblSerie = new JLabel("Número de serie: " + qr.getNumeroSerie());
         lblSerie.setFont(lblSerie.getFont().deriveFont(Font.BOLD, 14f));
-        String textoProducto = nombreProducto != null && !nombreProducto.isBlank()
-                ? nombreProducto + " (ID " + idProducto + ")"
-                : "ID " + idProducto;
-        JLabel lblProducto = new JLabel("Producto: " + textoProducto);
+        info.add(lblSerie);
+        info.add(new JLabel("Producto: " + textoProducto()));
+        return info;
+    }
 
-        panelInfo.add(lblSerie);
-        panelInfo.add(lblProducto);
-        panelPrincipal.add(panelInfo, BorderLayout.NORTH);
-
-        // Panel de la imagen QR (Centro)
-        JPanel panelImagen = new JPanel(new GridBagLayout());
-        panelImagen.putClientProperty(FlatClientProperties.STYLE, "arc: 12; background: #FFFFFF;");
-        panelImagen.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
-
-        JLabel lblImagenQr = new JLabel();
-        lblImagenQr.setHorizontalAlignment(SwingConstants.CENTER);
-        BufferedImage imagen = leerImagen(png);
-        if (imagen != null) {
-            lblImagenQr.setIcon(new ImageIcon(
-                    imagen.getScaledInstance(TAMANO_IMAGEN, TAMANO_IMAGEN, Image.SCALE_SMOOTH)));
-        } else {
-            lblImagenQr.setText("No se pudo mostrar la imagen del código QR");
+    private String textoProducto() {
+        boolean hayNombre = qr.getNombreProducto() != null && !qr.getNombreProducto().isBlank();
+        String id = qr.getIdProducto() != null ? "ID " + qr.getIdProducto() : null;
+        if (hayNombre) {
+            return id != null ? qr.getNombreProducto() + " (" + id + ")" : qr.getNombreProducto();
         }
+        return id != null ? id : "N/D";
+    }
 
-        panelImagen.add(lblImagenQr);
-        panelPrincipal.add(panelImagen, BorderLayout.CENTER);
+    private JPanel crearPanelImagen(BufferedImage imagen) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.putClientProperty(FlatClientProperties.STYLE, "arc: 12; background: #FFFFFF;");
+        panel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        JLabel lblImagen = new JLabel();
+        lblImagen.setName("lblImagenQr");
+        lblImagen.setHorizontalAlignment(SwingConstants.CENTER);
+        if (imagen != null) {
+            lblImagen.setIcon(new ImageIcon(imagen.getScaledInstance(TAMANO_IMAGEN, TAMANO_IMAGEN, Image.SCALE_SMOOTH)));
+        } else {
+            lblImagen.setText(TEXTO_SIN_IMAGEN);
+        }
+        panel.add(lblImagen);
+        return panel;
+    }
 
-        // Botones inferiores
-        JButton btnGuardar = new JButton("Guardar PNG como...");
-        btnGuardar.setEnabled(imagen != null);
+    private JPanel crearPanelBotones(boolean puedeGuardar) {
+        JButton btnGuardar = new JButton("Guardar png como");
+        btnGuardar.setName("btnGuardarPng");
+        btnGuardar.setEnabled(puedeGuardar);
         btnGuardar.addActionListener(e -> guardarComoPng());
 
         JButton btnCerrar = new JButton("Cerrar");
         btnCerrar.addActionListener(e -> dispose());
 
-        JPanel panelSur = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panelSur.add(btnGuardar);
-        panelSur.add(btnCerrar);
-        panelPrincipal.add(panelSur, BorderLayout.SOUTH);
-
-        add(panelPrincipal);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panel.add(btnGuardar);
+        panel.add(btnCerrar);
+        return panel;
     }
 
-    /**
-     * Decodifica los bytes PNG en una imagen.
-     *
-     * @param bytes contenido del archivo PNG; puede ser nulo
-     * @return la imagen, o {@code null} si no hay bytes o no son una imagen válida
-     */
+    /** Pide la ruta, agrega «.png» si falta, confirma antes de reemplazar y guarda. Si se cancela, no crea archivo. */
+    private void guardarComoPng() {
+        JFileChooser selector = new JFileChooser();
+        selector.setDialogTitle("Guardar código QR");
+        selector.setFileFilter(new FileNameExtensionFilter("Imagen PNG", "png"));
+        selector.setSelectedFile(new File(nombreSeguro(qr.getNumeroSerie()) + ".png"));
+        if (selector.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File destino = selector.getSelectedFile();
+        if (!destino.getName().toLowerCase().endsWith(".png")) {
+            destino = new File(destino.getParentFile(), destino.getName() + ".png");
+        }
+        if (destino.exists() && JOptionPane.showConfirmDialog(this,
+                "El archivo " + destino.getName() + " ya existe.\n¿Desea reemplazarlo?",
+                "Archivo existente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            Files.write(destino.toPath(), png);
+            mensajes.informar("QR guardado", "Código QR guardado en:\n" + destino.getAbsolutePath());
+        } catch (IOException e) {
+            mensajes.error("Error al guardar", "No se pudo guardar el archivo:\n" + e.getMessage());
+        }
+    }
+
+    /** Evita que caracteres no válidos en nombres de archivo (p. ej. «/») rompan el nombre sugerido. */
+    private static String nombreSeguro(String nombre) {
+        return nombre == null || nombre.isBlank() ? "codigo-qr" : nombre.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    /** Decodifica los bytes PNG; devuelve {@code null} si no hay bytes o no son una imagen válida. */
     private static BufferedImage leerImagen(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -126,32 +157,6 @@ public class QrPreviewDialog extends JDialog {
             return ImageIO.read(new ByteArrayInputStream(bytes));
         } catch (IOException e) {
             return null;
-        }
-    }
-
-    /**
-     * Abre un selector de archivos y guarda el PNG del código QR en la ruta elegida.
-     * Agrega la extensión {@code .png} si el usuario no la escribió.
-     */
-    private void guardarComoPng() {
-        JFileChooser selector = new JFileChooser();
-        selector.setDialogTitle("Guardar código QR");
-        selector.setFileFilter(new FileNameExtensionFilter("Imagen PNG", "png"));
-        selector.setSelectedFile(new File(numeroSerie + ".png"));
-        if (selector.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-            return;
-        }
-        File destino = selector.getSelectedFile();
-        if (!destino.getName().toLowerCase().endsWith(".png")) {
-            destino = new File(destino.getParentFile(), destino.getName() + ".png");
-        }
-        try {
-            Files.write(destino.toPath(), png);
-            JOptionPane.showMessageDialog(this, "Código QR guardado en:\n" + destino.getAbsolutePath(),
-                    "QR guardado", JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo guardar el archivo:\n" + e.getMessage(),
-                    "Error al guardar", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

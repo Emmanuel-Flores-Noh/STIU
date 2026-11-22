@@ -1,4 +1,4 @@
-package mx.uady.inventario.cliente.util;
+package mx.uady.inventario.cliente.network;
 
 import org.junit.jupiter.api.Test;
 
