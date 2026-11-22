@@ -49,25 +49,25 @@ final class CatalogoSistema1 {
 
         if (ventaService != null) {
             despachador.registrarOperacion(Servicios.GESTOR_TIENDAS,
-                    Operaciones.ACTUALIZAR_TIENDA_VENTA, ventaService::registrarVenta);
+                    Operaciones.ACTUALIZAR_TIENDA_VENTA, new ActualizarTiendaVentaManejador(ventaService));
         }
         if (consultasVenta != null) {
             despachador.registrarOperacion(Servicios.GESTOR_TIENDAS,
-                    Operaciones.LISTAR_TIENDAS, ManejadoresConsulta.listarTiendas(consultasVenta));
+                    Operaciones.LISTAR_TIENDAS, new ListarTiendasManejador(consultasVenta));
             despachador.registrarOperacion(Servicios.GESTOR_TIENDAS,
-                    Operaciones.LISTAR_USUARIOS, ManejadoresConsulta.listarUsuariosProveedores(consultasVenta));
+                    Operaciones.LISTAR_USUARIOS, new ListarUsuariosManejador(consultasVenta));
         }
         if (mercanciaService != null && productoService != null) {
             despachador.registrarOperacion(Servicios.INVENTARIO, Operaciones.LISTAR_INVENTARIO,
-                    ManejadoresConsulta.listarInventarioDisponible(mercanciaService, productoService));
+                    new ListarInventarioManejador(mercanciaService, productoService));
             if (qrService != null) {
                 despachador.registrarOperacion(Servicios.INVENTARIO, Operaciones.OBTENER_QR,
-                        ManejadoresConsulta.obtenerQr(mercanciaService, productoService, qrService));
+                        new ObtenerQrManejador(mercanciaService, productoService, qrService));
             }
         }
         if (productoService != null) {
             despachador.registrarOperacion(Servicios.GESTOR_PRECIOS, Operaciones.LISTAR_PRECIOS_PRODUCTO,
-                    ManejadoresConsulta.listarPreciosProducto(productoService));
+                    new ListarPreciosProductoManejador(productoService));
         }
         return despachador;
     }
