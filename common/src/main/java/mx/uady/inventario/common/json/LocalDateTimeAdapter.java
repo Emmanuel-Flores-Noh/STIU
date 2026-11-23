@@ -11,10 +11,36 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Adaptador Gson para java.time.LocalDateTime (formato ISO-8601).
+ *
+ * <p>Es la única fuente del formato de fecha y hora del contrato: los campos que no pasan por
+ * Gson (por ejemplo {@code fecha_venta}) usan {@link #formatear(LocalDateTime)} y
+ * {@link #parsear(String)} para escribirse y leerse igual en los tres componentes.</p>
  */
 public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    /** Formato ISO-8601 sin zona horaria, p. ej. {@code 2026-11-12T09:30:00}. */
+    public static final DateTimeFormatter FORMATO_ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+    /**
+     * Convierte una fecha y hora al formato ISO-8601 del contrato. Los segundos siempre se incluyen.
+     *
+     * @param valor fecha y hora; no puede ser {@code null}
+     * @return texto ISO-8601
+     */
+    public static String formatear(LocalDateTime valor) {
+        return valor.format(FORMATO_ISO);
+    }
+
+    /**
+     * Interpreta un texto ISO-8601 del contrato.
+     *
+     * @param texto fecha y hora en formato ISO-8601
+     * @return la fecha y hora
+     * @throws java.time.format.DateTimeParseException si el texto no tiene el formato esperado
+     */
+    public static LocalDateTime parsear(String texto) {
+        return LocalDateTime.parse(texto, FORMATO_ISO);
+    }
 
     /**
      * Escribir un LocalDateTime al formato ISO-8601
@@ -27,7 +53,7 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         if (value == null) {
             out.nullValue();
         } else {
-            out.value(value.format(FORMATTER));
+            out.value(formatear(value));
         }
     }
 
@@ -43,6 +69,6 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
             in.nextNull();
             return null;
         }
-        return LocalDateTime.parse(in.nextString(), FORMATTER);
+        return parsear(in.nextString());
     }
 }
