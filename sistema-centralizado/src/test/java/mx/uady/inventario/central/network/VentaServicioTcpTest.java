@@ -9,6 +9,8 @@ import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -23,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class VentaServicioTcpTest {
 
     @Test
+    @Tag("RF-17")
+    @Tag("RF-24")
+    @DisplayName("RF-17, RF-24 · Enruta la venta y conserva el id de solicitud")
     void enrutaVentaYConservaElIdDeSolicitud() throws Exception {
         VentaService servicio = new VentaService((serie, tienda, usuario) ->
                 new VentaResultado(serie, tienda, LocalDateTime.parse("2026-11-12T00:00:00")));

@@ -12,6 +12,8 @@ import java.time.Duration;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -43,6 +45,10 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @Tag("RF-08")
+    @Tag("RF-10")
+    @DisplayName("RF-06, RF-08, RF-10 · Registra la unidad en almacén con un QR legible")
     void registraLaUnidadEnAlmacenConUnQrLegible() throws Exception {
         Mercancia unidad = servicio.registrar(2, "  SN-NUEVA-01 ");
 
@@ -58,6 +64,8 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-07")
+    @DisplayName("RF-07 · Rechaza una serie duplicada sin importar mayúsculas")
     void rechazaUnaSerieDuplicadaSinImportarMayusculas() {
         SerieDuplicadaException e = assertThrows(SerieDuplicadaException.class,
                 () -> servicio.registrar(1, "sn-uady-0001"));
@@ -66,12 +74,17 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @DisplayName("RF-06 · Rechaza serie vacía y producto inexistente")
     void rechazaSerieVaciaYProductoInexistente() {
         assertThrows(ValidacionException.class, () -> servicio.registrar(1, "   "));
         assertThrows(NegocioException.class, () -> servicio.registrar(99, "SN-X"));
     }
 
     @Test
+    @Tag("RF-06")
+    @Tag("RNF-16")
+    @DisplayName("RF-06, RNF-16 · Si no se puede escribir el QR no registra la unidad")
     void siNoSePuedeEscribirElQrNoRegistraLaUnidad() throws Exception {
         // Un archivo en lugar de la carpeta de QR hace fallar la escritura.
         Path noEsCarpeta = Files.createFile(directorioQr.resolve("ocupado"));
@@ -82,12 +95,16 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RNF-26")
+    @DisplayName("RNF-26 · Una serie que no sirve como nombre de archivo se rechaza como validación")
     void unaSerieQueNoSirveComoNombreDeArchivoSeRechazaComoValidacion() {
         assertThrows(ValidacionException.class, () -> servicio.registrar(1, "../fuera"));
         assertTrue(servicio.listar(null, null).stream().noneMatch(m -> m.numeroSerie().contains("fuera")));
     }
 
     @Test
+    @Tag("RF-11")
+    @DisplayName("RF-11 · Asegurar QR genera el QR de una unidad sin él y guarda la ruta")
     void asegurarQrGeneraElQrDeUnaUnidadSinElYGuardaLaRuta() {
         assertEquals(null, servicio.listar(1, null).get(0).rutaQr());
 
@@ -100,6 +117,8 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-11")
+    @DisplayName("RF-11 · Asegurar QR no regenera si el archivo ya existe")
     void asegurarQrNoRegeneraSiElArchivoYaExiste() throws Exception {
         Mercancia primera = servicio.asegurarQr("SN-UADY-0001");
         java.nio.file.attribute.FileTime antes = Files.getLastModifiedTime(Path.of(primera.rutaQr()));
@@ -112,6 +131,8 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-11")
+    @DisplayName("RF-11 · Asegurar QR regenera si el archivo se borró")
     void asegurarQrRegeneraSiElArchivoSeBorro() throws Exception {
         Path ruta = Path.of(servicio.asegurarQr("SN-UADY-0003").rutaQr());
         Files.delete(ruta);
@@ -122,11 +143,15 @@ class MercanciaServiceMemoriaTest {
     }
 
     @Test
+    @Tag("RF-11")
+    @DisplayName("RF-11 · Asegurar QR de una unidad inexistente es error de negocio")
     void asegurarQrDeUnaUnidadInexistenteEsErrorDeNegocio() {
         assertThrows(NegocioException.class, () -> servicio.asegurarQr("NO-EXISTE"));
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Filtra por producto y por estado")
     void filtraPorProductoYPorEstado() {
         assertEquals(2, servicio.listar(1, null).size());
         assertEquals(4, servicio.listar(null, EstadoMercancia.VENDIDO).size());

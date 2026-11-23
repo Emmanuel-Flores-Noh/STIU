@@ -13,11 +13,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 class TareaAsyncTest {
 
     @Test
+    @Tag("RNF-08")
+    @Tag("RNF-12")
+    @DisplayName("RNF-08, RNF-12 · Ejecuta fuera del hilo de Swing y entrega el resultado en él")
     void ejecutaFueraDelHiloDeSwingYEntregaElResultadoEnEl() throws Exception {
         AtomicBoolean operacionEnEdt = new AtomicBoolean(true);
         AtomicBoolean callbackEnEdt = new AtomicBoolean(false);
@@ -42,6 +47,9 @@ class TareaAsyncTest {
     }
 
     @Test
+    @Tag("RNF-08")
+    @Tag("RNF-12")
+    @DisplayName("RNF-08, RNF-12 · Bloquea los controles mientras corre y restaura su estado")
     void bloqueaLosControlesMientrasCorreYRestauraSuEstado() throws Exception {
         JButton habilitado = new JButton();
         JButton yaDeshabilitado = new JButton();
@@ -68,6 +76,9 @@ class TareaAsyncTest {
     }
 
     @Test
+    @Tag("RNF-08")
+    @Tag("RNF-12")
+    @DisplayName("RNF-08, RNF-12 · Entrega la causa original al callback de error")
     void entregaLaCausaOriginalAlCallbackDeError() throws Exception {
         IllegalStateException original = new IllegalStateException("falla");
         AtomicReference<Throwable> recibido = new AtomicReference<>();
@@ -90,6 +101,9 @@ class TareaAsyncTest {
     }
 
     @Test
+    @Tag("RNF-08")
+    @Tag("RNF-12")
+    @DisplayName("RNF-08, RNF-12 · Rechaza ejecutarse fuera del hilo de Swing")
     void rechazaEjecutarseFueraDelHiloDeSwing() {
         assertFalse(SwingUtilities.isEventDispatchThread());
         assertThrows(IllegalStateException.class, () -> TareaAsync.de(() -> 1).ejecutar(null));

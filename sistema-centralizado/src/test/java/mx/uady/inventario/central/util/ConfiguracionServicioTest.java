@@ -1,5 +1,7 @@
 package mx.uady.inventario.central.util;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -11,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ConfiguracionServicioTest {
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Usa valores por defecto cuando no hay variables")
     void usaValoresPorDefectoCuandoNoHayVariables() {
         ConfiguracionServicio configuracion = ConfiguracionServicio.desdeMapa(Map.of());
 
@@ -24,6 +28,8 @@ class ConfiguracionServicioTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Lee todas las variables")
     void leeTodasLasVariables() {
         ConfiguracionServicio configuracion = ConfiguracionServicio.desdeMapa(Map.of(
                 "SERVICE_PORT", "6100",
@@ -44,6 +50,8 @@ class ConfiguracionServicioTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Rechaza puertos y números inválidos")
     void rechazaPuertosYNumerosInvalidos() {
         assertThrows(IllegalArgumentException.class,
                 () -> ConfiguracionServicio.desdeMapa(Map.of("SERVICE_PORT", "70000")));
@@ -58,6 +66,8 @@ class ConfiguracionServicioTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Permite puerto efímero y exige hosts")
     void permitePuertoEfimeroYExigeHosts() {
         ConfiguracionServicio configuracion = ConfiguracionServicio.desdeMapa(Map.of("SERVICE_PORT", "0"));
         assertEquals(0, configuracion.puertoServicio());
@@ -69,6 +79,8 @@ class ConfiguracionServicioTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · El mensaje de error indica la variable")
     void mensajeDeErrorIndicaLaVariable() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> ConfiguracionServicio.desdeMapa(Map.of("SERVICE_POOL_SIZE", "abc")));

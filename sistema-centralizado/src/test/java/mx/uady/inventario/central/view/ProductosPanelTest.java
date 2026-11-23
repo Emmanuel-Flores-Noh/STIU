@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.model.ProductoConUnidades;
@@ -23,6 +25,8 @@ class ProductosPanelTest {
             fila(3, "Silla de visita", 0));
 
     @Test
+    @Tag("RF-04")
+    @DisplayName("RF-04 · Muestra los productos ordenados por nombre")
     void muestraLosProductosOrdenadosPorNombre() throws Exception {
         enEdt(() -> {
             ProductosPanel panel = new ProductosPanel();
@@ -36,6 +40,8 @@ class ProductosPanelTest {
     }
 
     @Test
+    @Tag("RF-04")
+    @DisplayName("RF-04 · Filtra por nombre sin distinguir acentos")
     void filtraPorNombreSinDistinguirAcentos() throws Exception {
         enEdt(() -> {
             ProductosPanel panel = new ProductosPanel();
@@ -53,6 +59,8 @@ class ProductosPanelTest {
     }
 
     @Test
+    @Tag("RF-02")
+    @DisplayName("RF-02 · Editar solo se habilita con una fila seleccionada")
     void editarSoloSeHabilitaConUnaFilaSeleccionada() throws Exception {
         enEdt(() -> {
             ProductosPanel panel = new ProductosPanel();
@@ -70,6 +78,8 @@ class ProductosPanelTest {
     }
 
     @Test
+    @Tag("RF-02")
+    @DisplayName("RF-02 · Editar entrega el producto seleccionado")
     void editarEntregaElProductoSeleccionado() throws Exception {
         AtomicReference<ProductoConUnidades> editado = new AtomicReference<>();
         enEdt(() -> {

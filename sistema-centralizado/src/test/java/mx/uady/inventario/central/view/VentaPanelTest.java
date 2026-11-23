@@ -14,6 +14,8 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.common.modelo.EstadoMercancia;
@@ -29,6 +31,8 @@ class VentaPanelTest {
     private static final Usuario USUARIO = new Usuario(3, 3, "Lucero", "Chan", "Canul");
 
     @Test
+    @Tag("RF-15")
+    @DisplayName("RF-15 · Muestra mercancías y permite seleccionar una venta")
     void muestraMercanciasYPermiteSeleccionarUnaVenta() throws Exception {
         MercanciaPanelTest.enEdt(() -> {
             VentaPanel panel = new VentaPanel();
@@ -50,6 +54,8 @@ class VentaPanelTest {
     }
 
     @Test
+    @Tag("RF-15")
+    @DisplayName("RF-15 · No permite vender sin mercancía, tienda o usuario")
     void noPermiteVenderSinMercanciaOTiendaOUsuario() throws Exception {
         MercanciaPanelTest.enEdt(() -> {
             VentaPanel panel = new VentaPanel();
@@ -67,6 +73,8 @@ class VentaPanelTest {
     }
 
     @Test
+    @Tag("RF-15")
+    @DisplayName("RF-15 · Recargar catálogos conserva la tienda y el usuario elegidos")
     void recargarCatalogosConservaLaTiendaYElUsuarioElegidos() throws Exception {
         TiendaAlmacen otraTienda = new TiendaAlmacen(9, "Tienda Norte", "Calle 2");
         Usuario otroUsuario = new Usuario(5, 2, "Luis", "Can", null);
@@ -86,6 +94,8 @@ class VentaPanelTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Filtra por número de serie")
     void filtraPorNumeroDeSerie() throws Exception {
         Mercancia otra = new Mercancia("AB-0002", 1, EstadoMercancia.EN_ALMACEN, null);
         MercanciaPanelTest.enEdt(() -> {
