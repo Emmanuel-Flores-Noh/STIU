@@ -28,6 +28,7 @@ import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.model.VentaHistorial;
 import mx.uady.inventario.central.view.comun.Documentos;
+import mx.uady.inventario.central.view.comun.ResumenTabla;
 
 /** Historial de ventas con filtros por tienda, producto, rango de fechas y número de serie. */
 public final class VentaHistorialPanel extends JPanel {
@@ -35,6 +36,10 @@ public final class VentaHistorialPanel extends JPanel {
     private static final long serialVersionUID = 1L;
     static final String TODAS = "Todas";
     static final String TODOS = "Todos";
+    private static final String FECHA_INVALIDA =
+            "Las fechas deben escribirse como aaaa-mm-dd, por ejemplo 2026-11-12.";
+    private static final ResumenTabla RESUMEN = new ResumenTabla("Todavía no hay ventas registradas.",
+            "Ninguna venta coincide con los filtros.", "%d de %d ventas", "1 venta", "%d ventas");
 
     private final VentaHistorialTableModel modelo = new VentaHistorialTableModel();
     private final JTable tabla = new JTable(modelo);
@@ -159,19 +164,9 @@ public final class VentaHistorialPanel extends JPanel {
     }
 
     private void actualizarResumen(boolean fechaInvalida) {
-        int total = modelo.getRowCount();
-        int visibles = tabla.getRowCount();
-        if (fechaInvalida) {
-            estado.setText("Las fechas deben escribirse como aaaa-mm-dd, por ejemplo 2026-11-12.");
-        } else if (total == 0) {
-            estado.setText("Todavía no hay ventas registradas.");
-        } else if (visibles == 0) {
-            estado.setText("Ninguna venta coincide con los filtros.");
-        } else if (visibles < total) {
-            estado.setText(visibles + " de " + total + " ventas");
-        } else {
-            estado.setText(total == 1 ? "1 venta" : total + " ventas");
-        }
+        estado.setText(fechaInvalida
+                ? FECHA_INVALIDA
+                : RESUMEN.texto(modelo.getRowCount(), tabla.getRowCount(), null));
     }
 
     /** Valor elegido en un combo de filtro, o {@code null} si es "Todas"/"Todos". */

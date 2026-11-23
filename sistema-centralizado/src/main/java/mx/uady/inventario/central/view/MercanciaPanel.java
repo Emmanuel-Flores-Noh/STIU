@@ -32,6 +32,7 @@ import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.view.comun.Documentos;
+import mx.uady.inventario.central.view.comun.ResumenTabla;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
@@ -45,6 +46,9 @@ public class MercanciaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
     static final String TODOS = "Todos";
     static final String SIN_PRODUCTOS = "Primero registra un producto en la pestaña Productos.";
+    private static final String SIN_RESULTADOS_FILTRADOS = "No hay unidades con los filtros elegidos.";
+    private static final ResumenTabla RESUMEN = new ResumenTabla("No hay unidades registradas.",
+            "Ninguna unidad coincide con «%s».", "%d de %d unidades", "1 unidad", "%d unidades");
 
     // Registro
     private final JComboBox<Producto> productoRegistro = new JComboBox<>();
@@ -223,15 +227,9 @@ public class MercanciaPanel extends JPanel {
         int total = modelo.getRowCount();
         int visibles = tabla.getRowCount();
         boolean hayFiltros = filtroProducto.getSelectedIndex() > 0 || filtroEstado.getSelectedIndex() > 0;
-        if (total == 0) {
-            estado.setText(hayFiltros ? "No hay unidades con los filtros elegidos." : "No hay unidades registradas.");
-        } else if (visibles == 0) {
-            estado.setText("Ninguna unidad coincide con «" + busquedaSerie.getText().strip() + "».");
-        } else if (visibles < total) {
-            estado.setText(visibles + " de " + total + " unidades");
-        } else {
-            estado.setText(total == 1 ? "1 unidad" : total + " unidades");
-        }
+        estado.setText(total == 0 && hayFiltros
+                ? SIN_RESULTADOS_FILTRADOS
+                : RESUMEN.texto(total, visibles, busquedaSerie.getText()));
     }
 
     private void actualizarBotonRegistrar() {

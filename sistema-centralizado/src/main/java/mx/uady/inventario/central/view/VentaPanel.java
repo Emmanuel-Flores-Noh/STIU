@@ -28,6 +28,7 @@ import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.service.ConsultasVentaService;
 import mx.uady.inventario.central.view.comun.Documentos;
+import mx.uady.inventario.central.view.comun.ResumenTabla;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.TiendaAlmacen;
 import mx.uady.inventario.common.modelo.Usuario;
@@ -39,6 +40,9 @@ import mx.uady.inventario.common.modelo.Usuario;
 public final class VentaPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final ResumenTabla RESUMEN = new ResumenTabla(
+            "No hay mercancías disponibles para vender.", "Ninguna mercancía coincide con «%s».",
+            "%d de %d mercancías", "1 mercancía disponible", "%d mercancías disponibles");
 
     private final VentaTableModel modelo = new VentaTableModel();
     private final JTable tabla = new JTable(modelo);
@@ -144,17 +148,7 @@ public final class VentaPanel extends JPanel {
     }
 
     private void actualizarResumen() {
-        int total = modelo.getRowCount();
-        int visibles = tabla.getRowCount();
-        if (total == 0) {
-            estado.setText("No hay mercancías disponibles para vender.");
-        } else if (visibles == 0) {
-            estado.setText("Ninguna mercancía coincide con «" + busqueda.getText().strip() + "».");
-        } else if (visibles < total) {
-            estado.setText(visibles + " de " + total + " mercancías");
-        } else {
-            estado.setText(total == 1 ? "1 mercancía disponible" : total + " mercancías disponibles");
-        }
+        estado.setText(RESUMEN.texto(modelo.getRowCount(), tabla.getRowCount(), busqueda.getText()));
     }
 
     private void actualizarDisponibilidad() {
