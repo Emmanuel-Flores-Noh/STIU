@@ -2,6 +2,7 @@ package mx.uady.inventario.central.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -77,5 +78,55 @@ class ProductoValidatorTest {
         assertEquals(2, errores.size());
         assertThrows(ValidacionException.class,
                 () -> ProductoValidator.exigirValido(new Producto(0, "", null, BigDecimal.ZERO)));
+    }
+
+    @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Acepta el precio mínimo de un centavo")
+    void aceptaElPrecioMinimoDeUnCentavo() {
+        assertTrue(ProductoValidator.errores("Silla", new BigDecimal("0.01")).isEmpty());
+    }
+
+    @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Acepta el precio máximo exacto y rechaza el siguiente centavo")
+    void aceptaElPrecioMaximoExactoYRechazaElSiguienteCentavo() {
+        assertTrue(ProductoValidator.errores("Silla", new BigDecimal("99999999.99")).isEmpty());
+        assertEquals("El precio no puede ser mayor que 99999999.99.",
+                ProductoValidator.errores("Silla", new BigDecimal("100000000.00")).get(Campo.PRECIO));
+    }
+
+    @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Los espacios al inicio y al final no cuentan para el largo del nombre")
+    void losEspaciosAlInicioYAlFinalNoCuentanParaElLargoDelNombre() {
+        String justo = "a".repeat(ProductoValidator.LONGITUD_MAXIMA_NOMBRE);
+
+        assertTrue(ProductoValidator.errores("   " + justo + "   ", BigDecimal.ONE).isEmpty());
+        Producto guardado = ProductoValidator.normalizar(
+                new Producto(0, "   " + justo + "   ", null, BigDecimal.ONE));
+        assertEquals(justo, guardado.nombre());
+    }
+
+    @Test
+    @Tag("RF-01")
+    @DisplayName("RF-01 · Una descripción vacía se guarda como nula y una con texto se recorta")
+    void unaDescripcionVaciaSeGuardaComoNulaYUnaConTextoSeRecorta() {
+        assertNull(ProductoValidator.normalizar(new Producto(0, "Silla", "   ", BigDecimal.ONE)).descripcion());
+        assertEquals("Ergonómica",
+                ProductoValidator.normalizar(new Producto(0, "Silla", "  Ergonómica ", BigDecimal.ONE)).descripcion());
+    }
+
+    @Test
+    @Tag("RF-01")
+    @Tag("RNF-30")
+    @DisplayName("RF-01, RNF-30 · Normalizar rechaza un producto nulo con un mensaje claro")
+    void normalizarRechazaUnProductoNuloConUnMensajeClaro() {
+        ValidacionException error = assertThrows(ValidacionException.class,
+                () -> ProductoValidator.normalizar(null));
+        assertEquals("No se indicó el producto.", error.getMessage());
     }
 }
