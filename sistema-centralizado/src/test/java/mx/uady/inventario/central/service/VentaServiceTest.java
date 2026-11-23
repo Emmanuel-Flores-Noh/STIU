@@ -30,7 +30,7 @@ class VentaServiceTest {
         assertEquals("SN-001:3:12", serieRecibida.get());
         assertEquals("SN-001", resultado.get("numero_serie").getAsString());
         assertEquals(3, resultado.get("id_tienda").getAsInt());
-        assertEquals("2026-11-12T00:00", resultado.get("fecha_venta").getAsString());
+        assertEquals("2026-11-12T00:00:00", resultado.get("fecha_venta").getAsString());
     }
 
     @Test
