@@ -71,7 +71,7 @@ public class DespachadorSolicitudes {
      * Crea el despachador con el catálogo completo y conecta cada operación cuyo servicio
      * se proporcione. Un servicio nulo deja sus operaciones declaradas pero pendientes.
      *
-     * <p>El cableado entre servicios y manejadores vive en {@link CatalogoSistema1}.</p>
+     * <p>El cableado entre servicios y manejadores vive en {@link CatalogoOperaciones}.</p>
      *
      * @param ventaService     registra ventas ({@code actualizarTiendaVenta})
      * @param consultasVenta   catálogos de tiendas y usuarios ({@code listarTiendas}, {@code listarUsuarios})
@@ -87,7 +87,7 @@ public class DespachadorSolicitudes {
             MercanciaService mercanciaService,
             ProductoService productoService,
             QrService qrService) {
-        return CatalogoSistema1.crear(ventaService, consultasVenta, mercanciaService, productoService, qrService);
+        return CatalogoOperaciones.crear(ventaService, consultasVenta, mercanciaService, productoService, qrService);
     }
 
     /**

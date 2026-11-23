@@ -15,9 +15,9 @@ import mx.uady.inventario.common.servicio.Servicios;
  * de negocio del Sistema 1. Así {@link DespachadorSolicitudes} solo mapea operación → manejador
  * y no conoce la capa de servicios.</p>
  */
-final class CatalogoSistema1 {
+final class CatalogoOperaciones {
 
-    private CatalogoSistema1() {
+    private CatalogoOperaciones() {
     }
 
     /**
