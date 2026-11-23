@@ -25,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RegistroServiciosTest {
 
     @Test
+    @Tag("RF-41")
+    @Tag("RF-45")
+    @DisplayName("RF-41, RF-45 · Un proveedor registrado se encuentra por su servicio")
     void registrarYBuscar() {
         RegistroServicios registro = new RegistroServicios();
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -36,6 +39,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-42")
+    @DisplayName("RF-42 · Sustituir un servicio registrado cambia su proveedor")
     void sustituirExistente() {
         RegistroServicios registro = new RegistroServicios();
         registro.registrar(new Proveedor("inventario", "host1", 6000));
@@ -47,6 +52,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-42")
+    @DisplayName("RF-42 · Sustituir un servicio no registrado no lo agrega")
     void sustituirInexistenteNoRegistra() {
         RegistroServicios registro = new RegistroServicios();
 
@@ -56,6 +63,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-43")
+    @DisplayName("RF-43 · Eliminar un servicio lo quita del registro")
     void eliminar() {
         RegistroServicios registro = new RegistroServicios();
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -66,6 +75,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-44")
+    @DisplayName("RF-44 · La tabla de servicios se entrega como copia inmodificable")
     void getServiciosEsCopia() {
         RegistroServicios registro = new RegistroServicios();
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -76,6 +87,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-45")
+    @DisplayName("RF-45 · Buscar un servicio nulo o vacío no encuentra nada")
     void buscarServicioVacio() {
         RegistroServicios registro = new RegistroServicios();
         assertTrue(registro.buscar(null).isEmpty());
@@ -83,6 +96,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-54")
+    @DisplayName("RF-54 · Registros concurrentes de servicios distintos no se pierden")
     void concurrenciaBasica() throws InterruptedException {
         RegistroServicios registro = new RegistroServicios();
         int hilos = 8;
@@ -115,6 +130,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · El proveedor queda no disponible al alcanzar el umbral de fallos")
     void marcaNoDisponibleAlAlcanzarUmbral() {
         RegistroServicios registro = new RegistroServicios(3, 30_000);
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -130,6 +147,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Una comunicación exitosa limpia los fallos acumulados")
     void exitoLimpiaLosFallos() {
         RegistroServicios registro = new RegistroServicios(2, 30_000);
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -142,6 +161,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Al vencer el enfriamiento el proveedor se reactiva y el conteo reinicia")
     void elEnfriamientoVenceYReactiva() {
         AtomicLong ahora = new AtomicLong(1_000);
         RegistroServicios registro = new RegistroServicios(2, 5_000, ahora::get);
@@ -168,6 +189,9 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-41")
+    @Tag("RF-52")
+    @DisplayName("RF-41, RF-52 · Registrar de nuevo un proveedor no disponible lo reactiva")
     void registrarDeNuevoReactiva() {
         RegistroServicios registro = new RegistroServicios(1, 30_000);
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -181,6 +205,9 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-42")
+    @Tag("RF-52")
+    @DisplayName("RF-42, RF-52 · Sustituir un proveedor no disponible lo reactiva")
     void sustituirReactiva() {
         RegistroServicios registro = new RegistroServicios(1, 30_000);
         registro.registrar(new Proveedor("inventario", "localhost", 6000));
@@ -192,6 +219,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Un servicio no registrado, nulo o en blanco no está disponible")
     void servicioNoRegistradoNoEstaDisponible() {
         RegistroServicios registro = new RegistroServicios();
         assertFalse(registro.estaDisponible("inventario"));
@@ -200,6 +229,9 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-41")
+    @Tag("RF-47")
+    @DisplayName("RF-41, RF-47 · Un proveedor con servicio, host o puerto inválidos se rechaza")
     void validaciones() {
         RegistroServicios registro = new RegistroServicios();
         assertThrows(IllegalArgumentException.class, () -> new Proveedor("", "host", 1));
@@ -209,6 +241,8 @@ class RegistroServiciosTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Un umbral de fallos no positivo o un enfriamiento negativo se rechazan")
     void validacionesDeResiliencia() {
         assertThrows(IllegalArgumentException.class, () -> new RegistroServicios(0, 100));
         assertThrows(IllegalArgumentException.class, () -> new RegistroServicios(1, -1));

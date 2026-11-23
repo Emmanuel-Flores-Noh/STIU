@@ -36,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnrutadorTest {
 
     @Test
+    @Tag("RF-45")
+    @DisplayName("RF-45 · Enruta la solicitud al proveedor y devuelve su respuesta")
     void enrutaAlProveedorYDevuelveRespuesta() throws Exception {
         ServerSocket provider = new ServerSocket(0);
         int port = provider.getLocalPort();
@@ -77,6 +79,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-48")
+    @DisplayName("RF-48 · Un servicio sin proveedor responde SERVICIO_DESCONOCIDO")
     void servicioDesconocido() {
         RegistroServicios registro = new RegistroServicios();
         Enrutador enrutador = new Enrutador(2000);
@@ -89,6 +93,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-47")
+    @DisplayName("RF-47 · Una solicitud nula se rechaza")
     void solicitudInvalidaLanza() {
         RegistroServicios registro = new RegistroServicios();
         Enrutador enrutador = new Enrutador(2000);
@@ -97,6 +103,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-53")
+    @DisplayName("RF-53 · Un proveedor que cierra sin responder produce un error del broker")
     void proveedorSinRespuesta() throws Exception {
         ServerSocket provider = new ServerSocket(0);
         int port = provider.getLocalPort();
@@ -125,6 +133,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-51")
+    @DisplayName("RF-51 · Reintenta hasta agotar los intentos configurados")
     void reintentaHastaAgotarLosIntentos() throws Exception {
         ServerSocket provider = new ServerSocket(0);
         int port = provider.getLocalPort();
@@ -165,6 +175,9 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-45")
+    @Tag("RF-51")
+    @DisplayName("RF-45, RF-51 · Una respuesta de error del proveedor no se reintenta")
     void unaRespuestaDeErrorNoSeReintenta() throws Exception {
         ServerSocket provider = new ServerSocket(0);
         int port = provider.getLocalPort();
@@ -205,6 +218,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-50")
+    @DisplayName("RF-50 · Un proveedor lento agota el tiempo límite de lectura y responde TIMEOUT")
     void usaElTimeoutDeLecturaConfigurado() throws Exception {
         ServerSocket provider = new ServerSocket(0);
         int port = provider.getLocalPort();
@@ -238,6 +253,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Un proveedor no disponible responde PROVEEDOR_NO_REGISTRADO sin contactarlo")
     void proveedorNoDisponibleNoSeContacta() throws Exception {
         ServerSocket proveedor = new ServerSocket(0);
         int port = proveedor.getLocalPort();
@@ -259,6 +276,8 @@ class EnrutadorTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @DisplayName("RF-52 · Fallos repetidos marcan al proveedor como no disponible")
     void fallosRepetidosMarcanElProveedorNoDisponible() throws Exception {
         // Puerto cerrado: las conexiones se rechazan de inmediato.
         ServerSocket temporal = new ServerSocket(0);
@@ -293,6 +312,9 @@ class EnrutadorTest {
      * que el servicio quedo marcado como no disponible (una sola vez).
      */
     @Test
+    @Tag("RF-52")
+    @Tag("RF-56")
+    @DisplayName("RF-52, RF-56 · La bitácora anota cada intento fallido y la marca de no disponible")
     void laBitacoraAnotaLosIntentosFallidosYLaMarcaDeNoDisponible() throws Exception {
         ServerSocket temporal = new ServerSocket(0);
         int port = temporal.getLocalPort();
