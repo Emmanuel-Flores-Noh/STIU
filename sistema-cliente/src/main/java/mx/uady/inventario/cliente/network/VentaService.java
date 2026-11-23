@@ -8,7 +8,6 @@ import com.google.gson.reflect.TypeToken;
 import mx.uady.inventario.cliente.error.ComunicacionException;
 import mx.uady.inventario.cliente.error.ComunicacionError;
 import mx.uady.inventario.cliente.model.*;
-import mx.uady.inventario.cliente.network.ClienteTCP;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;

@@ -18,6 +18,18 @@ public class TiendaDTO {
     private String direccion;
 
     /**
+     * Constructor
+     * @param idTienda Id
+     * @param nombre Nombre
+     * @param direccion Direccion
+     */
+    public TiendaDTO(Long idTienda, String nombre, String direccion) {
+        this.idTienda = idTienda;
+        this.nombre = nombre;
+        this.direccion = direccion;
+    }
+
+    /**
      * Obtiene el identificador único de la tienda.
      * 
      * @return El ID de la tienda.

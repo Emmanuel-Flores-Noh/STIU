@@ -19,6 +19,18 @@ public class UsuarioDTO {
     private String apellidoPaterno;
 
     /**
+     * Constructor
+     * @param idUsuario ID
+     * @param nombres Nombres
+     * @param apellidoPaterno Apellido paterno
+     */
+    public UsuarioDTO(Long idUsuario, String nombres, String apellidoPaterno) {
+        this.idUsuario = idUsuario;
+        this.nombres = nombres;
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    /**
      * Obtiene el identificador único del usuario.
      * 
      * @return El ID del usuario.

@@ -68,7 +68,7 @@ public class QrDTO {
      *
      * @return Imagen png de qr en base 64
      */
-    private String getPngBase64() {
+    public String getPngBase64() {
         return pngBase64;
     }
 
