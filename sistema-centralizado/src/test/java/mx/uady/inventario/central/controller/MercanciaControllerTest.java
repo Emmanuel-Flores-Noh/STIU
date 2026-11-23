@@ -1,13 +1,17 @@
 package mx.uady.inventario.central.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,6 +33,7 @@ import mx.uady.inventario.central.service.memoria.MercanciaServiceMemoria;
 import mx.uady.inventario.central.service.memoria.ProductoServiceMemoria;
 import mx.uady.inventario.central.view.MercanciaPanel;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
+import mx.uady.inventario.common.modelo.Mercancia;
 
 class MercanciaControllerTest {
 
@@ -106,6 +111,41 @@ class MercanciaControllerTest {
                 .setSelectedItem(EstadoMercancia.VENDIDO));
         esperar(() -> filas() == 4);
         assertEquals(4, filas());
+    }
+
+    @Test
+    @Tag("RF-11")
+    @Tag("RNF-12")
+    @DisplayName("RF-11, RNF-12 · Ver QR genera el PNG que falta y pide a la vista mostrar esa unidad")
+    void verQrGeneraElPngYPideALaVistaMostrarlo() throws Exception {
+        List<Mercancia> mostradas = new CopyOnWriteArrayList<>();
+        AlmacenMemoria almacen = AlmacenMemoria.conDatosDeEjemplo(Duration.ZERO);
+        MercanciaServiceMemoria servicio = new MercanciaServiceMemoria(almacen, new QrService(directorioQr));
+        SwingUtilities.invokeAndWait(() -> {
+            panel = new MercanciaPanel() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void mostrarQr(Mercancia unidad) {
+                    mostradas.add(unidad);
+                }
+            };
+            new MercanciaController(servicio, new ProductoServiceMemoria(almacen), panel).cargar();
+        });
+        esperar(() -> filas() == 10);
+        assertNull(enEdt(() -> {
+            panel.seleccionarUnidad("SN-UADY-0001");
+            return panel.seleccionada().orElseThrow().rutaQr();
+        }), "las unidades del seed no traen PNG");
+
+        SwingUtilities.invokeAndWait(() -> componente("verQr", JButton.class).doClick());
+        esperar(() -> mostradas.size() == 1);
+
+        Mercancia unidad = mostradas.get(0);
+        assertEquals("SN-UADY-0001", unidad.numeroSerie());
+        assertTrue(Files.isRegularFile(Path.of(unidad.rutaQr())));
+        assertEquals(unidad.rutaQr(), enEdt(() -> panel.seleccionada().orElseThrow().rutaQr()),
+                "la tabla muestra la unidad con su PNG y sigue seleccionada");
     }
 
     // ---- Auxiliares ----

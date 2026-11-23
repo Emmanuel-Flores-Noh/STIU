@@ -17,6 +17,7 @@ import javax.swing.JTable;
 
 import mx.uady.inventario.central.view.comun.ResumenTabla;
 import mx.uady.inventario.central.view.comun.TablaFiltrable;
+import mx.uady.inventario.central.view.components.QrVista;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
@@ -168,6 +169,11 @@ public class MercanciaPanel extends JPanel {
     /** Estado elegido en el filtro, o {@code null} para todos. */
     public EstadoMercancia filtroEstadoSeleccionado() {
         return filtros.estadoSeleccionado();
+    }
+
+    /** Abre la vista previa del código QR de la unidad, con el nombre de su producto. */
+    public void mostrarQr(Mercancia unidad) {
+        QrVista.mostrar(this, unidad, nombreProducto(unidad.idProducto()));
     }
 
     public void setEstado(String texto) {
