@@ -5,6 +5,15 @@ import java.awt.Component;
 
 /**
  * Cuadros de diálogo con el resultado de una operación: éxito, error y la pregunta de reintento.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-32:</b> Notificación modal de éxito al registrar venta.</li>
+ *   <li><b>RF-33:</b> Notificación modal ante rechazo de venta sin opción a reintentar.</li>
+ *   <li><b>RF-37:</b> Despliegue de mensajes comprensibles para errores de red o servidor.</li>
+ *   <li><b>RF-38:</b> Ventana con el tipo de error y la pregunta «¿Desea reintentar la operación?» con opciones «Sí» / «No».</li>
+ * </ul>
+ * </p>
  */
 public class OperacionDialog {
 
@@ -27,6 +36,7 @@ public class OperacionDialog {
     /**
      * Arma el texto de la ventana de reintento: el mensaje del fallo seguido de la pregunta.
      *
+     * <p>Requisito: RF-38.</p>
      * @param mensaje explicación del fallo
      * @return texto completo de la ventana
      */
@@ -37,6 +47,7 @@ public class OperacionDialog {
     /**
      * Muestra un mensaje de éxito.
      *
+     * <p>Requisito: RF-32.</p>
      * @param mensaje texto a mostrar
      */
     public void exito(String mensaje) {
@@ -56,6 +67,7 @@ public class OperacionDialog {
     /**
      * Muestra un mensaje de error.
      *
+     * <p>Requisitos: RF-33, RF-37.</p>
      * @param mensaje texto a mostrar
      */
     public void error(String mensaje) {
@@ -65,6 +77,7 @@ public class OperacionDialog {
     /**
      * Muestra un mensaje de error con título propio.
      *
+     * <p>Requisitos: RF-33, RF-37.</p>
      * @param titulo  título de la ventana
      * @param mensaje texto a mostrar
      */
@@ -75,6 +88,7 @@ public class OperacionDialog {
     /**
      * Muestra el tipo de error y pregunta «¿Desea reintentar la operación?».
      *
+     * <p>Requisito: RF-38.</p>
      * @param tipoError tipo de error (título de la ventana)
      * @param mensaje   explicación del fallo
      * @return {@code true} solo si el encargado elige «Sí»

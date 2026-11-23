@@ -4,6 +4,15 @@ package mx.uady.inventario.cliente.model;
  * Objeto de transferencia de datos (DTO) de una unidad de mercancía disponible, tal como la
  * devuelve la operación {@code listarInventario} del Sistema 1: incluye el nombre del producto
  * para mostrarlo y buscarlo en la tabla del proveedor.
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Carga del inventario disponible en segundo plano al iniciar o actualizar la vista.</li>
+ *   <li><b>RF-26:</b> Presentación en la tabla de inventario (columnas Número de serie, Producto y Estado «En almacén»).</li>
+ *   <li><b>RF-27:</b> Filtrado de inventario por número de serie o nombre de producto.</li>
+ *   <li><b>RF-31:</b> Selección de una unidad requerida para habilitar el registro de venta.</li>
+ *   <li><b>RF-32:</b> Venta de la unidad seleccionada y posterior remoción de la vista.</li>
+ * </ul>
+ * </p>
  */
 public class MercanciaDTO {
     private String numeroSerie;
@@ -20,6 +29,7 @@ public class MercanciaDTO {
     /**
      * Crea el DTO con todos sus datos.
      *
+     * <p>Requisito: RF-26.</p>
      * @param numeroSerie    número de serie de la unidad
      * @param idProducto     identificador del producto
      * @param nombreProducto nombre del producto
@@ -34,6 +44,7 @@ public class MercanciaDTO {
 
     /**
      * Obtiene el número de serie de la unidad.
+     *
      *
      * @return número de serie
      */

@@ -7,11 +7,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import mx.uady.inventario.cliente.error.ComunicacionException;
 import mx.uady.inventario.cliente.error.ComunicacionError;
-import mx.uady.inventario.cliente.model.MercanciaDTO;
-import mx.uady.inventario.cliente.model.PrecioHistorialDTO;
-import mx.uady.inventario.cliente.model.QrDTO;
-import mx.uady.inventario.cliente.model.TiendaDTO;
-import mx.uady.inventario.cliente.model.UsuarioDTO;
+import mx.uady.inventario.cliente.model.*;
 import mx.uady.inventario.cliente.network.ClienteTCP;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
@@ -30,6 +26,20 @@ import java.util.concurrent.Future;
  * clase del cliente que conoce servicios, operaciones y nombres de parámetros del contrato; habla
  * exclusivamente con el Broker a través de {@link ClienteTCP}.
  *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Carga asíncrona y paralela de tiendas, usuarios proveedores e inventario disponible.</li>
+ *   <li><b>RF-26:</b> Consulta del inventario disponible en estado «En almacén» ({@code listarInventario}).</li>
+ *   <li><b>RF-28:</b> Consulta de tiendas destino ({@code listarTiendas}).</li>
+ *   <li><b>RF-29:</b> Consulta de usuarios con rol de proveedor ({@code listarUsuarios}).</li>
+ *   <li><b>RF-32:</b> Registro de venta de la unidad seleccionada ({@code actualizarTiendaVenta}).</li>
+ *   <li><b>RF-34:</b> Consulta de imagen PNG de código QR en Base64 ({@code obtenerQr}).</li>
+ *   <li><b>RF-36:</b> Consulta del historial cronológico de precios de un producto ({@code listarPreciosProducto}).</li>
+ *   <li><b>RF-39:</b> Comunicación exclusiva a través del Broker.</li>
+ *   <li><b>RNF-06:</b> Rendimiento de carga concurrente de catálogos e inventario.</li>
+ * </ul>
+ * </p>
+ *
  * <p>Todas las operaciones son bloqueantes: deben llamarse fuera del hilo de la interfaz.</p>
  */
 public class VentaService {
@@ -40,16 +50,6 @@ public class VentaService {
      */
     static final String OPERACION_HISTORIAL_PRECIOS = "obtenerHistorialPrecios";
 
-    /**
-     * Listas que se cargan al abrir la ventana o al actualizar.
-     *
-     * @param tiendas   tiendas destino, en el orden del Sistema 1
-     * @param usuarios  usuarios con rol de proveedor
-     * @param mercancia unidades disponibles «En almacén»
-     */
-    public record Catalogos(List<TiendaDTO> tiendas, List<UsuarioDTO> usuarios, List<MercanciaDTO> mercancia) {
-    }
-
     private final ClienteTCP cliente;
     private final ExecutorService hilos;
     private final Gson gson = GsonFactory.DEFAULT;
@@ -57,6 +57,7 @@ public class VentaService {
     /**
      * Crea el servicio con un grupo propio de tres hilos de segundo plano para la carga paralela.
      *
+     * <p>Requisitos: RF-25, RNF-06.</p>
      * @param cliente cliente TCP del Broker
      */
     public VentaService(ClienteTCP cliente) {
@@ -70,6 +71,7 @@ public class VentaService {
     /**
      * Crea el servicio con el ejecutor indicado.
      *
+     * <p>Requisitos: RF-25, RNF-06.</p>
      * @param cliente cliente TCP del Broker
      * @param hilos   ejecutor donde corren las consultas paralelas
      */
@@ -81,6 +83,7 @@ public class VentaService {
     /**
      * Consulta las tiendas destino, en el orden en que las envía el Sistema 1.
      *
+     * <p>Requisito: RF-28 (lista de tiendas ordenadas por nombre).</p>
      * @return tiendas; lista vacía si no hay
      * @throws ComunicacionException si falla la comunicación o el servidor responde con error
      */
@@ -92,6 +95,7 @@ public class VentaService {
     /**
      * Consulta los usuarios con rol de proveedor.
      *
+     * <p>Requisito: RF-29 (usuarios con rol proveedor).</p>
      * @return usuarios; lista vacía si no hay
      * @throws ComunicacionException si falla la comunicación o el servidor responde con error
      */
@@ -103,6 +107,7 @@ public class VentaService {
     /**
      * Consulta las unidades disponibles (solo las que están «En almacén»).
      *
+     * <p>Requisito: RF-26 (inventario de mercancía disponible).</p>
      * @return unidades disponibles; lista vacía si no hay
      * @throws ComunicacionException si falla la comunicación o el servidor responde con error
      */
@@ -116,6 +121,7 @@ public class VentaService {
      * Consulta en paralelo tiendas, usuarios e inventario, de modo que la carga tarde lo que la más
      * lenta y no la suma de las tres (RNF-06 y RNF-08). Si una falla, se propaga su error original.
      *
+     * <p>Requisitos: RF-25 (carga al abrir ventana), RNF-06 (rendimiento de carga concurrente).</p>
      * @return las tres listas
      * @throws ComunicacionException error de la primera consulta que falle
      */
@@ -139,6 +145,7 @@ public class VentaService {
      * Registra la venta de una unidad a una tienda, vinculada al usuario que la registra. Se envía una
      * sola vez: nunca se reintenta de forma automática.
      *
+     * <p>Requisitos: RF-32 (registro de venta exitosa), RF-38 (no reintento automático de ventas).</p>
      * @param numeroSerie número de serie de la unidad
      * @param idTienda    identificador de la tienda destino
      * @param idUsuario   identificador del usuario que registra la venta
@@ -158,6 +165,7 @@ public class VentaService {
     /**
      * Obtiene el código QR de una unidad (imagen PNG codificada en Base64).
      *
+     * <p>Requisitos: RF-34 (visualización de QR en base64), RF-35 (guardado como PNG local).</p>
      * @param numeroSerie número de serie de la unidad
      * @return QR de la unidad
      * @throws ComunicacionException si falla la comunicación o el servidor no devuelve el QR
@@ -172,6 +180,7 @@ public class VentaService {
     /**
      * Obtiene el historial de precios de un producto.
      *
+     * <p>Requisito: RF-36 (consulta de historial de precios del producto).</p>
      * @param idProducto identificador del producto
      * @return nombre, precio actual y precios anteriores
      * @throws ComunicacionException si falla la comunicación o el servidor no devuelve el historial

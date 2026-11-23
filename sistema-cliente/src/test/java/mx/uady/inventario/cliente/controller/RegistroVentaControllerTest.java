@@ -25,11 +25,8 @@ import mx.uady.inventario.cliente.model.UsuarioDTO;
 import mx.uady.inventario.cliente.view.RegistroVentaFrame;
 
 /**
- * Suite de pruebas unitarias y de integración para el controlador y la interfaz del Sistema Proveedor (Cliente).
- * Verifica la correcta inicialización de componentes, la carga de catálogos, el filtrado y el flujo de registro.
- * 
- * @author UADY
- * @version 1.0
+ * Pruebas unitarias para el flujo del controlador de ventas.
+ * Criterio ERS: RF-10 / RF-12.
  */
 class RegistroVentaControllerTest {
 

@@ -2,6 +2,15 @@ package mx.uady.inventario.cliente.model;
 
 /**
  * Objeto de transferencia de datos (DTO) para representar una tienda o almacén dentro de la interfaz gráfica del Sistema Proveedor.
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Carga de la lista de tiendas al abrir la ventana.</li>
+ *   <li><b>RF-28:</b> Despliegue de la lista de tiendas destino ordenadas alfabéticamente por nombre.</li>
+ *   <li><b>RF-31:</b> Validación de tienda seleccionada para habilitar el registro de venta.</li>
+ *   <li><b>RF-32:</b> Registro de la venta asociado a la tienda elegida.</li>
+ * </ul>
+ * </p>
+ *
  */
 public class TiendaDTO {
     private Long idTienda;

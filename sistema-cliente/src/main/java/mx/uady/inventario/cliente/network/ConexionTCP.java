@@ -20,6 +20,15 @@ import java.util.concurrent.TimeUnit;
  * <p>El tiempo límite es <b>total</b> (conexión + espera de respuesta): lo que se gasta conectando
  * se descuenta del tiempo de lectura. No reintenta; cada fallo se clasifica en una
  * {@link ComunicacionException}.</p>
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-37:</b> Identificación de causas de error de red (sin conexión, tiempo agotado, conexión interrumpida).</li>
+ *   <li><b>RF-39:</b> Conexión de sockets TCP exclusivamente contra el Broker.</li>
+ *   <li><b>RF-40:</b> Respeto estricto del tiempo límite de respuesta configurado ({@code timeoutMs}).</li>
+ *   <li><b>RNF-05:</b> Gestión del timeout general para evitar bloqueos indefinidos.</li>
+ * </ul>
+ * </p>
  */
 public class ConexionTCP {
 
@@ -30,6 +39,7 @@ public class ConexionTCP {
     /**
      * Crea el transporte.
      *
+     * <p>Requisitos: RF-39, RF-40.</p>
      * @param host      host o IP del Broker
      * @param puerto    puerto del Broker
      * @param timeoutMs tiempo límite total, en milisegundos
@@ -43,6 +53,7 @@ public class ConexionTCP {
     /**
      * Envía una línea y espera la línea de respuesta.
      *
+     * <p>Requisitos: RF-39, RF-40, RF-37.</p>
      * @param linea texto a enviar (sin salto de línea)
      * @return línea recibida, sin salto de línea
      * @throws ComunicacionException si no hay conexión, se agota el tiempo o se cierra la conexión
@@ -65,6 +76,14 @@ public class ConexionTCP {
         }
     }
 
+    /**
+     * Establece la conexión del socket TCP con el Broker aplicando el timeout correspondiente.
+     *
+     * <p>Requisitos: RF-39, RF-40, RF-37.</p>
+     *
+     * @param socket instancia de socket a conectar
+     * @throws ComunicacionException si se agota el tiempo o no hay conexión con el Broker
+     */
     private void conectar(Socket socket) throws ComunicacionException {
         try {
             socket.connect(new InetSocketAddress(host, puerto), timeoutMs);
@@ -77,6 +96,13 @@ public class ConexionTCP {
         }
     }
 
+    /**
+     * Escribe la trama de texto en el canal de salida UTF-8 terminada con salto de línea y vacía el búfer.
+     *
+     * @param socket socket conectado
+     * @param linea  cadena a transmitir
+     * @throws IOException si falla la escritura en el socket
+     */
     private static void enviar(Socket socket, String linea) throws IOException {
         BufferedWriter salida = new BufferedWriter(
                 new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
@@ -85,6 +111,16 @@ public class ConexionTCP {
         salida.flush();
     }
 
+    /**
+     * Lee una línea de respuesta desde el canal de entrada del socket.
+     *
+     * <p>Requisito: RF-37.</p>
+     *
+     * @param socket socket conectado
+     * @return línea recibida desde el Broker
+     * @throws IOException           si ocurre un error de lectura de bajo nivel
+     * @throws ComunicacionException si la conexión se cierra inesperadamente sin recibir datos
+     */
     private static String recibir(Socket socket) throws IOException, ComunicacionException {
         BufferedReader entrada = new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -96,6 +132,15 @@ public class ConexionTCP {
         return respuesta;
     }
 
+    /**
+     * Calcula los milisegundos restantes para el timeout de lectura descontando el tiempo de conexión.
+     *
+     * <p>Requisito: RF-40.</p>
+     *
+     * @param limiteNanos tiempo límite absoluto en nanosegundos
+     * @return milisegundos restantes para la operación de socket
+     * @throws ComunicacionException si el tiempo límite ya expiró
+     */
     private int milisRestantes(long limiteNanos) throws ComunicacionException {
         long restante = TimeUnit.NANOSECONDS.toMillis(limiteNanos - System.nanoTime());
         if (restante <= 0) {

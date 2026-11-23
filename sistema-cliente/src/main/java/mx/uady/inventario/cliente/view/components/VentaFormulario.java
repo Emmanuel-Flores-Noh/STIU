@@ -20,6 +20,16 @@ import java.util.function.Function;
 /**
  * Formulario de venta: lista de tiendas, lista de usuarios proveedores y los botones de registrar
  * la venta y de consultar el historial de precios. No decide cuándo habilitarse: la ventana se lo indica.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-28:</b> Despliegue de la lista de tiendas para elegir el destino de la venta.</li>
+ *   <li><b>RF-29:</b> Despliegue de la lista de encargados de ventas (usuarios con rol proveedor).</li>
+ *   <li><b>RF-31:</b> Habilitación del botón «Registrar venta» únicamente cuando unidad, tienda y usuario están seleccionados.</li>
+ *   <li><b>RF-32:</b> Disparo de la acción de venta y limpieza de los selectores tras éxito.</li>
+ *   <li><b>RF-36:</b> Disparo de la consulta de historial de precios para la unidad seleccionada.</li>
+ * </ul>
+ * </p>
  */
 public class VentaFormulario extends JPanel {
 

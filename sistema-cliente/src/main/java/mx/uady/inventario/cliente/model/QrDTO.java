@@ -6,8 +6,12 @@ import java.util.Base64;
  * Código QR de una unidad tal como lo devuelve {@code obtenerQr}: {@code {numeroSerie, idProducto,
  * nombreProducto, pngBase64}}. La imagen PNG llega codificada en Base64.
  *
- * <p>Requisitos: RF-22 (contrato de {@code obtenerQr}), RF-34 (mostrar el QR; la imagen se pide en
- * Base64) y RF-35 (guardar el PNG).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-34:</b> Visualización del código QR de la unidad seleccionada al hacer doble clic.</li>
+ *   <li><b>RF-35:</b> Guardado del código QR mostrado como archivo PNG local en disco.</li>
+ * </ul>
+ * </p>
  */
 public class QrDTO {
     private String numeroSerie;
@@ -71,6 +75,7 @@ public class QrDTO {
     /**
      * Decodifica la imagen PNG recibida en Base64 (RF-34).
      *
+     * <p>Requisitos: RF-34 (renderizado de imagen en diálogo), RF-35 (guardado como PNG local).</p>
      * @return bytes del PNG, o {@code null} si no vino imagen o la codificación es inválida
      */
     public byte[] decodificarPng() throws IllegalArgumentException{

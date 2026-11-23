@@ -15,9 +15,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Tabla de inventario con desplazamiento: muestra las unidades disponibles (Número de serie,
- * Producto y Estado), las filtra con el campo de búsqueda y avisa cuando cambia la selección o se
- * hace doble clic sobre una unidad.
+ * Tabla de inventario con desplazamiento: muestra las unidades disponibles (Número de serie, las filtra con el campo de búsqueda y
+ * avisa cuando cambia la selección o se hace doble clic sobre una unidad.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-26:</b> Despliegue de inventario disponible en una tabla (Número de serie, Producto, Estado «En almacén»).</li>
+ *   <li><b>RF-27:</b> Filtrado de inventario en tiempo real a través del campo de búsqueda.</li>
+ *   <li><b>RF-31:</b> Notificación del cambio de selección de mercancía para habilitar el botón de venta.</li>
+ *   <li><b>RF-34:</b> Detección de doble clic en una fila para solicitar y mostrar el código QR.</li>
+ * </ul>
+ * </p>
  */
 public class MercanciaTabla extends JScrollPane{
     private final Modelo modelo = new Modelo();

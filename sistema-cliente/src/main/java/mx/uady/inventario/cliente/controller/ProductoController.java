@@ -6,6 +6,15 @@ import mx.uady.inventario.cliente.util.PantallaTipo;
 /**
  * Casos de uso sobre el producto de una unidad: consulta de su código QR y de su historial de precios.
  * Las consultas corren en segundo plano y los errores se informan con {@link PresentadorErrores}.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-34:</b> Visualización del código QR de la unidad seleccionada al hacer doble clic.</li>
+ *   <li><b>RF-36:</b> Consulta del historial de precios del producto de la unidad elegida.</li>
+ *   <li><b>RF-37:</b> Notificación adecuada de errores si falla la consulta remota.</li>
+ *   <li><b>RF-38:</b> Reintento interactivo de la consulta en caso de problemas de red.</li>
+ * </ul>
+ * </p>
  */
 public class ProductoController {
 
@@ -17,6 +26,7 @@ public class ProductoController {
     /**
      * Crea el controlador.
      *
+     * <p>Requisitos: RF-34, RF-36.</p>
      * @param vista    pantalla donde se muestran los resultados
      * @param servicio acceso al Sistema 1 a través del Broker
      * @param ejecutor ejecutor de trabajos en segundo plano
@@ -32,6 +42,7 @@ public class ProductoController {
      * Obtiene y muestra el código QR de una unidad. La imagen se pide codificada en Base64; si no se
      * puede mostrar, la ventana del QR lo indica.
      *
+     * <p>Requisito: RF-34 (código QR en Base64 por doble clic).</p>
      * @param numeroSerie número de serie de la unidad; si está vacío no hace nada
      */
     public void consultarQr(String numeroSerie) {
@@ -53,6 +64,7 @@ public class ProductoController {
     /**
      * Obtiene y muestra el historial de precios de un producto.
      *
+     * <p>Requisito: RF-36 (consulta de historial de precios).</p>
      * @param idProducto identificador del producto; si es nulo no hace nada
      */
     public void consultarHistorialPrecios(Integer idProducto) {

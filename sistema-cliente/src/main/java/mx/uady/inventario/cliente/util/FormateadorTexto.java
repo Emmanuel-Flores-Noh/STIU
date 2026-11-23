@@ -17,8 +17,15 @@ import java.util.regex.Pattern;
  * Normalización y presentación de texto para el encargado: comparación sin acentos ni mayúsculas,
  * estado de las unidades, fechas {@code dd/MM/yyyy HH:mm} y precios en pesos.
  *
- * <p>Requisitos: RF-26 (estado «En almacén»), RF-27 (búsqueda sin acentos ni mayúsculas),
- * RF-32 (fecha {@code dd/mm/aaaa HH:mm}) y RF-36 (precios y fechas del historial).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-26:</b> Filtrado y despliegue exclusivo de unidades en estado «En almacén».</li>
+ *   <li><b>RF-27:</b> Búsqueda parcial de inventario insensible a mayúsculas y acentos diacríticos.</li>
+ *   <li><b>RF-32:</b> Formateo de fecha de confirmación de venta en formato {@code dd/MM/yyyy HH:mm}.</li>
+ *   <li><b>RF-36:</b> Formateo de precios en moneda y fechas cronológicas para el historial de precios.</li>
+ *   <li><b>RNF-07:</b> Eficiencia de procesamiento para filtros de inventario en tiempo real.</li>
+ * </ul>
+ * </p>
  */
 public final class FormateadorTexto {
 
@@ -33,8 +40,9 @@ public final class FormateadorTexto {
     }
 
     /**
-     * Convierte el texto a minúsculas y le quita los acentos (RF-27).
+     * Convierte el texto a minúsculas y le quita los acentos
      *
+     * <p>Requisitos: RF-27.</p>
      * @param texto texto original; puede ser nulo
      * @return texto normalizado; cadena vacía si el original es nulo
      */
@@ -48,7 +56,8 @@ public final class FormateadorTexto {
 
     /**
      * Indica si el estado equivale a «En almacén», sin importar mayúsculas, acentos ni guiones bajos
-     * (por ejemplo {@code EN_ALMACEN}). Cubre RF-26.
+     *
+     * <p>Requisitos: RF-26.</p>
      *
      * @param estado estado recibido; puede ser nulo
      * @return {@code true} si la unidad está en almacén
@@ -58,7 +67,7 @@ public final class FormateadorTexto {
     }
 
     /**
-     * Da al estado un texto legible para la tabla (p. ej. {@code EN_ALMACEN} pasa a «En almacén»).
+     * Da al estado un texto legible para la tabla
      *
      * @param estado estado recibido; puede ser nulo
      * @return texto para mostrar; cadena vacía si no hay estado
@@ -78,21 +87,19 @@ public final class FormateadorTexto {
      * Da formato a una fecha ISO 8601 usando la zona horaria del equipo.
      *
      * @param texto fecha en texto; puede ser nulo
-     * @return fecha en {@code dd/MM/yyyy HH:mm}, el texto original si no se puede interpretar,
-     *         o "N/D" si no hay fecha
+     * @return fecha en {@code dd/MM/yyyy HH:mm}, el texto original si no se puede interpretar, o "N/D" si no hay fecha
      */
     public static String fecha(String texto) {
         return fecha(texto, ZoneId.systemDefault());
     }
 
     /**
-     * Da formato a una fecha ISO 8601. Si trae zona horaria (por ejemplo {@code Z}) se convierte a la
-     * zona indicada; si no, se muestra como llegó (RF-32).
+     * Da formato a una fecha ISO 8601. Si trae zona horaria
      *
+     * <p>Requisitos: RF-32.</p>
      * @param texto fecha en texto; puede ser nulo
      * @param zona  zona a la que se convierten las fechas con zona horaria
-     * @return fecha en {@code dd/MM/yyyy HH:mm}, el texto original si no se puede interpretar,
-     *         o "N/D" si no hay fecha
+     * @return fecha en {@code dd/MM/yyyy HH:mm}, el texto original si no se puede interpretar, o "N/D" si no hay fecha
      */
     public static String fecha(String texto, ZoneId zona) {
         if (texto == null || texto.isBlank()) {

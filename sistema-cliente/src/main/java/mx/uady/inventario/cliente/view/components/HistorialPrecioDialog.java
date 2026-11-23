@@ -25,6 +25,13 @@ import java.util.List;
  * Ventana «Historial de precios»: muestra el nombre y el precio actual del producto y la lista de
  * precios anteriores con su fecha, del más antiguo al más reciente. Si el producto nunca cambió de
  * precio, muestra solo el precio actual y lo indica.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-36:</b> Consulta y despliegue del historial de precios de un producto (nombre, precio actual y tabla cronológica de precios anteriores).</li>
+ *   <li><b>RNF-23:</b> Desacoplamiento de componentes de presentación visual.</li>
+ * </ul>
+ * </p>
  */
 public class HistorialPrecioDialog extends JDialog {
 
@@ -33,6 +40,7 @@ public class HistorialPrecioDialog extends JDialog {
     /**
      * Crea la ventana modal.
      *
+     * <p>Requisito: RF-36.</p>
      * @param parent    ventana propietaria
      * @param historial datos del historial a mostrar
      */

@@ -13,13 +13,17 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Punto de entrada principal para el Sistema 2 (Cliente del Proveedor).
- * 
- * <p>Valida la configuración de red.</p>
- */
-/**
  * Punto de entrada del Sistema 2 (Cliente del Proveedor). Valida la configuración de red, arma los
  * objetos de la aplicación (cliente TCP, servicio, controlador y ventana) y abre la ventana.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Carga inicial de listas e inventario al abrir la ventana.</li>
+ *   <li><b>RF-39:</b> Comunicación exclusiva con el Broker mediante host y puerto configurados.</li>
+ *   <li><b>RF-40:</b> Verificación y cumplimiento del tiempo de espera mínimo requerido ({@code CLIENT_TIMEOUT_MS}).</li>
+ *   <li><b>RNF-05:</b> Alineación de timeouts entre el cliente y el peor caso del Broker.</li>
+ * </ul>
+ * </p>
  */
 public final class Main {
 
@@ -29,6 +33,7 @@ public final class Main {
     /**
      * Inicia el sistema. Si la configuración de red no es válida, informa el motivo y termina con código 1.
      *
+     * <p>Requisito: RF-40 (imposibilidad de arranque con valores inválidos de timeout o red).</p>
      * @param args argumentos de línea de comandos (no se usan)
      */
     public static void main(String[] args) {
@@ -51,7 +56,13 @@ public final class Main {
             throw e;
         }
     }
-
+    /**
+     * Imprime en consola un resumen
+     *
+     * <p>Requisitos: RF-39, RF-40, RNF-05.</p>
+     *
+     * @param configuracion configuración de red a imprimir
+     */
     private static void imprimirResumen(ConfiguracionNetwork configuracion) {
         System.out.println("==================================================");
         System.out.println("  Iniciando Sistema Cliente del Proveedor");
@@ -66,9 +77,16 @@ public final class Main {
         }
     }
 
+    /**
+     * Inicializa las dependencias principales del cliente (capa de red, servicios, vista y controlador)
+     * y dispara la carga de catálogos e inventario.
+     *
+     * <p>Requisitos: RF-25 (apertura de ventana y carga en segundo plano), RF-39 (conectividad con Broker).</p>
+     *
+     * @param configuracion parámetros de red para inicializar el cliente TCP
+     */
     private static void abrirVentana(ConfiguracionNetwork configuracion) {
-        ClienteTCP cliente = new ClienteTCP(
-                configuracion.brokerHost(), configuracion.brokerPuerto(), configuracion.timeoutMs());
+        ClienteTCP cliente = new ClienteTCP(configuracion.brokerHost(), configuracion.brokerPuerto(), configuracion.timeoutMs());
         VentaService servicio = new VentaService(cliente);
 
         RegistroVentaFrame ventana = new RegistroVentaFrame();

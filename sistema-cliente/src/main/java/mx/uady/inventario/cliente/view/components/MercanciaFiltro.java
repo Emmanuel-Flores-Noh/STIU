@@ -11,10 +11,14 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 /**
- * Filtro en tiempo real del inventario: en cada tecla deja las unidades cuyo número de serie o
- * nombre de producto contienen el texto buscado, sin distinguir mayúsculas ni acentos. El texto se
- * toma literalmente (no es una expresión regular), la columna Estado no cuenta y una búsqueda vacía
- * muestra todas las unidades.
+ * Filtro en tiempo real del inventario sin distinguir mayúsculas ni acentos.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-27:</b> Filtrado de inventario por número de serie o nombre de producto (búsqueda parcial insensible a mayúsculas y acentos, actualización en tiempo real).</li>
+ *   <li><b>RNF-07:</b> Actualización fluida y eficiente por cada evento del teclado sobre el inventario.</li>
+ * </ul>
+ * </p>
  */
 public class MercanciaFiltro {
 
@@ -58,6 +62,7 @@ public class MercanciaFiltro {
     /**
      * Crea el filtro de filas para un texto de búsqueda.
      *
+     * <p>Requisito: RF-27 (coincidencia parcial sin mayúsculas ni acentos en serie o producto).</p>
      * @param texto texto buscado; no debe estar vacío
      * @return filtro que acepta las filas cuyo serie o producto contienen el texto
      */

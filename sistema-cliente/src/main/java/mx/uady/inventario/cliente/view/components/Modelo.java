@@ -7,7 +7,16 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Modelo de solo lectura que guarda las unidades como {@link MercanciaDTO}. */
+/**
+ * Modelo de solo lectura que guarda las unidades como {@link MercanciaDTO}.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-26:</b> Despliegue de columnas Número de serie, Producto y Estado para unidades en almacén.</li>
+ *   <li><b>RF-27:</b> Soporte para ordenamiento y filtrado de filas mediante {@link MercanciaFiltro}.</li>
+ * </ul>
+ * </p>
+ */
 public class Modelo extends AbstractTableModel {
 
     /** Índice de la columna del número de serie. */

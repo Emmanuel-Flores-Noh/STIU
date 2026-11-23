@@ -10,7 +10,13 @@ import java.util.List;
  * antiguo al más reciente, tal como los envía el Sistema 1 ({@code {idProducto, nombre, precioActual,
  * historial}}).
  *
- * <p>Requisitos: RF-23 (contrato de la operación) y RF-36 (historial de precios en el Sistema 2).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-36:</b> Consulta del historial de precios del producto de la unidad seleccionada.
+ *   Si el producto nunca ha cambiado de precio, el historial se presenta como una lista vacía
+ *   junto con el precio actual.</li>
+ * </ul>
+ * </p>
  */
 
 public class PrecioHistorialDTO {

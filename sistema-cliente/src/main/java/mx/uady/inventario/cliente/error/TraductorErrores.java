@@ -10,12 +10,16 @@ import java.util.concurrent.ExecutionException;
  * Convierte errores técnicos (fallos de comunicación y códigos de error del contrato) en mensajes
  * que el encargado de ventas pueda entender, y decide si tiene sentido ofrecer reintentar.
  *
- * <p>Cuando el Broker responde {@code TIMEOUT} (E005, por ejemplo con el Sistema 1 caído), el mensaje
- * del Broker se conserva y se acompaña de su código y una explicación, porque el cliente espera lo
- * suficiente para recibirlo (RF-40, RNF-05).</p>
- *
- * <p>Requisitos: RF-33, RF-37 (catálogo de errores de la sección 4.C), RF-38 y RNF-33 (ningún
- * mensaje muestra JSON, trazas ni códigos sin explicación).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-33:</b> Informar rechazos de venta ({@code PARAMETROS_INVALIDOS}, {@code RECURSO_NO_ENCONTRADO}) sin ofrecer reintentar.</li>
+ *   <li><b>RF-37:</b> Presentar cada error del catálogo o de red con un mensaje descriptivo comprensible.</li>
+ *   <li><b>RF-38:</b> Ofrecer reintentar operaciones que fallaron por red o servidor transitorio sin reintentar automáticamente.</li>
+ *   <li><b>RF-40:</b> Traducción y explicación del error {@code TIMEOUT} (E005) recibido del Broker.</li>
+ *   <li><b>RNF-05:</b> Tiempos máximos de espera alineados con el Broker.</li>
+ *   <li><b>RNF-33:</b> Mensajes en español sin exposición de trazas ni JSON crudo.</li>
+ * </ul>
+ * </p>
  */
 public final class TraductorErrores {
 
@@ -27,6 +31,7 @@ public final class TraductorErrores {
     /**
      * Describe un error: título, mensaje y si conviene reintentar.
      *
+     * <p>Requisitos: RF-33, RF-37, RF-38.</p>
      * @param error excepción recibida (puede venir envuelta en {@link ExecutionException})
      * @return descripción lista para mostrar al encargado
      */
@@ -51,6 +56,7 @@ public final class TraductorErrores {
     /**
      * Traduce un error a un mensaje para el encargado.
      *
+     * <p>Requisitos: RF-37, RNF-33.</p>
      * @param error excepción recibida
      * @return mensaje entendible en español
      */
@@ -62,6 +68,7 @@ public final class TraductorErrores {
      * Indica si conviene ofrecer reintentar (RF-38): sí para fallas de red o del servidor, no para
      * {@code PARAMETROS_INVALIDOS} y {@code RECURSO_NO_ENCONTRADO}, cuyo resultado sería el mismo.
      *
+     * <p>Requisitos: RF-33, RF-38.</p>
      * @param error excepción recibida
      * @return {@code true} si reintentar podría resolver el problema
      */
@@ -69,6 +76,14 @@ public final class TraductorErrores {
         return describir(error).reintentable();
     }
 
+    /**
+     * Genera la descripción para fallos originados en la capa de red o transporte TCP.
+     *
+     * <p>Requisitos: RF-37, RF-39, RF-40.</p>
+     *
+     * @param tipo categoría del fallo de comunicación
+     * @return descripción amigable con título y reintentabilidad
+     */
     private static DescripcionError describirRed(ComunicacionError tipo) {
         return switch (tipo) {
             case TIEMPO_AGOTADO -> new DescripcionError(TITULO_TIEMPO,
@@ -82,6 +97,15 @@ public final class TraductorErrores {
         };
     }
 
+    /**
+     * Genera la descripción amigable para códigos de error devueltos por el servidor remoto según el catálogo.
+     *
+     * <p>Requisitos: RF-33, RF-37, RF-38, RF-40.</p>
+     *
+     * @param codigo  código de error del contrato
+     * @param mensaje mensaje textual provisto por el servidor
+     * @return descripción con mensaje comprensible y reintentabilidad
+     */
     private static DescripcionError describirServidor(CodigoError codigo, String mensaje) {
         if (codigo == null) {
             return new DescripcionError("Error del servidor",
@@ -100,7 +124,15 @@ public final class TraductorErrores {
         };
     }
 
-    /** Conserva el mensaje que el Broker envió con E005 y lo explica (RF-50, RNF-33). */
+    /**
+     * Conserva el mensaje descriptivo que el Broker envió con E005 y lo acompaña de explicación comprensible.
+     *
+     * <p>Requisitos: RF-40, RNF-05, RNF-33.</p>
+     *
+     * @param codigo        código de error (TIMEOUT / E005)
+     * @param mensajeBroker mensaje retornado por el Broker
+     * @return texto claro explicando el timeout
+     */
     private static String describirTimeoutDelBroker(CodigoError codigo, String mensajeBroker) {
         String detalleBroker = mensajeBroker != null && !mensajeBroker.isBlank()
                 ? mensajeBroker : codigo.getMensajePorDefecto();
@@ -108,11 +140,17 @@ public final class TraductorErrores {
                 + detalleBroker + ". Intente de nuevo en unos momentos.";
     }
 
+    /** Formatea el detalle textual si está presente. */
     private static String detalle(String mensaje) {
         return mensaje != null && !mensaje.isBlank() ? "\nDetalle: " + mensaje : "";
     }
 
-    /** Obtiene la causa real de un error envuelto por {@code SwingWorker} o por tareas concurrentes. */
+    /**
+     * Desenuelve la causa raíz de un error encapsulado en {@link ExecutionException} o {@link CompletionException}.
+     *
+     * @param error excepción posiblemente envuelta
+     * @return excepción causante original
+     */
     private static Throwable desenvolver(Throwable error) {
         Throwable actual = error;
         while ((actual instanceof ExecutionException || actual instanceof CompletionException)

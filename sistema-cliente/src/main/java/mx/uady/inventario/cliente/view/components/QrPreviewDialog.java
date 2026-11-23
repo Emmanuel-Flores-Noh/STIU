@@ -32,6 +32,14 @@ import java.nio.file.Files;
 /**
  * Ventana «Código QR»: muestra la imagen del QR, el número de serie y el nombre del producto, y
  * permite guardar la imagen como PNG. Si la imagen no puede mostrarse, lo indica en la misma ventana.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-34:</b> Despliegue de ventana modal «Código QR» con imagen en Base64, serie y producto. En caso de fallo muestra «No se pudo mostrar la imagen del código QR.».</li>
+ *   <li><b>RF-35:</b> Guardado del código QR mostrado como archivo PNG local mediante botón «Guardar png como».</li>
+ *   <li><b>RNF-23:</b> Desacoplamiento de componentes de interfaz gráfica.</li>
+ * </ul>
+ * </p>
  */
 public class QrPreviewDialog extends JDialog {
 

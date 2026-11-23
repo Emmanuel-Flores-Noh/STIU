@@ -6,8 +6,14 @@ import mx.uady.inventario.common.error.CodigoError;
  * Fallo de una operación contra el Broker: problema de red, tiempo de espera agotado o respuesta
  * inválida. Su especialización {@link ErrorServicioException} cubre las respuestas de error del servidor.
  *
- * <p>Requisitos: RF-37 (errores de red con mensaje propio), RF-38 (reintento explícito) y
- * RF-40 (tiempo de espera agotado).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-37:</b> Presentación de cada error de red o de servidor con un mensaje descriptivo comprensible.</li>
+ *   <li><b>RF-38:</b> Clasificación del fallo para determinar si procede ofrecer reintento de la operación.</li>
+ *   <li><b>RF-39:</b> Manejo de errores por discrepancia de {@code idSolicitud} o ausencia de conexión con el Broker.</li>
+ *   <li><b>RF-40:</b> Detección de expiración del tiempo límite de respuesta (timeout).</li>
+ * </ul>
+ * </p>
  */
 public class ComunicacionException extends Exception {
 

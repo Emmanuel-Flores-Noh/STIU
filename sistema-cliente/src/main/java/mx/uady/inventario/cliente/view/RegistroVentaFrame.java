@@ -13,12 +13,27 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Ventana gráfica principal del Sistema Proveedor para la gestión y registro de ventas de mercancía.
- * Permite visualizar el inventario disponible, filtrar registros, consultar códigos QR asociados 
- * a cada unidad mediante doble clic y ejecutar transacciones conectadas al broker central.
- * 
- * @author UADY
- * @version 1.2
+ * Ventana principal modularizada para el registro de ventas del proveedor.
+ * Compone la barra de herramientas y filtros, la tabla de inventario disponible y el formulario de venta,
+ * delegando la visualización modal a los diálogos de QR e historial de precios.
+ *
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Apertura de ventana, visualización de estado («Cargando» / «Listo») y despliegue de catálogos e inventario.</li>
+ *   <li><b>RF-26:</b> Despliegue de la tabla de mercancía disponible en almacén.</li>
+ *   <li><b>RF-27:</b> Filtrado de inventario en tiempo real por número de serie o nombre de producto.</li>
+ *   <li><b>RF-28:</b> Selector de tiendas destino.</li>
+ *   <li><b>RF-29:</b> Selector de encargados de ventas (usuarios proveedores).</li>
+ *   <li><b>RF-30:</b> Botón «Actualizar Listas» para reconsultar tiendas, inventario y usuarios.</li>
+ *   <li><b>RF-31:</b> Habilitación condicional del botón «Registrar venta de unidad seleccionada» solo ante selección completa.</li>
+ *   <li><b>RF-32:</b> Despliegue de confirmación de venta exitosa y limpieza del formulario.</li>
+ *   <li><b>RF-34:</b> Apertura modal del visor de código QR al realizar doble clic sobre una fila del inventario.</li>
+ *   <li><b>RF-36:</b> Apertura modal del visor de historial de precios al presionar «Ver historial de precios».</li>
+ *   <li><b>RF-37:</b> Notificación de errores de red o servidor.</li>
+ *   <li><b>RF-38:</b> Presentación de ventana de confirmación interactiva para reintentar operaciones fallidas.</li>
+ *   <li><b>RNF-23:</b> Desacoplamiento de la interfaz gráfica respecto a la lógica de red y serialización.</li>
+ * </ul>
+ * </p>
  */
 public class RegistroVentaFrame extends JFrame implements VistaController {
 
@@ -33,8 +48,11 @@ public class RegistroVentaFrame extends JFrame implements VistaController {
     private boolean cargando;
 
     /**
-     * Construye la ventana. Hasta que se llame a {@link #( RegistroVentaController )}, los botones
-     * no ejecutan ninguna operación.
+     * Construye la ventana principal e inicializa sus paneles y gestores de eventos.
+     * Hasta que se asigne el controlador con {@link #setOperaciones(VentaOperaciones)},
+     * los eventos de usuario operan sobre la implementación base nula.
+     *
+     * <p>Requisito: RF-25.</p>
      */
     public RegistroVentaFrame() {
         super("Sistema Proveedor - Registro de Ventas (UADY)");
@@ -47,7 +65,9 @@ public class RegistroVentaFrame extends JFrame implements VistaController {
     }
 
     /**
-     * Conecta la ventana con el controlador que atiende sus acciones.
+     * Conecta la ventana con el controlador que atiende sus acciones de negocio.
+     *
+     * <p>Requisito: RNF-23.</p>
      *
      * @param operaciones controlador de la pantalla
      */
@@ -56,9 +76,11 @@ public class RegistroVentaFrame extends JFrame implements VistaController {
     }
 
     /**
-     * Obtiene la tabla de inventario (para pruebas de interfaz).
+     * Obtiene la tabla de inventario (útil para pruebas unitarias y de interfaz).
      *
-     * @return panel con la tabla de inventario
+     * <p>Requisito: RF-26.</p>
+     *
+     * @return componente con la tabla de inventario
      */
     public MercanciaTabla getTablaMercancia() {
         return tabla;
@@ -112,6 +134,9 @@ public class RegistroVentaFrame extends JFrame implements VistaController {
         return barra;
     }
 
+    /**
+     * Conecta los componentes a eventos
+     */
     private void conectarEventos() {
         btnRefrescar.addActionListener(e -> operaciones.cargarListas());
         tabla.setAlCambiarSeleccion(this::actualizarHabilitacion);

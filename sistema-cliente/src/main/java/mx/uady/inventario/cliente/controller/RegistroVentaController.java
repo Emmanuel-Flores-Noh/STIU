@@ -11,12 +11,25 @@ import mx.uady.inventario.cliente.util.PantallaTipo;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Controlador encargado de coordinar la lógica de negocio, la comunicación de red
- * con ClienteTCP y la actualización asíncrona de la interfaz gráfica
- * en RegistroVentaFrame.
+ * Controlador encargado de coordinar la lógica de negocio para el registro de ventas
+ * y la comunicación asíncrona con el Broker de servicios.
  *
- * <p>La vista nunca conoce el socket ni el JSON: recibe DTOs y mensajes ya traducidos
- * con el TraductorErrores.</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-25:</b> Carga en segundo plano de listas de tiendas, usuarios proveedores e inventario disponible al iniciar la vista.</li>
+ *   <li><b>RF-26:</b> Actualización de la tabla con unidades disponibles en almacén.</li>
+ *   <li><b>RF-28:</b> Poblado del selector de tiendas destino.</li>
+ *   <li><b>RF-29:</b> Poblado del selector de encargados de venta (usuarios proveedores).</li>
+ *   <li><b>RF-30:</b> Recarga manual de catálogos e inventario con indicador visual de carga.</li>
+ *   <li><b>RF-31:</b> Habilitación y validación estricta de que exista unidad, tienda y usuario antes de permitir la venta.</li>
+ *   <li><b>RF-32:</b> Registro de la venta con actualización de vista, limpieza de campos y recarga de listas.</li>
+ *   <li><b>RF-33:</b> Notificación clara cuando el servidor rechaza la venta sin reintento automático.</li>
+ *   <li><b>RF-34:</b> Delegación de la consulta del código QR de la unidad seleccionada.</li>
+ *   <li><b>RF-36:</b> Delegación de la consulta del historial de precios del producto.</li>
+ *   <li><b>RF-37:</b> Presentación individualizada y entendible de fallos de red o servidor.</li>
+ *   <li><b>RF-38:</b> Opción de reintento controlado sin retransmisión automática espontánea.</li>
+ * </ul>
+ * </p>
  */
 public class RegistroVentaController implements VentaOperaciones {
     private final VistaController vista;
@@ -29,6 +42,7 @@ public class RegistroVentaController implements VentaOperaciones {
     /**
      * Crea el controlador con su propio {@link ProductoController}.
      *
+     * <p>Requisitos: RF-25, RF-31, RF-32, RF-34, RF-36.</p>
      * @param vista    pantalla que se coordina
      * @param servicio acceso al Sistema 1 a través del Broker
      * @param ejecutor ejecutor de trabajos en segundo plano
@@ -40,6 +54,7 @@ public class RegistroVentaController implements VentaOperaciones {
     /**
      * Crea el controlador con un {@link ProductoController} ya construido.
      *
+     * <p>Requisitos: RF-25, RF-31, RF-32, RF-34, RF-36.</p>
      * @param vista     pantalla que se coordina
      * @param servicio  acceso al Sistema 1 a través del Broker
      * @param ejecutor  ejecutor de trabajos en segundo plano
@@ -54,7 +69,7 @@ public class RegistroVentaController implements VentaOperaciones {
     }
 
     /**
-     * Regla RF-31: una venta solo puede enviarse con una unidad, una tienda y un usuario elegidos.
+     * RF-31: una venta solo puede enviarse con una unidad, una tienda y un usuario elegidos.
      * La usan la vista (para habilitar el botón) y este controlador (para rechazar el envío).
      *
      * @param unidad  unidad seleccionada; puede ser nula

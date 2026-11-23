@@ -9,9 +9,12 @@ import java.math.BigDecimal;
  * {@code historial} que devuelve {@code listarPreciosProducto}, serializado desde el modelo
  * {@code HistorialPrecio} de {@code common} ({@code precioHistorico}, {@code fechaCambio}).
  *
- * <p>Requisitos: RF-23 (contrato de {@code listarPreciosProducto}) y RF-36 (historial de precios).</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-36:</b> Consulta del historial de precios de un producto (lista cronológica de precios anteriores y fecha de cambio).</li>
+ * </ul>
+ * </p>
  */
-
 public class PrecioDTO {
 
     @SerializedName("precioHistorico")

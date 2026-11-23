@@ -6,7 +6,13 @@ import javax.swing.*;
 
 /**
  * Aplica el aspecto visual (FlatLaf) de la aplicación. Si no puede aplicarse, la interfaz sigue
+ *
  * funcionando con el aspecto por defecto de Swing.
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RNF-23:</b> Estandarización de componentes visuales en la aplicación cliente.</li>
+ * </ul>
+ * </p>
  */
 public final class IntefazConfiguracion {
     private IntefazConfiguracion(){}

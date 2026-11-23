@@ -4,16 +4,20 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Parámetros de red del Sistema Cliente (Sistema 2), leídos de variables de entorno.
+ * Configuración de red del cliente. Define el parámetro CLIENT_TIMEOUT_MS garantizando
+ * que supere el tiempo de respuesta en el peor caso del Broker (~15s) (documentado en README y docker-compose.yml).
  *
- * <p>El tiempo límite del cliente debe cubrir el peor caso del Broker: 3 intentos de 2 s de conexión
- * más 5 s de lectura, con 0.2 s entre intentos (21.4 s). Por eso el valor por defecto es de 22,000 ms
- * y se advierte cuando se configura uno menor ({@link #timeoutInferiorAlRecomendado()}). Un valor no
- * numérico o menor o igual a 0 impide el arranque.</p>
+ * <p>Trazabilidad con Requisitos:
+ * <ul>
+ *   <li><b>RF-39:</b> Comunicación exclusiva con el Broker a través de {@code BROKER_HOST} y {@code BROKER_PORT}.</li>
+ *   <li><b>RF-40:</b> Tiempo límite del cliente ({@code CLIENT_TIMEOUT_MS}) de al menos 22,000 ms; rechaza valores no numéricos o &le; 0.</li>
+ *   <li><b>RNF-05:</b> Tiempos máximos de espera alineados con los reintentos del Broker.</li>
+ * </ul>
+ * </p>
  *
- * @param brokerHost   host o dirección IP del Broker ({@code BROKER_HOST})
- * @param brokerPuerto puerto del Broker ({@code BROKER_PORT})
- * @param timeoutMs    tiempo límite total de una solicitud, en milisegundos ({@code CLIENT_TIMEOUT_MS})
+ * @param brokerHost   host o dirección IP del Broker
+ * @param brokerPuerto puerto del Broker
+ * @param timeoutMs    tiempo límite total de una solicitud, en milisegundos
  */
 public record ConfiguracionNetwork(
         String brokerHost,
@@ -37,6 +41,7 @@ public record ConfiguracionNetwork(
     /**
      * Valida los valores recibidos.
      *
+     * <p>Requisitos: RF-39, RF-40.</p>
      * @throws IllegalArgumentException si el host está vacío, el puerto está fuera de 1-65535
      *                                  o el tiempo límite no es positivo
      */
@@ -51,6 +56,7 @@ public record ConfiguracionNetwork(
     /**
      * Lee la configuración de las variables de entorno del proceso.
      *
+     * <p>Requisitos: RF-39, RF-40.</p>
      * @return configuración lista para el cliente TCP
      * @throws IllegalArgumentException si algún valor no es válido
      */
@@ -76,12 +82,21 @@ public record ConfiguracionNetwork(
     /**
      * Indica si el tiempo límite configurado es menor al necesario para esperar al Broker en su peor caso.
      *
+     * <p>Requisitos: RF-40, RNF-05.</p>
      * @return {@code true} si {@code timeoutMs} es menor a {@link #TIMEOUT_MINIMO_RECOMENDADO_MS}
      */
     public boolean timeoutInferiorAlRecomendado() {
         return timeoutMs < TIMEOUT_MINIMO_RECOMENDADO_MS;
     }
 
+    /**
+     * Valida que el puerto se encuentre en el rango permitido por TCP (1-65535).
+     *
+     * <p>Requisito: RF-39.</p>
+     *
+     * @param puerto   número de puerto
+     * @param variable nombre de la variable de entorno
+     */
     private static void validarPuerto(int puerto, String variable) {
         if (puerto <= 0 || puerto > 65535) {
             throw new IllegalArgumentException(variable + " fuera de rango válido (1-65535): " + puerto);
