@@ -3,8 +3,6 @@ package mx.uady.inventario.central.view;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -135,18 +133,10 @@ public final class VentaHistorialPanel extends JPanel {
     }
 
     private void aplicarFiltros() {
-        String serieTexto = serie.getText().strip();
-        String tiendaElegida = elegido(tienda);
-        String productoElegido = elegido(producto);
-        LocalDate desdeFecha = fecha(desde.getText());
-        LocalDate hastaFecha = fecha(hasta.getText());
-        tablaFiltrable.filtrar(venta -> FiltroTexto.contiene(venta.numeroSerie(), serieTexto)
-                && (tiendaElegida == null || tiendaElegida.equals(venta.tienda()))
-                && (productoElegido == null || productoElegido.equals(venta.producto()))
-                && (desdeFecha == null || !venta.fechaVenta().toLocalDate().isBefore(desdeFecha))
-                && (hastaFecha == null || !venta.fechaVenta().toLocalDate().isAfter(hastaFecha)));
-        actualizarResumen(!desde.getText().isBlank() && desdeFecha == null
-                || !hasta.getText().isBlank() && hastaFecha == null);
+        CriteriosHistorialVentas criterios = CriteriosHistorialVentas.de(serie.getText(), elegido(tienda),
+                elegido(producto), desde.getText(), hasta.getText());
+        tablaFiltrable.filtrar(criterios::cumple);
+        actualizarResumen(criterios.fechaInvalida());
     }
 
     private void actualizarResumen(boolean fechaInvalida) {
@@ -167,17 +157,6 @@ public final class VentaHistorialPanel extends JPanel {
         opciones.add(opcionTodos);
         opciones.addAll(new TreeSet<>(ventas.stream().map(valor).filter(Objects::nonNull).toList()));
         Combos.rellenarConservando(combo, opciones, Function.identity());
-    }
-
-    private static LocalDate fecha(String texto) {
-        if (texto.isBlank()) {
-            return null;
-        }
-        try {
-            return LocalDate.parse(texto.strip());
-        } catch (DateTimeParseException error) {
-            return null;
-        }
     }
 
     // ---- API para el controlador ----
