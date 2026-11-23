@@ -3,8 +3,6 @@ package mx.uady.inventario.central.view;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -22,15 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.model.VentaHistorial;
 import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
+import mx.uady.inventario.central.view.comun.TablaFiltrable;
 
 /** Historial de ventas con filtros por tienda, producto, rango de fechas y número de serie. */
 public final class VentaHistorialPanel extends JPanel {
@@ -44,8 +40,9 @@ public final class VentaHistorialPanel extends JPanel {
             "Ninguna venta coincide con los filtros.", "%d de %d ventas", "1 venta", "%d ventas");
 
     private final VentaHistorialTableModel modelo = new VentaHistorialTableModel();
-    private final JTable tabla = new JTable(modelo);
-    private final TableRowSorter<VentaHistorialTableModel> ordenador = new TableRowSorter<>(modelo);
+    private final TablaFiltrable<VentaHistorialTableModel, VentaHistorial> tablaFiltrable =
+            new TablaFiltrable<>(modelo, modelo::getFila);
+    private final JTable tabla = tablaFiltrable.tabla();
     private final JTextField serie = new JTextField(12);
     private final JComboBox<String> tienda = new JComboBox<>();
     private final JComboBox<String> producto = new JComboBox<>();
@@ -64,17 +61,10 @@ public final class VentaHistorialPanel extends JPanel {
         construirControles();
         tabla.setName("tablaHistorialVentas");
         estado.setName("estadoHistorialVentas");
-        tabla.setRowSorter(ordenador);
-        tabla.setFillsViewportHeight(true);
-        tabla.setRowHeight(26);
-        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabla.getSelectionModel().addListSelectionListener(e -> abrirQr.setEnabled(seleccionada().isPresent()));
-        tabla.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && tabla.rowAtPoint(e.getPoint()) >= 0 && abrirQr.isEnabled()) {
-                    alAbrirQr.run();
-                }
+        tablaFiltrable.alSeleccionar(() -> abrirQr.setEnabled(seleccionada().isPresent()));
+        tablaFiltrable.alDobleClic(() -> {
+            if (abrirQr.isEnabled()) {
+                alAbrirQr.run();
             }
         });
         abrirQr.setName("abrirQrVenta");
@@ -150,17 +140,11 @@ public final class VentaHistorialPanel extends JPanel {
         String productoElegido = elegido(producto);
         LocalDate desdeFecha = fecha(desde.getText());
         LocalDate hastaFecha = fecha(hasta.getText());
-        ordenador.setRowFilter(new RowFilter<VentaHistorialTableModel, Integer>() {
-            @Override
-            public boolean include(Entry<? extends VentaHistorialTableModel, ? extends Integer> fila) {
-                VentaHistorial venta = modelo.getFila(fila.getIdentifier());
-                return FiltroTexto.contiene(venta.numeroSerie(), serieTexto)
-                        && (tiendaElegida == null || tiendaElegida.equals(venta.tienda()))
-                        && (productoElegido == null || productoElegido.equals(venta.producto()))
-                        && (desdeFecha == null || !venta.fechaVenta().toLocalDate().isBefore(desdeFecha))
-                        && (hastaFecha == null || !venta.fechaVenta().toLocalDate().isAfter(hastaFecha));
-            }
-        });
+        tablaFiltrable.filtrar(venta -> FiltroTexto.contiene(venta.numeroSerie(), serieTexto)
+                && (tiendaElegida == null || tiendaElegida.equals(venta.tienda()))
+                && (productoElegido == null || productoElegido.equals(venta.producto()))
+                && (desdeFecha == null || !venta.fechaVenta().toLocalDate().isBefore(desdeFecha))
+                && (hastaFecha == null || !venta.fechaVenta().toLocalDate().isAfter(hastaFecha)));
         actualizarResumen(!desde.getText().isBlank() && desdeFecha == null
                 || !hasta.getText().isBlank() && hastaFecha == null);
     }
@@ -168,7 +152,7 @@ public final class VentaHistorialPanel extends JPanel {
     private void actualizarResumen(boolean fechaInvalida) {
         estado.setText(fechaInvalida
                 ? FECHA_INVALIDA
-                : RESUMEN.texto(modelo.getRowCount(), tabla.getRowCount(), null));
+                : RESUMEN.texto(tablaFiltrable.totalFilas(), tablaFiltrable.filasVisibles(), null));
     }
 
     /** Valor elegido en un combo de filtro, o {@code null} si es "Todas"/"Todos". */
@@ -211,9 +195,7 @@ public final class VentaHistorialPanel extends JPanel {
     }
 
     public Optional<VentaHistorial> seleccionada() {
-        int fila = tabla.getSelectedRow();
-        return fila < 0 ? Optional.empty()
-                : Optional.of(modelo.getFila(tabla.convertRowIndexToModel(fila)));
+        return tablaFiltrable.seleccionada();
     }
 
     public void setEstado(String texto) {

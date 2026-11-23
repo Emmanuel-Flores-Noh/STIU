@@ -18,16 +18,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.service.ConsultasVentaService;
 import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
+import mx.uady.inventario.central.view.comun.TablaFiltrable;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.TiendaAlmacen;
 import mx.uady.inventario.common.modelo.Usuario;
@@ -44,8 +40,10 @@ public final class VentaPanel extends JPanel {
             "%d de %d mercancías", "1 mercancía disponible", "%d mercancías disponibles");
 
     private final VentaTableModel modelo = new VentaTableModel();
-    private final JTable tabla = new JTable(modelo);
-    private final TableRowSorter<VentaTableModel> ordenador = new TableRowSorter<>(modelo);
+    private final TablaFiltrable<VentaTableModel, Mercancia> tablaFiltrable =
+            new TablaFiltrable<VentaTableModel, Mercancia>(modelo, modelo::getFila)
+                    .ordenarPor(VentaTableModel.COL_SERIE);
+    private final JTable tabla = tablaFiltrable.tabla();
     private final JTextField busqueda = new JTextField(18);
     private final JComboBox<TiendaAlmacen> tienda = new JComboBox<>();
     private final JComboBox<Usuario> usuario = new JComboBox<>();
@@ -126,28 +124,17 @@ public final class VentaPanel extends JPanel {
     }
 
     private JTable construirTabla() {
-        tabla.setRowSorter(ordenador);
-        ordenador.setSortKeys(List.of(new RowSorter.SortKey(VentaTableModel.COL_SERIE, SortOrder.ASCENDING)));
-        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabla.setFillsViewportHeight(true);
-        tabla.setRowHeight(26);
-        tabla.getSelectionModel().addListSelectionListener(e -> actualizarDisponibilidad());
+        tablaFiltrable.alSeleccionar(this::actualizarDisponibilidad);
         return tabla;
     }
 
     private void aplicarBusqueda() {
-        String texto = busqueda.getText();
-        ordenador.setRowFilter(texto.isBlank() ? null : new RowFilter<VentaTableModel, Integer>() {
-            @Override
-            public boolean include(Entry<? extends VentaTableModel, ? extends Integer> fila) {
-                return FiltroTexto.contiene(fila.getStringValue(VentaTableModel.COL_SERIE), texto);
-            }
-        });
+        tablaFiltrable.filtrarPorTexto(VentaTableModel.COL_SERIE, busqueda.getText());
         actualizarResumen();
     }
 
     private void actualizarResumen() {
-        estado.setText(RESUMEN.texto(modelo.getRowCount(), tabla.getRowCount(), busqueda.getText()));
+        estado.setText(RESUMEN.texto(tablaFiltrable.totalFilas(), tablaFiltrable.filasVisibles(), busqueda.getText()));
     }
 
     private void actualizarDisponibilidad() {
@@ -182,21 +169,11 @@ public final class VentaPanel extends JPanel {
     }
 
     public Optional<Mercancia> seleccionada() {
-        int enVista = tabla.getSelectedRow();
-        return enVista < 0
-                ? Optional.empty()
-                : Optional.of(modelo.getFila(tabla.convertRowIndexToModel(enVista)));
+        return tablaFiltrable.seleccionada();
     }
 
     public boolean seleccionarMercancia(String numeroSerie) {
-        int enModelo = modelo.indiceDe(numeroSerie);
-        int enVista = enModelo < 0 ? -1 : tabla.convertRowIndexToView(enModelo);
-        if (enVista < 0) {
-            return false;
-        }
-        tabla.setRowSelectionInterval(enVista, enVista);
-        tabla.scrollRectToVisible(tabla.getCellRect(enVista, 0, true));
-        return true;
+        return tablaFiltrable.seleccionarFilaDelModelo(modelo.indiceDe(numeroSerie));
     }
 
     public Optional<TiendaAlmacen> tiendaSeleccionada() {

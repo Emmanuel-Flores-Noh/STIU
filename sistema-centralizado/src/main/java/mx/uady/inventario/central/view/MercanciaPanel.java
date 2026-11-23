@@ -7,8 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +21,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
 import javax.swing.UIManager;
-import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
+import mx.uady.inventario.central.view.comun.TablaFiltrable;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
@@ -63,8 +57,10 @@ public class MercanciaPanel extends JPanel {
     private final JButton actualizar = new JButton("Actualizar");
     private final JButton verQr = new JButton("Ver QR");
     private final MercanciaTableModel modelo = new MercanciaTableModel();
-    private final JTable tabla = new JTable(modelo);
-    private final TableRowSorter<MercanciaTableModel> ordenador = new TableRowSorter<>(modelo);
+    private final TablaFiltrable<MercanciaTableModel, Mercancia> tablaFiltrable =
+            new TablaFiltrable<MercanciaTableModel, Mercancia>(modelo, modelo::getFila)
+                    .ordenarPor(MercanciaTableModel.COL_SERIE);
+    private final JTable tabla = tablaFiltrable.tabla();
     private final JLabel estado = new JLabel(" ");
 
     private Runnable alRegistrar = () -> { };
@@ -181,23 +177,15 @@ public class MercanciaPanel extends JPanel {
     }
 
     private JTable construirTabla() {
-        tabla.setRowSorter(ordenador);
-        ordenador.setSortKeys(List.of(new RowSorter.SortKey(MercanciaTableModel.COL_SERIE, SortOrder.ASCENDING)));
-        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabla.setFillsViewportHeight(true);
-        tabla.setRowHeight(26);
         tabla.getColumnModel().getColumn(MercanciaTableModel.COL_SERIE).setPreferredWidth(180);
         tabla.getColumnModel().getColumn(MercanciaTableModel.COL_PRODUCTO).setPreferredWidth(320);
         tabla.getColumnModel().getColumn(MercanciaTableModel.COL_ESTADO).setPreferredWidth(110);
         tabla.getColumnModel().getColumn(MercanciaTableModel.COL_QR).setPreferredWidth(90);
 
-        tabla.getSelectionModel().addListSelectionListener(e -> verQr.setEnabled(seleccionada().isPresent()));
-        tabla.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && tabla.rowAtPoint(e.getPoint()) >= 0 && verQr.isEnabled()) {
-                    alVerQr.run();
-                }
+        tablaFiltrable.alSeleccionar(() -> verQr.setEnabled(seleccionada().isPresent()));
+        tablaFiltrable.alDobleClic(() -> {
+            if (verQr.isEnabled()) {
+                alVerQr.run();
             }
         });
         return tabla;
@@ -210,13 +198,7 @@ public class MercanciaPanel extends JPanel {
     }
 
     private void aplicarBusqueda() {
-        String texto = busquedaSerie.getText();
-        ordenador.setRowFilter(texto.isBlank() ? null : new RowFilter<MercanciaTableModel, Integer>() {
-            @Override
-            public boolean include(Entry<? extends MercanciaTableModel, ? extends Integer> fila) {
-                return FiltroTexto.contiene(fila.getStringValue(MercanciaTableModel.COL_SERIE), texto);
-            }
-        });
+        tablaFiltrable.filtrarPorTexto(MercanciaTableModel.COL_SERIE, busquedaSerie.getText());
         actualizarResumen();
     }
 
@@ -224,8 +206,8 @@ public class MercanciaPanel extends JPanel {
         if (!cargado) {
             return;
         }
-        int total = modelo.getRowCount();
-        int visibles = tabla.getRowCount();
+        int total = tablaFiltrable.totalFilas();
+        int visibles = tablaFiltrable.filasVisibles();
         boolean hayFiltros = filtroProducto.getSelectedIndex() > 0 || filtroEstado.getSelectedIndex() > 0;
         estado.setText(total == 0 && hayFiltros
                 ? SIN_RESULTADOS_FILTRADOS
@@ -289,19 +271,11 @@ public class MercanciaPanel extends JPanel {
 
     /** @return {@code true} si la unidad está visible con los filtros actuales y quedó seleccionada */
     public boolean seleccionarUnidad(String numeroSerie) {
-        int enModelo = modelo.indiceDe(numeroSerie);
-        int enVista = enModelo < 0 ? -1 : tabla.convertRowIndexToView(enModelo);
-        if (enVista < 0) {
-            return false;
-        }
-        tabla.setRowSelectionInterval(enVista, enVista);
-        tabla.scrollRectToVisible(tabla.getCellRect(enVista, 0, true));
-        return true;
+        return tablaFiltrable.seleccionarFilaDelModelo(modelo.indiceDe(numeroSerie));
     }
 
     public Optional<Mercancia> seleccionada() {
-        int enVista = tabla.getSelectedRow();
-        return enVista < 0 ? Optional.empty() : Optional.of(modelo.getFila(tabla.convertRowIndexToModel(enVista)));
+        return tablaFiltrable.seleccionada();
     }
 
     public String nombreProducto(int idProducto) {
