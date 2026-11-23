@@ -20,10 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pruebas unitarias para {@link ProductoController}.
- * Valida la consulta asíncrona y visualización del código QR (RF-34)
- * y del historial de precios (RF-36).
- */
-class ProductoControllerTest {
+ * Valida la consulta asíncrona y visualización del código QR (RF-34) * y del historial de precios (RF-36). */class ProductoControllerTest {
 
     private VistaFalsa vista;
     private ServicioFalso servicio;

@@ -21,10 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Suite de pruebas unitarias para {@link RegistroVentaController}.
- * Valida la orquestación de la carga de listas (RF-25, RF-30), validación de venta completa (RF-31),
- * registro de ventas exitoso (RF-32), rechazo sin reintento (RF-33) y manejo de reintentos (RF-38).
- */
-class RegistroVentaControllerTest {
+ * Valida la orquestación de la carga de listas (RF-25, RF-30), validación de venta completa (RF-31), * registro de ventas exitoso (RF-32), rechazo sin reintento (RF-33) y manejo de reintentos (RF-38). */class RegistroVentaControllerTest {
 
     private VistaFalsa vista;
     private ServicioFalso servicio;
