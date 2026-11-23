@@ -1,13 +1,10 @@
 package mx.uady.inventario.central.view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 
 import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
@@ -39,16 +35,12 @@ public class MercanciaPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
     static final String TODOS = "Todos";
-    static final String SIN_PRODUCTOS = "Primero registra un producto en la pestaña Productos.";
+    static final String SIN_PRODUCTOS = RegistroMercanciaForm.SIN_PRODUCTOS;
     private static final String SIN_RESULTADOS_FILTRADOS = "No hay unidades con los filtros elegidos.";
     private static final ResumenTabla RESUMEN = new ResumenTabla("No hay unidades registradas.",
             "Ninguna unidad coincide con «%s».", "%d de %d unidades", "1 unidad", "%d unidades");
 
-    // Registro
-    private final JComboBox<Producto> productoRegistro = new JComboBox<>();
-    private final JTextField serie = new JTextField(22);
-    private final JButton registrar = new JButton("Registrar");
-    private final JLabel errorSerie = new JLabel(" ");
+    private final RegistroMercanciaForm registro = new RegistroMercanciaForm();
 
     // Consulta
     private final JComboBox<Object> filtroProducto = new JComboBox<>();
@@ -63,20 +55,18 @@ public class MercanciaPanel extends JPanel {
     private final JTable tabla = tablaFiltrable.tabla();
     private final JLabel estado = new JLabel(" ");
 
-    private Runnable alRegistrar = () -> { };
     private Runnable alCambiarFiltros = () -> { };
     private Runnable alVerQr = () -> { };
     /** Evita recargar mientras se rellenan los combos por código. */
     private boolean ajustandoCombos;
     private boolean cargado;
-    private boolean hayProductos;
 
     public MercanciaPanel() {
         super(new BorderLayout(0, 12));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         nombrarComponentes();
 
-        add(construirRegistro(), BorderLayout.NORTH);
+        add(registro, BorderLayout.NORTH);
         JPanel consulta = new JPanel(new BorderLayout(0, 8));
         consulta.add(construirFiltros(), BorderLayout.NORTH);
         consulta.add(new JScrollPane(construirTabla()), BorderLayout.CENTER);
@@ -84,15 +74,10 @@ public class MercanciaPanel extends JPanel {
         consulta.add(estado, BorderLayout.SOUTH);
         add(consulta, BorderLayout.CENTER);
 
-        actualizarBotonRegistrar();
         verQr.setEnabled(false);
     }
 
     private void nombrarComponentes() {
-        productoRegistro.setName("productoRegistro");
-        serie.setName("serie");
-        registrar.setName("registrar");
-        errorSerie.setName("errorSerie");
         filtroProducto.setName("filtroProducto");
         filtroEstado.setName("filtroEstado");
         busquedaSerie.setName("busquedaSerie");
@@ -100,45 +85,6 @@ public class MercanciaPanel extends JPanel {
         verQr.setName("verQr");
         tabla.setName("tablaUnidades");
         estado.setName("estadoUnidades");
-    }
-
-    private JPanel construirRegistro() {
-        productoRegistro.setRenderer(Combos.renderTexto(MercanciaPanel::textoDe));
-        productoRegistro.setPrototypeDisplayValue(new Producto(0, "Laptop Lenovo ThinkPad E14 extra", null, null));
-        serie.putClientProperty("JTextField.placeholderText", "Escanea o escribe el número de serie");
-        serie.addActionListener(e -> {
-            if (registrar.isEnabled()) {
-                alRegistrar.run();
-            }
-        });
-        serie.getDocument().addDocumentListener(Documentos.alCambiar(() -> mostrarErrorSerie(null)));
-        registrar.addActionListener(e -> alRegistrar.run());
-        Color rojo = UIManager.getColor("Component.error.focusedBorderColor");
-        errorSerie.setForeground(rojo != null ? rojo : new Color(0xC62828));
-        errorSerie.putClientProperty("FlatLaf.styleClass", "small");
-
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Registrar unidad"),
-                BorderFactory.createEmptyBorder(4, 8, 4, 8)));
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(4, 0, 0, 8);
-        c.anchor = GridBagConstraints.WEST;
-
-        c.gridx = 0; c.gridy = 0;
-        panel.add(new JLabel("Producto"), c);
-        c.gridx = 1;
-        panel.add(productoRegistro, c);
-        c.gridx = 2;
-        panel.add(new JLabel("Número de serie"), c);
-        c.gridx = 3; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(serie, c);
-        c.gridx = 4; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.insets = new Insets(4, 0, 0, 0);
-        panel.add(registrar, c);
-
-        c.gridx = 3; c.gridy = 1; c.gridwidth = 2; c.insets = new Insets(2, 0, 0, 0);
-        panel.add(errorSerie, c);
-        return panel;
     }
 
     private JPanel construirFiltros() {
@@ -214,21 +160,10 @@ public class MercanciaPanel extends JPanel {
                 : RESUMEN.texto(total, visibles, busquedaSerie.getText()));
     }
 
-    private void actualizarBotonRegistrar() {
-        registrar.setEnabled(hayProductos);
-        productoRegistro.setEnabled(hayProductos);
-        serie.setEnabled(hayProductos);
-        if (!hayProductos && cargado) {
-            mostrarErrorSerie(SIN_PRODUCTOS);
-        } else if (SIN_PRODUCTOS.equals(errorSerie.getText())) {
-            mostrarErrorSerie(null);
-        }
-    }
-
     // ---- API para el controlador ----
 
     public void alRegistrar(Runnable accion) {
-        this.alRegistrar = accion;
+        registro.alRegistrar(accion);
     }
 
     public void alCambiarFiltros(Runnable accion) {
@@ -247,14 +182,12 @@ public class MercanciaPanel extends JPanel {
 
         ajustandoCombos = true;
         try {
-            Combos.rellenarConservando(productoRegistro, productos, Producto::idProducto);
             Combos.rellenarConservando(filtroProducto, opcionesFiltro, MercanciaPanel::claveProducto);
         } finally {
             ajustandoCombos = false;
         }
-        hayProductos = !productos.isEmpty();
+        registro.mostrarProductos(productos);
         cargado = true;
-        actualizarBotonRegistrar();
     }
 
     public void mostrarUnidades(List<Mercancia> unidades, List<Producto> productos) {
@@ -283,26 +216,20 @@ public class MercanciaPanel extends JPanel {
     }
 
     public Optional<Producto> productoParaRegistrar() {
-        return Optional.ofNullable((Producto) productoRegistro.getSelectedItem());
+        return registro.productoElegido();
     }
 
     public String serieCapturada() {
-        return serie.getText();
+        return registro.serieCapturada();
     }
 
     public void limpiarSerie() {
-        serie.setText("");
-        serie.requestFocusInWindow();
+        registro.limpiarSerie();
     }
 
     /** Muestra (o borra, con {@code null}) el error del número de serie y resalta el campo. */
     public void mostrarErrorSerie(String error) {
-        serie.putClientProperty("JComponent.outline", error == null ? null : "error");
-        errorSerie.setText(error == null ? " " : error);
-        if (error != null) {
-            serie.selectAll();
-            serie.requestFocusInWindow();
-        }
+        registro.mostrarError(error);
     }
 
     /** Producto elegido en el filtro, o {@code null} para todos. */
@@ -321,7 +248,13 @@ public class MercanciaPanel extends JPanel {
 
     /** Controles que se bloquean mientras hay una operación en curso. */
     public Component[] controles() {
-        return new Component[] {productoRegistro, serie, registrar, filtroProducto, filtroEstado, actualizar, verQr};
+        Component[] deRegistro = registro.controles();
+        Component[] todos = Arrays.copyOf(deRegistro, deRegistro.length + 4);
+        todos[deRegistro.length] = filtroProducto;
+        todos[deRegistro.length + 1] = filtroEstado;
+        todos[deRegistro.length + 2] = actualizar;
+        todos[deRegistro.length + 3] = verQr;
+        return todos;
     }
 
     // ---- Auxiliares ----
