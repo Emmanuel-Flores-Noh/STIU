@@ -16,12 +16,12 @@ import mx.uady.inventario.common.contrato.EstadoRespuesta;
 import mx.uady.inventario.common.contrato.Respuesta;
 import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.json.GsonFactory;
+import mx.uady.inventario.common.json.LocalDateTimeAdapter;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
 
 import javax.swing.*;
 import java.lang.reflect.Type;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
@@ -259,7 +259,7 @@ public class RegistroVentaController {
         }
         String texto = resultado.getAsJsonObject().get("fecha_venta").getAsString();
         try {
-            return LocalDateTime.parse(texto).format(FORMATO_FECHA);
+            return LocalDateTimeAdapter.parsear(texto).format(FORMATO_FECHA);
         } catch (DateTimeParseException e) {
             return texto;
         }

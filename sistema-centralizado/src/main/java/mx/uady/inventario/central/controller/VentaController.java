@@ -1,6 +1,5 @@
 package mx.uady.inventario.central.controller;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import mx.uady.inventario.central.service.NegocioException;
 import mx.uady.inventario.central.service.VentaService;
 import mx.uady.inventario.central.view.Mensajes;
 import mx.uady.inventario.central.view.VentaPanel;
+import mx.uady.inventario.common.json.LocalDateTimeAdapter;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.TiendaAlmacen;
 import mx.uady.inventario.common.modelo.Usuario;
@@ -129,7 +129,7 @@ public final class VentaController {
 
     private static String fecha(JsonObject resultado) {
         try {
-            return LocalDateTime.parse(resultado.get("fecha_venta").getAsString()).format(FECHA);
+            return LocalDateTimeAdapter.parsear(resultado.get("fecha_venta").getAsString()).format(FECHA);
         } catch (RuntimeException e) {
             return "ahora";
         }
