@@ -113,8 +113,7 @@ class TraductorErroresTest {
     @Tag("RF-37")
     @DisplayName("RF-37 · Caso Límite: Desenvolver excepciones anidadas en ExecutionException")
     void traducirError_CasoLimite_DesenvolverExcepcionesAnidadas() {
-        ComunicacionException causaReal = new ComunicacionException(
-                ComunicacionError.TIEMPO_AGOTADO, "Timeout local", null);
+        ComunicacionException causaReal = new ComunicacionException(ComunicacionError.TIEMPO_AGOTADO, "Timeout local", null);
         ExecutionException envuelta = new ExecutionException("Fallo en tarea asíncrona", causaReal);
 
         DescripcionError descripcion = TraductorErrores.describir(envuelta);

@@ -17,10 +17,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import mx.uady.inventario.cliente.controller.VentaOperaciones;
 import mx.uady.inventario.cliente.model.MercanciaDTO;
@@ -41,9 +38,10 @@ class RegistroVentaFrameTest {
 
     private RegistroVentaFrame frame;
 
+
     @BeforeEach
     void preparar() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeFalse(
+        Assumptions.assumeFalse(
                 java.awt.GraphicsEnvironment.isHeadless(),
                 "Requiere entorno gráfico con display X11 para inicializar JFrame");
         SwingUtilities.invokeAndWait(() -> {
@@ -159,7 +157,7 @@ class RegistroVentaFrameTest {
         assertTrue(llamado.get(), "Hacer clic en 'Actualizar Listas' debe llamar a cargarListas (RF-30)");
     }
 
-    // ---- Métodos Auxiliares para pruebas de Swing ----
+    // Para pruebas swing
 
     private static <T extends Component> T buscar(Container raiz, String nombre, Class<T> tipo) {
         for (Component c : raiz.getComponents()) {

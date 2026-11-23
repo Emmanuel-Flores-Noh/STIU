@@ -107,8 +107,7 @@ public final class FormateadorTexto {
         }
         String limpio = texto.trim().replaceFirst("^(\\d{4}-\\d{2}-\\d{2}) (\\d)", "$1T$2");
         try {
-            TemporalAccessor fecha = DateTimeFormatter.ISO_DATE_TIME
-                    .parseBest(limpio, OffsetDateTime::from, LocalDateTime::from);
+            TemporalAccessor fecha = DateTimeFormatter.ISO_DATE_TIME.parseBest(limpio, OffsetDateTime::from, LocalDateTime::from);
             if (fecha instanceof OffsetDateTime conZona) {
                 return conZona.atZoneSameInstant(zona).format(FECHA_HORA);
             }

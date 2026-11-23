@@ -18,8 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class QrPreviewTest {
 
     // 1x1 PNG transparente válido codificado en Base64
-    private static final String PNG_VALIDO_BASE64 =
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+    private static final String PNG_VALIDO_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
     @Test
     @Tag("RF-34")
@@ -31,7 +30,7 @@ class QrPreviewTest {
 
         assertNotNull(bytes);
         assertTrue(bytes.length > 0);
-        // Validar cabecera mágica de archivo PNG (0x89 'P' 'N' 'G')
+        // Validar cabecera png
         assertEquals((byte) 0x89, bytes[0]);
         assertEquals((byte) 'P', bytes[1]);
         assertEquals((byte) 'N', bytes[2]);

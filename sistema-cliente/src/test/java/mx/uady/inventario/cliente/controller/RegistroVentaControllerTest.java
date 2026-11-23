@@ -144,9 +144,7 @@ import static org.junit.jupiter.api.Assertions.*;
         assertTrue(vista.eventos.contains("combos"), "Debe recargar las listas tras venta exitosa");
 
         String mensajeExito = vista.mensajes.stream()
-                .filter(m -> m.contains("Venta registrada con éxito"))
-                .findFirst()
-                .orElse("");
+                .filter(m -> m.contains("Venta registrada con éxito")).findFirst().orElse("");
         assertTrue(mensajeExito.contains("SN-001"));
         assertTrue(mensajeExito.contains("Tienda Central UADY"));
     }

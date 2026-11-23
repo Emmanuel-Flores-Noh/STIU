@@ -122,12 +122,10 @@ public class ConexionTCP {
      * @throws ComunicacionException si la conexión se cierra inesperadamente sin recibir datos
      */
     private static String recibir(Socket socket) throws IOException, ComunicacionException {
-        BufferedReader entrada = new BufferedReader(
-                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         String respuesta = entrada.readLine();
         if (respuesta == null || respuesta.isBlank()) {
-            throw new ComunicacionException(ComunicacionError.CONEXION_INTERRUMPIDA,
-                    "El Broker cerró la conexión sin responder.", null);
+            throw new ComunicacionException(ComunicacionError.CONEXION_INTERRUMPIDA,"El Broker cerró la conexión sin responder.", null);
         }
         return respuesta;
     }
@@ -145,7 +143,7 @@ public class ConexionTCP {
         long restante = TimeUnit.NANOSECONDS.toMillis(limiteNanos - System.nanoTime());
         if (restante <= 0) {
             throw new ComunicacionException(ComunicacionError.TIEMPO_AGOTADO,
-                    "Se agotó el tiempo (" + timeoutMs + " ms) al conectar con el Broker.", null);
+                                            "Se agotó el tiempo (" + timeoutMs + " ms) al conectar con el Broker.", null);
         }
         return (int) Math.min(restante, Integer.MAX_VALUE);
     }

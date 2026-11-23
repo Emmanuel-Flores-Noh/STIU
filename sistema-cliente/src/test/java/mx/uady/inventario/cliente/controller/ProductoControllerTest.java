@@ -131,8 +131,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         assertTrue(vista.eventos.contains("historial"));
         assertNotNull(vista.historialMostrado);
-        assertTrue(vista.historialMostrado.getHistorialPrecios().isEmpty(),
-                "Si nunca cambió de precio, la lista previa es vacía (RF-36)");
+        assertTrue(vista.historialMostrado.getHistorialPrecios().isEmpty(), "Si nunca cambió de precio, la lista previa es vacía (RF-36)");
         assertEquals(new BigDecimal("250.00"), vista.historialMostrado.getPrecioActual());
 
         // id nulo no debe causar excepciones

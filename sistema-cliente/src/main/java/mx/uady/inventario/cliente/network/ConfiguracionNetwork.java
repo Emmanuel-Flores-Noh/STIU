@@ -104,7 +104,8 @@ public record ConfiguracionNetwork(
     }
 
     private static String valorODefecto(String valor, String defecto) {
-        return valor == null || valor.isBlank() ? defecto : valor.trim();
+        boolean esValorVacio = valor == null || valor.isBlank();
+        return esValorVacio ? defecto : valor.trim();
     }
 
     private static String requerirTexto(String valor, String campo) {

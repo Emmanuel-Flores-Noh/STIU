@@ -63,6 +63,6 @@ public class TiendaDTO {
      */
     @Override
     public String toString() {
-        return nombre != null ? nombre : "Tienda #" + idTienda;
+        return getNombre() != null ? getNombre() : "Tienda #" + getIdTienda();
     }
 }

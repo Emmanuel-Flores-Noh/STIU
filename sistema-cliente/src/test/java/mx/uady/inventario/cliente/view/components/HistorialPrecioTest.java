@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.SwingUtilities;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -32,7 +33,7 @@ class HistorialPrecioTest {
         assertEquals(new BigDecimal("13500.00"), dto.getHistorialPrecios().get(1).getPrecio());
 
         // Verificación en EDT de la ventana modal si hay entorno con pantalla
-        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+        if (!GraphicsEnvironment.isHeadless()) {
             SwingUtilities.invokeAndWait(() -> {
                 HistorialPrecioDialog dialog = new HistorialPrecioDialog(null, dto);
                 assertNotNull(dialog);
@@ -52,7 +53,7 @@ class HistorialPrecioTest {
         assertTrue(dtoSinCambios.getHistorialPrecios().isEmpty(),
                 "Si nunca cambió de precio, el historial debe ser una lista vacía (RF-36)");
 
-        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+        if (!GraphicsEnvironment.isHeadless()) {
             SwingUtilities.invokeAndWait(() -> {
                 HistorialPrecioDialog dialog = new HistorialPrecioDialog(null, dtoSinCambios);
                 assertNotNull(dialog);
@@ -72,7 +73,7 @@ class HistorialPrecioTest {
         assertNull(dtoNulo.getPrecioActual());
         assertNull(dtoNulo.getHistorialPrecios());
 
-        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+        if (!GraphicsEnvironment.isHeadless()) {
             SwingUtilities.invokeAndWait(() -> {
                 HistorialPrecioDialog dialog = new HistorialPrecioDialog(null, dtoNulo);
                 assertNotNull(dialog);

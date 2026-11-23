@@ -102,8 +102,7 @@ public class RegistroVentaFrame extends JFrame implements VistaController {
     private JPanel crearPanelTitulo() {
         JLabel titulo = new JLabel("Módulo de Proveedor - Registro y Trazabilidad de Ventas");
         titulo.setFont(titulo.getFont().deriveFont(Font.BOLD, 18f));
-        JLabel subtitulo = new JLabel(
-                "Seleccione una unidad disponible, verifique su código QR con doble clic y registre la venta.");
+        JLabel subtitulo = new JLabel("Seleccione una unidad disponible, verifique su código QR con doble clic y registre la venta.");
         subtitulo.setForeground(new Color(110, 110, 110));
         JPanel panel = new JPanel(new BorderLayout(0, 5));
         panel.add(titulo, BorderLayout.NORTH);

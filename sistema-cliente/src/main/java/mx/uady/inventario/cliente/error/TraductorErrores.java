@@ -134,15 +134,15 @@ public final class TraductorErrores {
      * @return texto claro explicando el timeout
      */
     private static String describirTimeoutDelBroker(CodigoError codigo, String mensajeBroker) {
-        String detalleBroker = mensajeBroker != null && !mensajeBroker.isBlank()
-                ? mensajeBroker : codigo.getMensajePorDefecto();
-        return "El sistema central no respondió a tiempo (error " + codigo.getCodigo() + "): "
-                + detalleBroker + ". Intente de nuevo en unos momentos.";
+        boolean existeMensajeBroker = mensajeBroker != null && !mensajeBroker.isBlank();
+        String detalleBroker = existeMensajeBroker ? mensajeBroker : codigo.getMensajePorDefecto();
+        return "El sistema central no respondió a tiempo (error " + codigo.getCodigo() + "): " + detalleBroker + ". Intente de nuevo en unos momentos.";
     }
 
     /** Formatea el detalle textual si está presente. */
     private static String detalle(String mensaje) {
-        return mensaje != null && !mensaje.isBlank() ? "\nDetalle: " + mensaje : "";
+        boolean esMensajeVacio = mensaje != null && !mensaje.isBlank();
+        return esMensajeVacio ? "\nDetalle: " + mensaje : "";
     }
 
     /**

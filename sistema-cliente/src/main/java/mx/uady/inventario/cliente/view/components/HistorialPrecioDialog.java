@@ -60,6 +60,10 @@ public class HistorialPrecioDialog extends JDialog {
         add(principal);
     }
 
+    /**
+     * Panel para datos base del historial de precios
+     * @return Panel de resumen para historial de precios
+     */
     private JPanel crearPanelResumen() {
         JPanel resumen = new JPanel(new GridLayout(2, 1, 5, 5));
 
@@ -78,10 +82,14 @@ public class HistorialPrecioDialog extends JDialog {
         return resumen;
     }
 
+    /**
+     * Crea panel tipo tabla con el historial de precios
+     * @return
+     */
     private Component crearPanelPrecios() {
         List<PrecioDTO> historialPrecios = historial.getHistorialPrecios();
 
-        // ¡Validación clave! Si la lista es null o vacía, maneja ambos casos de forma segura
+        // Maneja si lista es vacia o no
         if (historialPrecios == null || historialPrecios.isEmpty()) {
             JLabel vacio = new JLabel("Este producto no ha cambiado de precio.", SwingConstants.CENTER);
             vacio.setName("lblSinHistorial");

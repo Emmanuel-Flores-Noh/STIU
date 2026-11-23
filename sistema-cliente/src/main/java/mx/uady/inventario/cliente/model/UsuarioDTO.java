@@ -63,8 +63,8 @@ public class UsuarioDTO {
      */
     @Override
     public String toString() {
-        String n = nombres != null ? nombres : "";
-        String ap = apellidoPaterno != null ? apellidoPaterno : "";
-        return (n + " " + ap).trim();
+        String nombreUser = getNombres() != null ? getNombres() : "";
+        String apellidoUser = getApellidoPaterno() != null ? getApellidoPaterno() : "";
+        return (nombreUser + " " + apellidoUser).trim();
     }
 }
