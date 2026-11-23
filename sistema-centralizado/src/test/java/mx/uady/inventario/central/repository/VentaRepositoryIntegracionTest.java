@@ -3,6 +3,7 @@ package mx.uady.inventario.central.repository;
 import mx.uady.inventario.central.util.ConfiguracionBD;
 import mx.uady.inventario.central.util.ConexionBD;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -55,6 +56,9 @@ class VentaRepositoryIntegracionTest {
      * PARAMETROS_INVALIDOS) y en la base de datos queda exactamente una venta.
      */
     @Test
+    @Tag("RF-18")
+    @Tag("RNF-15")
+    @DisplayName("RF-18, RNF-15 · Solo una de diez ventas concurrentes se registra")
     void soloUnaDeDiezVentasConcurrentesSeRegistra() throws Exception {
         VentaRepository repositorio = new VentaRepository();
         ExecutorService ejecutor = Executors.newFixedThreadPool(HILOS);

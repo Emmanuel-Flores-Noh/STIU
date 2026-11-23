@@ -1,5 +1,6 @@
 package mx.uady.inventario.central.util;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -25,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ConexionBDIntegracionTest {
 
     @Test
+    @Tag("RNF-14")
+    @Tag("RNF-34")
+    @DisplayName("RNF-14, RNF-34 · Conecta y encuentra la semilla")
     void conectaYEncuentraLaSemilla() throws SQLException {
         ConfiguracionBD configuracion = ConfiguracionBD.desdeEntorno();
 

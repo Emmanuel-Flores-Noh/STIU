@@ -5,6 +5,8 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -19,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class QrServiceTest {
 
     @Test
+    @Tag("RF-10")
+    @DisplayName("RF-10 · Genera el PNG con su payload y permite leer sus bytes")
     void generaPngConPayloadYPermiteLeerSusBytes() throws Exception {
         Path directorio = Files.createTempDirectory("qr-test-");
         QrService servicio = new QrService(directorio);
@@ -32,6 +36,8 @@ class QrServiceTest {
     }
 
     @Test
+    @Tag("RNF-26")
+    @DisplayName("RNF-26 · Rechaza un número de serie que intenta salir del directorio")
     void rechazaNumeroDeSerieQueIntentaSalirDelDirectorio() throws Exception {
         QrService servicio = new QrService(Files.createTempDirectory("qr-test-"));
 

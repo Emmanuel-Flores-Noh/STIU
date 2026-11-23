@@ -18,6 +18,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,6 +54,9 @@ class MercanciaControllerTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @Tag("RNF-12")
+    @DisplayName("RF-09, RNF-12 · Cargar llena la tabla y los combos en segundo plano")
     void cargarLlenaLaTablaYLosCombos() throws Exception {
         assertEquals(10, filas());
         assertTrue(enEdt(() -> panel.productoParaRegistrar().isPresent()));
@@ -59,6 +64,8 @@ class MercanciaControllerTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @DisplayName("RF-06 · Registrar agrega la unidad, la selecciona y avisa a Productos")
     void registrarAgregaLaUnidadLaSeleccionaYAvisaAProductos() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             componente("serie", JTextField.class).setText("SN-NUEVA-77");
@@ -76,6 +83,9 @@ class MercanciaControllerTest {
     }
 
     @Test
+    @Tag("RF-07")
+    @Tag("RNF-30")
+    @DisplayName("RF-07, RNF-30 · Una serie duplicada se muestra junto al campo sin registrar")
     void unaSerieDuplicadaSeMuestraJuntoAlCampoSinRegistrar() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             componente("serie", JTextField.class).setText("SN-UADY-0001");
@@ -89,6 +99,8 @@ class MercanciaControllerTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Cambiar el filtro de estado recarga desde el servicio")
     void cambiarElFiltroDeEstadoRecargaDesdeElServicio() throws Exception {
         SwingUtilities.invokeAndWait(() -> componente("filtroEstado", javax.swing.JComboBox.class)
                 .setSelectedItem(EstadoMercancia.VENDIDO));

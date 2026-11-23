@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -37,6 +38,8 @@ class ConsultasVentaJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-13")
+    @DisplayName("RF-13 · Los catálogos coinciden con el seed")
     void losCatalogosCoincidenConElSeed() {
         assertEquals(3, consultas.listarTiendas().size());
         assertEquals(4, consultas.listarUsuarios().size());
@@ -44,6 +47,8 @@ class ConsultasVentaJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-14")
+    @DisplayName("RF-14 · El historial une producto, tienda y usuario")
     void elHistorialUneProductoTiendaYUsuario() throws SQLException, VentaRepositoryException {
         int idProducto = base.crearProducto("Proyector", "100.00");
         String serie = base.prefijo + "-V1";

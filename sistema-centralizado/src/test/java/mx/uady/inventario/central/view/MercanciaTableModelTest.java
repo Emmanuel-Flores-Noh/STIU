@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.common.modelo.EstadoMercancia;
@@ -13,6 +15,9 @@ import mx.uady.inventario.common.modelo.Mercancia;
 class MercanciaTableModelTest {
 
     @Test
+    @Tag("RF-08")
+    @Tag("RF-09")
+    @DisplayName("RF-08, RF-09 · Muestra el nombre del producto, el estado legible y si tiene QR")
     void muestraNombreDelProductoEstadoLegibleYSiTieneQr() {
         MercanciaTableModel modelo = new MercanciaTableModel();
         modelo.setFilas(List.of(
@@ -31,6 +36,8 @@ class MercanciaTableModelTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Actualiza la fila de una unidad sin distinguir mayúsculas")
     void actualizaLaFilaDeUnaUnidadSinDistinguirMayusculas() {
         MercanciaTableModel modelo = new MercanciaTableModel();
         modelo.setFilas(List.of(new Mercancia("SN-1", 1, EstadoMercancia.EN_ALMACEN, null)), Map.of());

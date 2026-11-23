@@ -3,6 +3,8 @@ package mx.uady.inventario.central.service;
 import com.google.gson.JsonObject;
 import mx.uady.inventario.central.repository.VentaRepositoryException;
 import mx.uady.inventario.central.repository.VentaResultado;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class VentaServiceTest {
 
     @Test
+    @Tag("RF-17")
+    @DisplayName("RF-17 · Valida los parámetros y devuelve la confirmación")
     void validaParametrosYDevuelveConfirmacion() throws Exception {
         AtomicReference<String> serieRecibida = new AtomicReference<>();
         VentaService servicio = new VentaService((serie, tienda, usuario) -> {
@@ -34,6 +38,8 @@ class VentaServiceTest {
     }
 
     @Test
+    @Tag("RF-17")
+    @DisplayName("RF-17 · Rechaza parámetros faltantes o negativos")
     void rechazaParametrosFaltantesONegativos() {
         VentaService servicio = new VentaService((serie, tienda, usuario) ->
                 new VentaResultado(serie, tienda, LocalDateTime.now()));
@@ -46,6 +52,9 @@ class VentaServiceTest {
     }
 
     @Test
+    @Tag("RF-17")
+    @Tag("RNF-16")
+    @DisplayName("RF-17, RNF-16 · Propaga el fallo del repositorio")
     void propagaFalloDelRepositorio() {
         VentaService servicio = new VentaService((serie, tienda, usuario) -> {
             throw new VentaRepositoryException("fallo de prueba");

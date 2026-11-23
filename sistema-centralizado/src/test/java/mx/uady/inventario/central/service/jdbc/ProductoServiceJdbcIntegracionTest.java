@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -37,6 +38,8 @@ class ProductoServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-01")
+    @DisplayName("RF-01 · Crea un producto normalizado que aparece con cero unidades")
     void creaUnProductoNormalizadoQueApareceConCeroUnidades() {
         Producto nuevo = servicio.guardar(new Producto(0, "  " + base.prefijo + " Monitor  ", "  ",
                 new BigDecimal("3200.50")));
@@ -50,6 +53,8 @@ class ProductoServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-03")
+    @DisplayName("RF-03 · Cambiar el precio guarda el anterior en el historial")
     void cambiarElPrecioGuardaElAnteriorEnElHistorial() throws SQLException {
         int id = base.crearProducto("Silla", "3499.00");
 
@@ -64,6 +69,8 @@ class ProductoServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-03")
+    @DisplayName("RF-03 · Sin cambio de precio no agrega historial")
     void sinCambioDePrecioNoAgregaHistorial() throws SQLException {
         int id = base.crearProducto("Mesa", "100.00");
 
@@ -73,6 +80,9 @@ class ProductoServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-03")
+    @Tag("RNF-16")
+    @DisplayName("RF-03, RNF-16 · Si falla la actualización tampoco queda el historial")
     void siFallaLaActualizacionTampocoQuedaElHistorial() throws SQLException {
         int id = base.crearProducto("Lampara", "50.00");
         ProductoRepository queFalla = new ProductoRepository() {
@@ -92,6 +102,8 @@ class ProductoServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-02")
+    @DisplayName("RF-02 · Editar un producto inexistente es error de negocio")
     void editarUnProductoInexistenteEsErrorDeNegocio() {
         assertThrows(NegocioException.class,
                 () -> servicio.guardar(new Producto(Integer.MAX_VALUE, "Fantasma", null, BigDecimal.ONE)));

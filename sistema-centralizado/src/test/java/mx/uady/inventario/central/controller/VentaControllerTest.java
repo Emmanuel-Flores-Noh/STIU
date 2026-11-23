@@ -18,6 +18,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.service.QrService;
@@ -61,6 +63,9 @@ class VentaControllerTest {
     }
 
     @Test
+    @Tag("RF-13")
+    @Tag("RNF-12")
+    @DisplayName("RF-13, RNF-12 · Carga unidades disponibles, tiendas y usuarios")
     void cargaUnidadesDisponiblesTiendasYUsuarios() throws Exception {
         assertEquals(6, filas());
         assertTrue(enEdt(() -> panel.tiendaSeleccionada().isPresent()));
@@ -68,6 +73,9 @@ class VentaControllerTest {
     }
 
     @Test
+    @Tag("RF-08")
+    @Tag("RF-15")
+    @DisplayName("RF-08, RF-15 · Vender marca la unidad como vendida y avisa a las demás pestañas")
     void venderMarcaLaUnidadComoVendidaYAvisaALasDemasPestanas() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             panel.seleccionarMercancia("SN-UADY-0001");
@@ -82,6 +90,8 @@ class VentaControllerTest {
     }
 
     @Test
+    @Tag("RF-15")
+    @DisplayName("RF-15 · Si se cancela la confirmación no se vende")
     void siSeCancelaLaConfirmacionNoSeVende() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             controlador.setConfirmar(pregunta -> false);

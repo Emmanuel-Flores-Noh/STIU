@@ -11,6 +11,8 @@ import mx.uady.inventario.common.error.CodigoError;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -131,6 +133,8 @@ class IntegracionFase5Test {
     }
 
     @Test
+    @Tag("RNF-02")
+    @DisplayName("RNF-02 · Veinte clientes simultáneos a través del Broker terminan sin errores")
     void veinteClientesSimultaneosATravesDelBrokerTerminanSinErrores() throws Exception {
         AtomicInteger atendidas = new AtomicInteger();
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();
@@ -184,6 +188,8 @@ class IntegracionFase5Test {
     }
 
     @Test
+    @Tag("RNF-05")
+    @DisplayName("RNF-05 · Apagar el sistema a mitad de una solicitud devuelve TIMEOUT")
     void apagarElSistemaAUmitadDeUnaSolicitudDevuelveTimeout() throws Exception {
         CountDownLatch recibida = new CountDownLatch(1);
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();

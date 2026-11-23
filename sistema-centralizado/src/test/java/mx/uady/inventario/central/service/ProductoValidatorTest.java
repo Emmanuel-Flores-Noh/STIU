@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.service.ProductoValidator.Campo;
@@ -16,18 +18,27 @@ import mx.uady.inventario.common.modelo.Producto;
 class ProductoValidatorTest {
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Acepta un producto válido")
     void aceptaUnProductoValido() {
         assertTrue(ProductoValidator.errores("Silla", new BigDecimal("10.50")).isEmpty());
         assertDoesNotThrow(() -> ProductoValidator.exigirValido(new Producto(0, "Silla", null, new BigDecimal("1"))));
     }
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Exige nombre")
     void exigeNombre() {
         assertTrue(ProductoValidator.errores(null, BigDecimal.ONE).containsKey(Campo.NOMBRE));
         assertTrue(ProductoValidator.errores("   ", BigDecimal.ONE).containsKey(Campo.NOMBRE));
     }
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Limita el nombre al tamaño de la columna")
     void limitaElNombreAlTamanoDeLaColumna() {
         String largo = "a".repeat(ProductoValidator.LONGITUD_MAXIMA_NOMBRE + 1);
         assertTrue(ProductoValidator.errores(largo, BigDecimal.ONE).containsKey(Campo.NOMBRE));
@@ -36,6 +47,9 @@ class ProductoValidatorTest {
     }
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Exige precio mayor que cero")
     void exigePrecioMayorQueCero() {
         assertEquals("El precio debe ser mayor que 0.",
                 ProductoValidator.errores("Silla", BigDecimal.ZERO).get(Campo.PRECIO));
@@ -44,6 +58,9 @@ class ProductoValidatorTest {
     }
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @DisplayName("RF-01, RF-02 · Respeta la precisión decimal de la columna")
     void respetaLaPrecisionDecimalDeLaColumna() {
         assertTrue(ProductoValidator.errores("Silla", new BigDecimal("1.999")).containsKey(Campo.PRECIO));
         assertTrue(ProductoValidator.errores("Silla", new BigDecimal("1.500")).isEmpty());
@@ -51,6 +68,10 @@ class ProductoValidatorTest {
     }
 
     @Test
+    @Tag("RF-01")
+    @Tag("RF-02")
+    @Tag("RNF-30")
+    @DisplayName("RF-01, RF-02, RNF-30 · Reporta todos los campos con error")
     void reportaTodosLosCamposConError() {
         Map<Campo, String> errores = ProductoValidator.errores("", BigDecimal.ZERO);
         assertEquals(2, errores.size());

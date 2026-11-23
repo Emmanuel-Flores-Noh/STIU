@@ -19,6 +19,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.common.modelo.EstadoMercancia;
@@ -35,6 +37,8 @@ class MercanciaPanelTest {
             new Mercancia("AB-0003", 2, EstadoMercancia.EN_ALMACEN, null));
 
     @Test
+    @Tag("RF-06")
+    @DisplayName("RF-06 · Sin productos no se puede registrar y lo indica")
     void sinProductosNoSePuedeRegistrarYLoIndica() throws Exception {
         enEdt(() -> {
             MercanciaPanel panel = new MercanciaPanel();
@@ -50,6 +54,8 @@ class MercanciaPanelTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Recargar productos conserva las selecciones y no dispara filtros")
     void recargarProductosConservaLasSeleccionesYNoDisparaFiltros() throws Exception {
         AtomicInteger cambiosDeFiltro = new AtomicInteger();
         enEdt(() -> {
@@ -70,6 +76,8 @@ class MercanciaPanelTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Los filtros devuelven null cuando se elige Todos")
     void losFiltrosDevuelvenNullCuandoSeEligeTodos() throws Exception {
         enEdt(() -> {
             MercanciaPanel panel = new MercanciaPanel();
@@ -83,6 +91,8 @@ class MercanciaPanelTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Busca por número de serie y selecciona unidades")
     void buscaPorNumeroDeSerieYSeleccionaUnidades() throws Exception {
         enEdt(() -> {
             MercanciaPanel panel = new MercanciaPanel();
@@ -102,6 +112,8 @@ class MercanciaPanelTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @DisplayName("RF-06 · Enter en la serie registra")
     void enterEnLaSerieRegistra() throws Exception {
         AtomicInteger registros = new AtomicInteger();
         enEdt(() -> {
