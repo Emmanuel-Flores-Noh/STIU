@@ -19,6 +19,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Window;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,9 +62,16 @@ public class HistorialPrecioDialog extends JDialog {
 
     private JPanel crearPanelResumen() {
         JPanel resumen = new JPanel(new GridLayout(2, 1, 5, 5));
-        JLabel lblNombre = new JLabel("Producto: " + (historial.getNombre() != null ? historial.getNombre() : "N/D"));
+
+        // Por nombre nulo
+        String nombre = historial.getNombre() != null ? historial.getNombre() : "N/D";
+        JLabel lblNombre = new JLabel("Producto: " + nombre);
         lblNombre.setFont(lblNombre.getFont().deriveFont(Font.BOLD, 14f));
-        JLabel lblPrecio = new JLabel("Precio actual: " + FormateadorTexto.precio(historial.getPrecioActual()));
+
+        // Mantener precio si es nulo
+        Boolean precioNulo = historial.getPrecioActual() != null;
+        String precioTexto = precioNulo ? FormateadorTexto.precio(historial.getPrecioActual()) : "N/D";
+        JLabel lblPrecio = new JLabel("Precio actual: " + precioTexto);
         lblPrecio.setName("lblPrecioActual");
         resumen.add(lblNombre);
         resumen.add(lblPrecio);
@@ -72,11 +80,14 @@ public class HistorialPrecioDialog extends JDialog {
 
     private Component crearPanelPrecios() {
         List<PrecioDTO> historialPrecios = historial.getHistorialPrecios();
-        if (historialPrecios.isEmpty()) {
+
+        // ¡Validación clave! Si la lista es null o vacía, maneja ambos casos de forma segura
+        if (historialPrecios == null || historialPrecios.isEmpty()) {
             JLabel vacio = new JLabel("Este producto no ha cambiado de precio.", SwingConstants.CENTER);
             vacio.setName("lblSinHistorial");
             return vacio;
         }
+
         DefaultTableModel modelo = new DefaultTableModel(new String[]{"Fecha", "Precio anterior"}, 0) {
             @Override
             public boolean isCellEditable(int fila, int columna) {

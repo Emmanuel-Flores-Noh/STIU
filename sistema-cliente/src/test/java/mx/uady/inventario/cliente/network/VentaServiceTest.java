@@ -3,11 +3,7 @@ package mx.uady.inventario.cliente.network;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import mx.uady.inventario.cliente.model.MercanciaDTO;
-import mx.uady.inventario.cliente.model.PrecioHistorialDTO;
-import mx.uady.inventario.cliente.model.QrDTO;
-import mx.uady.inventario.cliente.model.TiendaDTO;
-import mx.uady.inventario.cliente.model.UsuarioDTO;
+import mx.uady.inventario.cliente.model.*;
 import mx.uady.inventario.common.contrato.Respuesta;
 import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.json.GsonFactory;
@@ -126,7 +122,7 @@ class VentaServiceTest {
         };
 
         VentaService service = new VentaService(new ClienteTCP(conexion));
-        VentaService.Catalogos catalogos = service.cargarCatalogos();
+        Catalogos catalogos = service.cargarCatalogos();
 
         assertNotNull(catalogos);
         assertNotNull(catalogos.tiendas());
