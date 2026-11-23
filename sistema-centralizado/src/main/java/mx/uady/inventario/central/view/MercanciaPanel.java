@@ -99,6 +99,7 @@ public class MercanciaPanel extends JPanel {
         actualizar.setName("actualizar");
         verQr.setName("verQr");
         tabla.setName("tablaUnidades");
+        estado.setName("estadoUnidades");
     }
 
     private JPanel construirRegistro() {

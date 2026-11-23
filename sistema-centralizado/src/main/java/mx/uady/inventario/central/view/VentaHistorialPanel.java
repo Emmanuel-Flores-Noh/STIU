@@ -56,6 +56,7 @@ public final class VentaHistorialPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         construirControles();
         tabla.setName("tablaHistorialVentas");
+        estado.setName("estadoHistorialVentas");
         tabla.setRowSorter(ordenador);
         tabla.setFillsViewportHeight(true);
         tabla.setRowHeight(26);

@@ -72,6 +72,7 @@ public final class VentaPanel extends JPanel {
         actualizar.setName("actualizarVentas");
         vender.setName("registrarVenta");
         tabla.setName("tablaVentas");
+        estado.setName("estadoVentas");
     }
 
     private JPanel construirFormulario() {
