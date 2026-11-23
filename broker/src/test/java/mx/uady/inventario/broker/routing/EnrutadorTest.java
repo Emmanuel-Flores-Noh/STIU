@@ -6,18 +6,30 @@ import mx.uady.inventario.common.contrato.Respuesta;
 import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Servicios;
+import mx.uady.inventario.broker.util.BitacoraBroker;
+import mx.uady.inventario.common.contrato.EstadoRespuesta;
+import mx.uady.inventario.common.error.CodigoError;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -306,5 +318,202 @@ class EnrutadorTest {
         assertTrue(lineas.get(2).startsWith("[REGISTRO]")
                 && lineas.get(2).endsWith("inventario marcado como NO DISPONIBLE tras 1 fallos"), todas);
         // La segunda solicitud ya no contacta al proveedor: no agrega intentos.
+    }
+
+    // ---------------------------------------------------------------------
+    // Pruebas con un ConectorProveedor falso: sin sockets ni esperas reales.
+    // ---------------------------------------------------------------------
+
+    /**
+     * Conector que devuelve o lanza, en orden, los resultados programados.
+     * El ultimo resultado se repite si se agotan.
+     */
+    private static final class ConectorFalso extends ConectorProveedor {
+        private final Deque<Object> resultados = new ArrayDeque<>();
+        private int llamadas;
+
+        ConectorFalso(Object... resultados) {
+            super(1, 1);
+            this.resultados.addAll(List.of(resultados));
+        }
+
+        @Override
+        public Respuesta enviar(Solicitud solicitud, Proveedor proveedor) throws IOException {
+            llamadas++;
+            Object resultado = resultados.size() > 1 ? resultados.poll() : resultados.peek();
+            if (resultado instanceof IOException e) {
+                throw e;
+            }
+            if (resultado instanceof RuntimeException e) {
+                throw e;
+            }
+            return (Respuesta) resultado;
+        }
+    }
+
+    private final List<String> bitacora = new ArrayList<>();
+
+    private Enrutador enrutadorCon(ConectorFalso conector, int reintentos) {
+        return new Enrutador(conector, new PoliticaReintentos(reintentos, 0), new BitacoraBroker(bitacora::add));
+    }
+
+    private static RegistroServicios registroConInventario(int fallosParaIndisponible) {
+        RegistroServicios registro = new RegistroServicios(fallosParaIndisponible, 60_000);
+        registro.registrar(new Proveedor(Servicios.INVENTARIO, "localhost", 9001));
+        return registro;
+    }
+
+    private static Solicitud solicitudInventario(String id) {
+        return Solicitud.crear(id, Servicios.INVENTARIO, "listarInventario", null);
+    }
+
+    private static Respuesta exito(String id) {
+        return Respuesta.exito(id, new com.google.gson.JsonPrimitive("OK"));
+    }
+
+    @Test
+    @Tag("RF-45")
+    @DisplayName("RF-45 · Una respuesta exitosa al primer intento se devuelve y limpia los fallos previos")
+    void respuestaExitosaAlPrimerIntentoSeDevuelveYLimpiaLosFallosPrevios() {
+        RegistroServicios registro = registroConInventario(3);
+        registro.marcarFallo(Servicios.INVENTARIO);
+        Respuesta esperada = exito("ok-1");
+        ConectorFalso conector = new ConectorFalso(esperada);
+
+        Respuesta respuesta = enrutadorCon(conector, 2).enrutar(solicitudInventario("ok-1"), registro);
+
+        assertSame(esperada, respuesta);
+        assertEquals(1, conector.llamadas);
+        assertEquals(0, registro.fallos(Servicios.INVENTARIO));
+        assertTrue(bitacora.isEmpty());
+    }
+
+    @Test
+    @Tag("RF-45")
+    @Tag("RF-51")
+    @DisplayName("RF-45, RF-51 · Una respuesta de error del proveedor se devuelve sin reintentar")
+    void respuestaDeErrorDelProveedorSeDevuelveSinReintentar() {
+        RegistroServicios registro = registroConInventario(3);
+        Respuesta rechazo = Respuesta.error("err-1", CodigoError.RECURSO_NO_ENCONTRADO, "No existe");
+        ConectorFalso conector = new ConectorFalso(rechazo);
+
+        Respuesta respuesta = enrutadorCon(conector, 2).enrutar(solicitudInventario("err-1"), registro);
+
+        assertSame(rechazo, respuesta);
+        assertEquals(1, conector.llamadas);
+        assertEquals(0, registro.fallos(Servicios.INVENTARIO));
+    }
+
+    @Test
+    @Tag("RF-51")
+    @Tag("RF-56")
+    @DisplayName("RF-51, RF-56 · Un fallo de comunicación seguido de un éxito devuelve la respuesta y anota el intento")
+    void falloDeComunicacionSeguidoDeExitoDevuelveLaRespuestaYAnotaElIntento() {
+        RegistroServicios registro = registroConInventario(3);
+        ConectorFalso conector = new ConectorFalso(new IOException("Connection reset"), exito("rt-1"));
+
+        Respuesta respuesta = enrutadorCon(conector, 2).enrutar(solicitudInventario("rt-1"), registro);
+
+        assertEquals(EstadoRespuesta.EXITO, respuesta.getEstado());
+        assertEquals(2, conector.llamadas);
+        assertEquals(0, registro.fallos(Servicios.INVENTARIO));
+        assertEquals(1, bitacora.size(), String.join("\n", bitacora));
+        assertTrue(bitacora.get(0).contains("id=rt-1") && bitacora.get(0).contains("intento 1/3 fallo: ERROR_INTERNO"),
+                bitacora.get(0));
+    }
+
+    @Test
+    @Tag("RF-50")
+    @Tag("RF-51")
+    @DisplayName("RF-50, RF-51 · Si todos los intentos agotan el tiempo responde TIMEOUT con el id y suma un fallo")
+    void siTodosLosIntentosAgotanElTiempoRespondeTimeoutConElIdYSumaUnFallo() {
+        RegistroServicios registro = registroConInventario(3);
+        ConectorFalso conector = new ConectorFalso(new SocketTimeoutException("Read timed out"));
+
+        Respuesta respuesta = enrutadorCon(conector, 2).enrutar(solicitudInventario("to-1"), registro);
+
+        assertEquals(CodigoError.TIMEOUT, respuesta.getCodigoError());
+        assertEquals("to-1", respuesta.getIdSolicitud());
+        assertEquals("Tiempo de espera agotado al contactar al proveedor", respuesta.getMensajeError());
+        assertEquals(3, conector.llamadas);
+        assertEquals(1, registro.fallos(Servicios.INVENTARIO));
+        assertEquals(3, bitacora.size(), String.join("\n", bitacora));
+    }
+
+    @Test
+    @Tag("RF-51")
+    @Tag("RF-53")
+    @DisplayName("RF-51, RF-53 · Si todos los intentos fallan por comunicación responde ERROR_INTERNO con la causa")
+    void siTodosLosIntentosFallanPorComunicacionRespondeErrorInternoConLaCausa() {
+        RegistroServicios registro = registroConInventario(3);
+        ConectorFalso conector = new ConectorFalso(new IOException("Connection refused"));
+
+        Respuesta respuesta = enrutadorCon(conector, 1).enrutar(solicitudInventario("ei-1"), registro);
+
+        assertEquals(CodigoError.ERROR_INTERNO, respuesta.getCodigoError());
+        assertEquals("ei-1", respuesta.getIdSolicitud());
+        assertTrue(respuesta.getMensajeError().contains("Connection refused"), respuesta.getMensajeError());
+        assertEquals(2, conector.llamadas);
+    }
+
+    @Test
+    @Tag("RF-53")
+    @DisplayName("RF-53 · Una excepción no prevista del envío responde ERROR_INTERNO sin propagarse")
+    void excepcionNoPrevistaDelEnvioRespondeErrorInternoSinPropagarse() {
+        RegistroServicios registro = registroConInventario(3);
+        ConectorFalso conector = new ConectorFalso(new IllegalStateException("JSON ilegible"));
+
+        Respuesta respuesta = enrutadorCon(conector, 0).enrutar(solicitudInventario("ei-2"), registro);
+
+        assertEquals(CodigoError.ERROR_INTERNO, respuesta.getCodigoError());
+        assertEquals("ei-2", respuesta.getIdSolicitud());
+        assertEquals(1, conector.llamadas);
+    }
+
+    @Test
+    @Tag("RF-48")
+    @DisplayName("RF-48 · Un servicio sin proveedor responde SERVICIO_DESCONOCIDO sin contactar a nadie")
+    void servicioSinProveedorRespondeServicioDesconocidoSinContactarANadie() {
+        ConectorFalso conector = new ConectorFalso(exito("sd-1"));
+
+        Respuesta respuesta = enrutadorCon(conector, 2).enrutar(solicitudInventario("sd-1"), new RegistroServicios());
+
+        assertEquals(CodigoError.SERVICIO_DESCONOCIDO, respuesta.getCodigoError());
+        assertEquals("sd-1", respuesta.getIdSolicitud());
+        assertEquals(0, conector.llamadas);
+    }
+
+    @Test
+    @Tag("RF-52")
+    @Tag("RF-56")
+    @DisplayName("RF-52, RF-56 · Al alcanzar el umbral el proveedor queda no disponible y ya no se contacta")
+    void alAlcanzarElUmbralElProveedorQuedaNoDisponibleYYaNoSeContacta() {
+        RegistroServicios registro = registroConInventario(1);
+        ConectorFalso conector = new ConectorFalso(new IOException("Connection refused"));
+        Enrutador enrutador = enrutadorCon(conector, 0);
+
+        Respuesta primera = enrutador.enrutar(solicitudInventario("nd-1"), registro);
+        Respuesta segunda = enrutador.enrutar(solicitudInventario("nd-2"), registro);
+
+        assertEquals(CodigoError.ERROR_INTERNO, primera.getCodigoError());
+        assertEquals(CodigoError.PROVEEDOR_NO_REGISTRADO, segunda.getCodigoError());
+        assertEquals("nd-2", segunda.getIdSolicitud());
+        assertEquals(1, conector.llamadas);
+        assertFalse(registro.estaDisponible(Servicios.INVENTARIO));
+        assertTrue(bitacora.get(bitacora.size() - 1).endsWith("inventario marcado como NO DISPONIBLE tras 1 fallos"),
+                String.join("\n", bitacora));
+    }
+
+    @Test
+    @Tag("RF-51")
+    @DisplayName("RF-51 · El enrutador exige un conector, una política y una bitácora")
+    void enrutadorExigeUnConectorUnaPoliticaYUnaBitacora() {
+        ConectorFalso conector = new ConectorFalso(exito("x"));
+        PoliticaReintentos politica = new PoliticaReintentos(0, 0);
+        BitacoraBroker vacia = new BitacoraBroker(linea -> { });
+
+        assertThrows(NullPointerException.class, () -> new Enrutador(null, politica, vacia));
+        assertThrows(NullPointerException.class, () -> new Enrutador(conector, null, vacia));
+        assertThrows(NullPointerException.class, () -> new Enrutador(conector, politica, null));
     }
 }
