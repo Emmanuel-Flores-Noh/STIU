@@ -29,10 +29,9 @@ import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.UIManager;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
+import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
@@ -111,7 +110,7 @@ public class MercanciaPanel extends JPanel {
                 alRegistrar.run();
             }
         });
-        serie.getDocument().addDocumentListener(alCambiar(() -> mostrarErrorSerie(null)));
+        serie.getDocument().addDocumentListener(Documentos.alCambiar(() -> mostrarErrorSerie(null)));
         registrar.addActionListener(e -> alRegistrar.run());
         Color rojo = UIManager.getColor("Component.error.focusedBorderColor");
         errorSerie.setForeground(rojo != null ? rojo : new Color(0xC62828));
@@ -154,7 +153,7 @@ public class MercanciaPanel extends JPanel {
 
         busquedaSerie.putClientProperty("JTextField.placeholderText", "Buscar número de serie");
         busquedaSerie.putClientProperty("JTextField.showClearButton", true);
-        busquedaSerie.getDocument().addDocumentListener(alCambiar(this::aplicarBusqueda));
+        busquedaSerie.getDocument().addDocumentListener(Documentos.alCambiar(this::aplicarBusqueda));
 
         actualizar.addActionListener(e -> alCambiarFiltros.run());
         verQr.addActionListener(e -> alVerQr.run());
@@ -374,14 +373,6 @@ public class MercanciaPanel extends JPanel {
             }
         }
         combo.setSelectedIndex(0);
-    }
-
-    private static DocumentListener alCambiar(Runnable accion) {
-        return new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void removeUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void changedUpdate(DocumentEvent e) { accion.run(); }
-        };
     }
 
     /** Muestra productos por nombre y estados con texto legible. */

@@ -24,11 +24,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.service.ConsultasVentaService;
+import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.TiendaAlmacen;
 import mx.uady.inventario.common.modelo.Usuario;
@@ -78,7 +77,7 @@ public final class VentaPanel extends JPanel {
     private JPanel construirFormulario() {
         busqueda.putClientProperty("JTextField.placeholderText", "Buscar número de serie");
         busqueda.putClientProperty("JTextField.showClearButton", true);
-        busqueda.getDocument().addDocumentListener(documento(this::aplicarBusqueda));
+        busqueda.getDocument().addDocumentListener(Documentos.alCambiar(this::aplicarBusqueda));
 
         tienda.setRenderer(new RenderCatalogo());
         tienda.addActionListener(e -> actualizarDisponibilidad());
@@ -160,14 +159,6 @@ public final class VentaPanel extends JPanel {
     private void actualizarDisponibilidad() {
         vender.setEnabled(seleccionada().isPresent() && tienda.getSelectedItem() != null
                 && usuario.getSelectedItem() != null);
-    }
-
-    private static DocumentListener documento(Runnable accion) {
-        return new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void removeUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void changedUpdate(DocumentEvent e) { accion.run(); }
-        };
     }
 
     // ---- API para el controlador ----

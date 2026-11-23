@@ -23,11 +23,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.model.VentaHistorial;
+import mx.uady.inventario.central.view.comun.Documentos;
 
 /** Historial de ventas con filtros por tienda, producto, rango de fechas y número de serie. */
 public final class VentaHistorialPanel extends JPanel {
@@ -92,7 +92,7 @@ public final class VentaHistorialPanel extends JPanel {
         tienda.addItem(TODAS);
         producto.addItem(TODOS);
 
-        DocumentListener cambios = documento(this::aplicarFiltros);
+        DocumentListener cambios = Documentos.alCambiar(this::aplicarFiltros);
         serie.getDocument().addDocumentListener(cambios);
         desde.getDocument().addDocumentListener(cambios);
         hasta.getDocument().addDocumentListener(cambios);
@@ -198,14 +198,6 @@ public final class VentaHistorialPanel extends JPanel {
         } catch (DateTimeParseException error) {
             return null;
         }
-    }
-
-    private static DocumentListener documento(Runnable accion) {
-        return new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void removeUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void changedUpdate(DocumentEvent e) { accion.run(); }
-        };
     }
 
     // ---- API para el controlador ----
