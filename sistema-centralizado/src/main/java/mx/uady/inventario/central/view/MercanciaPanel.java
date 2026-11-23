@@ -9,17 +9,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -31,6 +30,7 @@ import javax.swing.SortOrder;
 import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
+import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
@@ -107,7 +107,7 @@ public class MercanciaPanel extends JPanel {
     }
 
     private JPanel construirRegistro() {
-        productoRegistro.setRenderer(new RenderNombres());
+        productoRegistro.setRenderer(Combos.renderTexto(MercanciaPanel::textoDe));
         productoRegistro.setPrototypeDisplayValue(new Producto(0, "Laptop Lenovo ThinkPad E14 extra", null, null));
         serie.putClientProperty("JTextField.placeholderText", "Escanea o escribe el número de serie");
         serie.addActionListener(e -> {
@@ -146,8 +146,8 @@ public class MercanciaPanel extends JPanel {
     }
 
     private JPanel construirFiltros() {
-        filtroProducto.setRenderer(new RenderNombres());
-        filtroEstado.setRenderer(new RenderNombres());
+        filtroProducto.setRenderer(Combos.renderTexto(MercanciaPanel::textoDe));
+        filtroEstado.setRenderer(Combos.renderTexto(MercanciaPanel::textoDe));
         filtroProducto.addItem(TODOS);
         filtroEstado.addItem(TODOS);
         for (EstadoMercancia e : EstadoMercancia.values()) {
@@ -259,20 +259,14 @@ public class MercanciaPanel extends JPanel {
 
     /** Rellena ambos combos conservando la selección actual cuando el producto sigue existiendo. */
     public void mostrarProductos(List<Producto> productos) {
-        Integer idRegistro = productoRegistro.getSelectedItem() instanceof Producto p ? p.idProducto() : null;
-        Integer idFiltro = filtroProducto.getSelectedItem() instanceof Producto p ? p.idProducto() : null;
+        List<Object> opcionesFiltro = new ArrayList<>();
+        opcionesFiltro.add(TODOS);
+        opcionesFiltro.addAll(productos);
 
         ajustandoCombos = true;
         try {
-            productoRegistro.removeAllItems();
-            filtroProducto.removeAllItems();
-            filtroProducto.addItem(TODOS);
-            for (Producto p : productos) {
-                productoRegistro.addItem(p);
-                filtroProducto.addItem(p);
-            }
-            seleccionarPorId(productoRegistro, idRegistro);
-            seleccionarPorId(filtroProducto, idFiltro);
+            Combos.rellenarConservando(productoRegistro, productos, Producto::idProducto);
+            Combos.rellenarConservando(filtroProducto, opcionesFiltro, MercanciaPanel::claveProducto);
         } finally {
             ajustandoCombos = false;
         }
@@ -358,33 +352,15 @@ public class MercanciaPanel extends JPanel {
 
     // ---- Auxiliares ----
 
-    private static void seleccionarPorId(JComboBox<?> combo, Integer idProducto) {
-        if (idProducto == null) {
-            if (combo.getItemCount() > 0) {
-                combo.setSelectedIndex(0);
-            }
-            return;
-        }
-        for (int i = 0; i < combo.getItemCount(); i++) {
-            if (combo.getItemAt(i) instanceof Producto p && p.idProducto() == idProducto) {
-                combo.setSelectedIndex(i);
-                return;
-            }
-        }
-        combo.setSelectedIndex(0);
+    /** Identifica las opciones del filtro: los productos por su id y la opción "Todos" por sí misma. */
+    private static Object claveProducto(Object opcion) {
+        return opcion instanceof Producto p ? p.idProducto() : opcion;
     }
 
     /** Muestra productos por nombre y estados con texto legible. */
-    private static final class RenderNombres extends DefaultListCellRenderer {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> lista, Object valor, int indice,
-                boolean seleccionado, boolean foco) {
-            Object texto = valor instanceof Producto p ? p.nombre()
-                    : valor instanceof EstadoMercancia e ? MercanciaTableModel.texto(e)
-                    : valor;
-            return super.getListCellRendererComponent(lista, texto, indice, seleccionado, foco);
-        }
+    private static Object textoDe(Object valor) {
+        return valor instanceof Producto p ? p.nombre()
+                : valor instanceof EstadoMercancia e ? MercanciaTableModel.texto(e)
+                : valor;
     }
 }

@@ -11,11 +11,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -27,6 +25,7 @@ import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.service.ConsultasVentaService;
+import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
 import mx.uady.inventario.common.modelo.Mercancia;
@@ -84,9 +83,9 @@ public final class VentaPanel extends JPanel {
         busqueda.putClientProperty("JTextField.showClearButton", true);
         busqueda.getDocument().addDocumentListener(Documentos.alCambiar(this::aplicarBusqueda));
 
-        tienda.setRenderer(new RenderCatalogo());
+        tienda.setRenderer(Combos.renderTexto(VentaPanel::textoDe));
         tienda.addActionListener(e -> actualizarDisponibilidad());
-        usuario.setRenderer(new RenderCatalogo());
+        usuario.setRenderer(Combos.renderTexto(VentaPanel::textoDe));
         usuario.addActionListener(e -> actualizarDisponibilidad());
         actualizar.addActionListener(e -> alActualizar.run());
         vender.addActionListener(e -> alVender.run());
@@ -173,26 +172,12 @@ public final class VentaPanel extends JPanel {
     }
 
     public void mostrarTiendas(List<TiendaAlmacen> tiendas) {
-        Integer anterior = tiendaSeleccionada().map(TiendaAlmacen::idTienda).orElse(null);
-        tienda.removeAllItems();
-        tiendas.forEach(tienda::addItem);
-        for (int i = 0; anterior != null && i < tienda.getItemCount(); i++) {
-            if (tienda.getItemAt(i).idTienda() == anterior) {
-                tienda.setSelectedIndex(i);
-            }
-        }
+        Combos.rellenarConservando(tienda, tiendas, TiendaAlmacen::idTienda);
         actualizarDisponibilidad();
     }
 
     public void mostrarUsuarios(List<Usuario> usuarios) {
-        Integer anterior = usuarioSeleccionado().map(Usuario::idUsuario).orElse(null);
-        usuario.removeAllItems();
-        usuarios.forEach(usuario::addItem);
-        for (int i = 0; anterior != null && i < usuario.getItemCount(); i++) {
-            if (usuario.getItemAt(i).idUsuario() == anterior) {
-                usuario.setSelectedIndex(i);
-            }
-        }
+        Combos.rellenarConservando(usuario, usuarios, Usuario::idUsuario);
         actualizarDisponibilidad();
     }
 
@@ -235,16 +220,9 @@ public final class VentaPanel extends JPanel {
     }
 
     /** Muestra tiendas y usuarios por nombre. */
-    private static final class RenderCatalogo extends DefaultListCellRenderer {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> lista, Object valor, int indice,
-                boolean seleccionado, boolean foco) {
-            Object texto = valor instanceof TiendaAlmacen t ? t.nombre()
-                    : valor instanceof Usuario u ? ConsultasVentaService.nombreCompleto(u)
-                    : valor;
-            return super.getListCellRendererComponent(lista, texto, indice, seleccionado, foco);
-        }
+    private static Object textoDe(Object valor) {
+        return valor instanceof TiendaAlmacen t ? t.nombre()
+                : valor instanceof Usuario u ? ConsultasVentaService.nombreCompleto(u)
+                : valor;
     }
 }

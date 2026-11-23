@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.model.VentaHistorial;
+import mx.uady.inventario.central.view.comun.Combos;
 import mx.uady.inventario.central.view.comun.Documentos;
 import mx.uady.inventario.central.view.comun.ResumenTabla;
 
@@ -177,12 +179,10 @@ public final class VentaHistorialPanel extends JPanel {
     /** Rellena un combo con los valores distintos del historial, conservando la opción elegida. */
     private void rellenar(JComboBox<String> combo, String opcionTodos, List<VentaHistorial> ventas,
             Function<VentaHistorial, String> valor) {
-        String anterior = elegido(combo);
-        combo.removeAllItems();
-        combo.addItem(opcionTodos);
-        TreeSet<String> valores = new TreeSet<>(ventas.stream().map(valor).filter(Objects::nonNull).toList());
-        valores.forEach(combo::addItem);
-        combo.setSelectedItem(anterior != null && valores.contains(anterior) ? anterior : opcionTodos);
+        List<String> opciones = new ArrayList<>();
+        opciones.add(opcionTodos);
+        opciones.addAll(new TreeSet<>(ventas.stream().map(valor).filter(Objects::nonNull).toList()));
+        Combos.rellenarConservando(combo, opciones, Function.identity());
     }
 
     private static LocalDate fecha(String texto) {
