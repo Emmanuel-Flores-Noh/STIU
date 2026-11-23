@@ -1,6 +1,8 @@
 package mx.uady.inventario.broker.network;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import mx.uady.inventario.broker.model.Proveedor;
@@ -195,76 +197,128 @@ public class ManejadorConexion implements Runnable {
      * @return La respuesta del propio broker
      */
     private Respuesta registrarDesdeSolicitud(Solicitud solicitud) {
-        JsonElement params = solicitud.getParametros();
-
-        // Si no tiene parametros o no es un JSON
-        if (params == null || !params.isJsonObject()) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro");
-        }
-
         try {
-            Proveedor proveedor = GsonFactory.DEFAULT.fromJson(params, Proveedor.class);
-            if( proveedor == null ) {
-                throw new RuntimeException("El json es null o es vacio");
-            }
+            Proveedor proveedor = leerProveedor(solicitud);
             registro.registrar(proveedor);
             bitacora.registrarCambioRegistro("registrar", proveedor.servicio(), proveedor, true);
             return Respuesta.exito(solicitud.getIdSolicitud(), new JsonPrimitive("Proveedor registrado"));
-        } catch (JsonSyntaxException e) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return parametrosInvalidos(solicitud, "registro", e);
         }
     }
 
     /**
-     * Sustituye el proveedor de un servicio desde una solicitud
+     * Sustituye el proveedor de un servicio desde una solicitud.
+     * Si el servicio no esta registrado no se agrega y se responde {@code PROVEEDOR_NO_REGISTRADO}.
      * @param solicitud La solicitud con el servicio, host y puerto del nuevo proveedor
      * @return La respuesta del propio broker
      */
     private Respuesta modificarDesdeSolicitud(Solicitud solicitud) {
-        JsonElement params = solicitud.getParametros();
-
-        // Si no tiene parametros o no es un JSON
-        if (params == null || !params.isJsonObject()) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro");
-        }
-
         try {
-            Proveedor proveedor = GsonFactory.DEFAULT.fromJson(params, Proveedor.class);
-            if( proveedor == null ) {
-                throw new RuntimeException("El json es null o es vacio");
-            }
+            Proveedor proveedor = leerProveedor(solicitud);
             boolean sustituido = registro.sustituir(proveedor);
             bitacora.registrarCambioRegistro("sustituir", proveedor.servicio(), proveedor, sustituido);
+            if (!sustituido) {
+                return proveedorNoRegistrado(solicitud, proveedor.servicio());
+            }
             return Respuesta.exito(solicitud.getIdSolicitud(), new JsonPrimitive("Proveedor modificado"));
-        } catch (JsonSyntaxException e) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return parametrosInvalidos(solicitud, "actualizacion", e);
         }
     }
 
-
     /**
-     * Elimina del registro el proveedor de un servicio desde una solicitud
-     * @param solicitud La solicitud con los datos del proveedor a eliminar
+     * Elimina del registro el proveedor de un servicio desde una solicitud.
+     * Solo se necesita el nombre del servicio; si no esta registrado se responde
+     * {@code PROVEEDOR_NO_REGISTRADO}.
+     * @param solicitud La solicitud con el servicio a eliminar
      * @return La respuesta del propio broker
      */
     private Respuesta removerDesdeSolicitud(Solicitud solicitud) {
-        JsonElement params = solicitud.getParametros();
-
-        // Si no tiene parametros o no es un JSON
-        if (params == null || !params.isJsonObject()) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro");
-        }
-
         try {
-            Proveedor proveedor = GsonFactory.DEFAULT.fromJson(params, Proveedor.class);
-            if( proveedor == null ) {
-                throw new RuntimeException("El json es null o es vacio");
+            String servicio = leerServicio(solicitud);
+            boolean eliminado = registro.eliminar(servicio);
+            bitacora.registrarCambioRegistro("eliminar", servicio, null, eliminado);
+            if (!eliminado) {
+                return proveedorNoRegistrado(solicitud, servicio);
             }
-            boolean eliminado = registro.eliminar(proveedor.servicio());
-            bitacora.registrarCambioRegistro("eliminar", proveedor.servicio(), null, eliminado);
             return Respuesta.exito(solicitud.getIdSolicitud(), new JsonPrimitive("Proveedor eliminado"));
-        } catch (JsonSyntaxException e) {
-            return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS, "Parametros invalidos para registro: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return parametrosInvalidos(solicitud, "eliminacion", e);
         }
+    }
+
+    /**
+     * Obtiene los parametros de una operacion de administracion.
+     * @param solicitud La solicitud dirigida al broker
+     * @return Los parametros como objeto JSON
+     * @throws IllegalArgumentException si la solicitud no trae parametros o no son un objeto JSON
+     */
+    private static JsonObject leerParametros(Solicitud solicitud) {
+        JsonElement params = solicitud.getParametros();
+        if (params == null || !params.isJsonObject()) {
+            throw new IllegalArgumentException("se esperaba un objeto con los datos del proveedor");
+        }
+        return params.getAsJsonObject();
+    }
+
+    /**
+     * Obtiene el nombre del servicio de los parametros de una operacion de administracion.
+     * @param solicitud La solicitud dirigida al broker
+     * @return El nombre del servicio
+     * @throws IllegalArgumentException si no hay parametros o el servicio es nulo o vacio
+     */
+    private static String leerServicio(Solicitud solicitud) {
+        JsonElement servicio = leerParametros(solicitud).get("servicio");
+        if (servicio == null || !servicio.isJsonPrimitive() || servicio.getAsString().isBlank()) {
+            throw new IllegalArgumentException("servicio es obligatorio");
+        }
+        return servicio.getAsString();
+    }
+
+    /**
+     * Construye el proveedor descrito en los parametros de una operacion de administracion.
+     * @param solicitud La solicitud con el servicio, host y puerto del proveedor
+     * @return El proveedor leido
+     * @throws IllegalArgumentException si falta el servicio, el host o el puerto no es valido
+     */
+    private static Proveedor leerProveedor(Solicitud solicitud) {
+        leerServicio(solicitud);
+        try {
+            return GsonFactory.DEFAULT.fromJson(leerParametros(solicitud), Proveedor.class);
+        } catch (JsonParseException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            // Gson envuelve la validacion del constructor de Proveedor; se recupera su mensaje.
+            for (Throwable causa = e.getCause(); causa != null; causa = causa.getCause()) {
+                if (causa instanceof IllegalArgumentException invalido) {
+                    throw invalido;
+                }
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Respuesta de error para parametros invalidos en una operacion de administracion.
+     * @param solicitud La solicitud atendida
+     * @param operacion El nombre de la operacion para el mensaje
+     * @param causa La validacion que fallo
+     * @return La respuesta {@code PARAMETROS_INVALIDOS} con el id de la solicitud
+     */
+    private static Respuesta parametrosInvalidos(Solicitud solicitud, String operacion, IllegalArgumentException causa) {
+        return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PARAMETROS_INVALIDOS,
+                "Parametros invalidos para " + operacion + ": " + causa.getMessage());
+    }
+
+    /**
+     * Respuesta de error para un servicio que no esta en el registro.
+     * @param solicitud La solicitud atendida
+     * @param servicio El servicio buscado
+     * @return La respuesta {@code PROVEEDOR_NO_REGISTRADO} con el id de la solicitud
+     */
+    private static Respuesta proveedorNoRegistrado(Solicitud solicitud, String servicio) {
+        return Respuesta.error(solicitud.getIdSolicitud(), CodigoError.PROVEEDOR_NO_REGISTRADO,
+                "Proveedor no registrado: " + servicio);
     }
 }
