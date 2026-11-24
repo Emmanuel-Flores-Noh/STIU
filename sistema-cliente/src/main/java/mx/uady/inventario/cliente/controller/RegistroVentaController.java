@@ -1,7 +1,6 @@
 package mx.uady.inventario.cliente.controller;
 
 
-import com.google.gson.JsonElement;
 import mx.uady.inventario.cliente.model.MercanciaDTO;
 import mx.uady.inventario.cliente.model.TiendaDTO;
 import mx.uady.inventario.cliente.model.UsuarioDTO;
@@ -10,22 +9,6 @@ import mx.uady.inventario.cliente.util.FormateadorTexto;
 import mx.uady.inventario.cliente.util.PantallaTipo;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import mx.uady.inventario.cliente.view.RegistroVentaFrame;
-import mx.uady.inventario.common.contrato.EstadoRespuesta;
-import mx.uady.inventario.common.contrato.Respuesta;
-import mx.uady.inventario.common.contrato.Solicitud;
-import mx.uady.inventario.common.json.GsonFactory;
-import mx.uady.inventario.common.json.LocalDateTimeAdapter;
-import mx.uady.inventario.common.servicio.Operaciones;
-import mx.uady.inventario.common.servicio.Servicios;
-
-import javax.swing.*;
-import java.lang.reflect.Type;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Controlador encargado de coordinar la lógica de negocio para el registro de ventas

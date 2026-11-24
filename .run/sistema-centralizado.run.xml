@@ -7,7 +7,6 @@
     </option>
     <option name="MAIN_CLASS_NAME" value="mx.uady.inventario.central.Main" />
     <module name="sistema-centralizado" />
-    <option name="PROGRAM_PARAMETERS" value="DB_USER=&quot;uady_user&quot; DB_PASSWORD=&quot;DB_ROOT_PASSWORD=&quot; DB_NAME=&quot;almacenes_uady&quot; DB_HOST=&quot;localhost&quot; DB_PORT=&quot;3306&quot; SERVICE_PORT=&quot;6000&quot; BROKER_HOST=&quot;localhost&quot; BROKER_PORT=&quot;5000&quot;" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
