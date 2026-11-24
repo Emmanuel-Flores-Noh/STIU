@@ -1,0 +1,12 @@
+classDiagram
+    %% Diagrama de clases - Broker, componente model
+    %% Paquete: mx.uady.inventario.broker.model
+
+    class Proveedor {
+        <<record>>
+        -String servicio
+        -String host
+        -int puerto
+        +Proveedor(String servicio, String host, int puerto)
+    }
+

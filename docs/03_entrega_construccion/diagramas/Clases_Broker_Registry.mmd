@@ -1,0 +1,46 @@
+classDiagram
+    %% Diagrama de clases - Broker, componente registry
+    %% Paquete: mx.uady.inventario.broker.registry
+
+    class AdministradorRegistro {
+        -RegistroServicios registro
+        -BitacoraBroker bitacora
+        +AdministradorRegistro(RegistroServicios registro, BitacoraBroker bitacora)
+        +atender(Solicitud solicitud) Respuesta
+        -registrarDesdeSolicitud(Solicitud solicitud) Respuesta
+        -modificarDesdeSolicitud(Solicitud solicitud) Respuesta
+        -removerDesdeSolicitud(Solicitud solicitud) Respuesta
+        -leerParametros(Solicitud solicitud)$ JsonObject
+        -leerServicio(Solicitud solicitud)$ String
+        -leerProveedor(Solicitud solicitud)$ Proveedor
+        -parametrosInvalidos(Solicitud solicitud, String operacion, IllegalArgumentException causa)$ Respuesta
+        -proveedorNoRegistrado(Solicitud solicitud, String servicio)$ Respuesta
+    }
+    class RegistroServicios {
+        -ConcurrentHashMap~String, Proveedor~ servicios
+        -ConcurrentHashMap~String, Salud~ salud
+        -int fallosParaIndisponible
+        -long tiempoIndisponibleMillis
+        -LongSupplier reloj
+        +RegistroServicios()
+        +RegistroServicios(ConfiguracionBroker configuracion)
+        +RegistroServicios(int fallosParaIndisponible, long tiempoIndisponibleMillis)
+        ~RegistroServicios(int fallosParaIndisponible, long tiempoIndisponibleMillis, LongSupplier reloj)
+        +registrar(Proveedor proveedor) void
+        +buscar(String servicio) Optional~Proveedor~
+        +sustituir(Proveedor nuevoProveedor) boolean
+        +eliminar(String servicio) boolean
+        +getServicios() Map~String, Proveedor~
+        +estaDisponible(String servicio) boolean
+        +marcarFallo(String servicio) void
+        +marcarExito(String servicio) void
+        +fallos(String servicio) int
+    }
+    class Salud["RegistroServicios.Salud"] {
+        <<record>>
+        -int fallos
+        -long indisponibleHasta
+    }
+
+    AdministradorRegistro "1" --> "1" RegistroServicios : registro
+    RegistroServicios "1" --> "0..*" Salud : salud

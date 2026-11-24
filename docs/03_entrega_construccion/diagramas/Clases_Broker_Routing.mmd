@@ -1,0 +1,46 @@
+classDiagram
+    %% Diagrama de clases - Broker, componente routing
+    %% Paquete: mx.uady.inventario.broker.routing
+
+    class ConectorProveedor {
+        -int timeoutConexionMillis
+        -int timeoutLecturaMillis
+        +ConectorProveedor(int timeoutConexionMillis, int timeoutLecturaMillis)
+        +enviar(Solicitud solicitud, Proveedor proveedor) Respuesta
+    }
+    class Enrutador {
+        -ConectorProveedor conector
+        -PoliticaReintentos politica
+        -BitacoraBroker bitacora
+        +Enrutador(int timeoutMillis)
+        +Enrutador(ConfiguracionBroker configuracion)
+        +Enrutador(ConfiguracionBroker configuracion, BitacoraBroker bitacora)
+        +Enrutador(int timeoutConexionMillis, int timeoutLecturaMillis, int reintentos, long esperaReintentoMillis)
+        +Enrutador(int timeoutConexionMillis, int timeoutLecturaMillis, int reintentos, long esperaReintentoMillis, BitacoraBroker bitacora)
+        ~Enrutador(ConectorProveedor conector, PoliticaReintentos politica, BitacoraBroker bitacora)
+        -validarSolicitud(Solicitud solicitud) boolean
+        +enrutar(Solicitud solicitud, RegistroServicios registro) Respuesta
+        -codigoDe(Exception error)$ CodigoError
+        -mensajeDe(Exception error)$ String
+    }
+    class PoliticaReintentos {
+        -int reintentos
+        -long esperaReintentoMillis
+        +PoliticaReintentos(int reintentos, long esperaReintentoMillis)
+        +intentosTotales() int
+        +ejecutar(Intento~T~ intento, ObservadorFallo observador) T
+        -esperarAntesDelSiguienteIntento() boolean
+    }
+    class Intento~T~["PoliticaReintentos.Intento"] {
+        <<interface>>
+        +ejecutar()* T
+    }
+    class ObservadorFallo["PoliticaReintentos.ObservadorFallo"] {
+        <<interface>>
+        +alFallar(int intento, int intentosTotales, Exception error)* void
+    }
+
+    Enrutador "1" *-- "1" ConectorProveedor : conector
+    Enrutador "1" *-- "1" PoliticaReintentos : politica
+    PoliticaReintentos "1" ..> "0..*" Intento : ejecuta
+    PoliticaReintentos "1" ..> "0..1" ObservadorFallo : notifica

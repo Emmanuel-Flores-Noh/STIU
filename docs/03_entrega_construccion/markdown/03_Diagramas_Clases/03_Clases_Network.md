@@ -5,9 +5,9 @@
 Servidor TCP que atiende las solicitudes JSON que llegan desde el Broker y registro del sistema en el Broker.
 
 <style>
-@page horizontal { size: letter landscape; }
+@page horizontal { size: letter landscape; margin: 0.6in; }
 .hoja-horizontal + h2, .hoja-horizontal + h2 + p { page: horizontal; }
-.hoja-horizontal + h2 + p img { display: block; width: 100%; height: auto; max-height: 16.5cm; object-fit: contain; margin: 0 auto; }
+.hoja-horizontal + h2 + p img { display: block; width: 100%; height: auto; max-height: 16cm; object-fit: contain; margin: 0 auto; }
 </style>
 
 <div class="hoja-horizontal"></div>

@@ -1,0 +1,66 @@
+classDiagram
+    %% Diagrama de clases - Broker, componente util
+    %% Paquete: mx.uady.inventario.broker.util
+
+    class BitacoraBroker {
+        +String PREFIJO_SOLICITUD$
+        +String PREFIJO_REGISTRO$
+        -DateTimeFormatter FORMATO_FECHA$
+        -int LARGO_MAXIMO_MENSAJE$
+        -String SIN_DATO$
+        -Consumer~String~ destino
+        -Supplier~LocalDateTime~ reloj
+        +BitacoraBroker(Consumer~String~ destino)
+        +BitacoraBroker(Consumer~String~ destino, Supplier~LocalDateTime~ reloj)
+        +consola()$ BitacoraBroker
+        +registrarSolicitud(Solicitud solicitud, Respuesta respuesta, String proveedor, long millis) void
+        +registrarIntentoFallido(Solicitud solicitud, Proveedor proveedor, int intento, int total, CodigoError codigo, String detalle) void
+        +registrarNoDisponible(String servicio, int fallos) void
+        +registrarCambioRegistro(String accion, String servicio, Proveedor proveedor, boolean aplicado) void
+        +direccion(Proveedor proveedor)$ String
+        -escribir(String prefijo, String contenido) void
+        -resultado(Respuesta respuesta)$ String
+        -texto(String valor)$ String
+        -recortar(String mensaje)$ String
+    }
+    class ConfiguracionBroker {
+        <<record>>
+        -int puerto
+        -int tamanoPool
+        -int timeoutConexionMillis
+        -int timeoutLecturaMillis
+        -int reintentos
+        -long esperaReintentoMillis
+        -int fallosParaIndisponible
+        -long tiempoIndisponibleMillis
+        +String VAR_PUERTO$
+        +String VAR_TAMANO_POOL$
+        +String VAR_TIMEOUT_CONEXION$
+        +String VAR_TIMEOUT_LECTURA$
+        +String VAR_REINTENTOS$
+        +String VAR_ESPERA_REINTENTO$
+        +String VAR_FALLOS_PARA_INDISPONIBLE$
+        +String VAR_TIEMPO_INDISPONIBLE$
+        -String PUERTO_POR_DEFECTO$
+        -String TAMANO_POOL_POR_DEFECTO$
+        -String TIMEOUT_CONEXION_POR_DEFECTO$
+        -String TIMEOUT_LECTURA_POR_DEFECTO$
+        -String REINTENTOS_POR_DEFECTO$
+        -String ESPERA_REINTENTO_POR_DEFECTO$
+        -String FALLOS_PARA_INDISPONIBLE_POR_DEFECTO$
+        -String TIEMPO_INDISPONIBLE_POR_DEFECTO$
+        +ConfiguracionBroker(int puerto, int tamanoPool, int timeoutConexionMillis, int timeoutLecturaMillis, int reintentos, long esperaReintentoMillis, int fallosParaIndisponible, long tiempoIndisponibleMillis)
+        +porDefecto()$ ConfiguracionBroker
+        +desdeEntorno()$ ConfiguracionBroker
+        +desdeMapa(Map~String, String~ variables)$ ConfiguracionBroker
+        -validarPuerto(int puerto, String variable)$ void
+        -valorODefecto(String valor, String defecto)$ String
+        -parseEntero(String valor, String variable)$ int
+        -parseLargo(String valor, String variable)$ long
+    }
+    class JsonBroker {
+        -JsonBroker()
+        +deserializarSolicitud(String json)$ Solicitud
+        +serializarRespuesta(Respuesta respuesta)$ String
+    }
+
