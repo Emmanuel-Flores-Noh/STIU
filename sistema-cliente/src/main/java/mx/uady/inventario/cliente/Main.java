@@ -1,58 +1,89 @@
 package mx.uady.inventario.cliente;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import mx.uady.inventario.cliente.util.ConfiguracionNetwork;
+import mx.uady.inventario.cliente.controller.EjecutorAsincrono;
+import mx.uady.inventario.cliente.controller.RegistroVentaController;
+import mx.uady.inventario.cliente.network.ClienteTCP;
+import mx.uady.inventario.cliente.network.ConfiguracionNetwork;
+import mx.uady.inventario.cliente.network.VentaService;
+import mx.uady.inventario.cliente.view.InterfazConfiguracion;
 import mx.uady.inventario.cliente.view.RegistroVentaFrame;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
- * Punto de entrada principal para el Sistema 2 (Cliente del Proveedor).
- * 
- * <p>Valida la configuración de red.</p>
+ * Punto de entrada del Sistema 2 (Cliente del Proveedor). Valida la configuración de red, arma los
+ * objetos de la aplicación (cliente TCP, servicio, controlador y ventana) y abre la ventana.
+ *
  */
-public class Main {
+public final class Main {
 
+    private Main() {
+    }
+
+    /**
+     * Inicia el sistema. Si la configuración de red no es válida, informa el motivo y termina con código 1.
+     *
+     * <p>Requisito: RF-40 (imposibilidad de arranque con valores inválidos de timeout o red).</p>
+     * @param args argumentos de línea de comandos (no se usan)
+     */
     public static void main(String[] args) {
-        ConfiguracionNetwork configRed;
-        try {
-            configRed = ConfiguracionNetwork.desdeEntorno();
-        } catch (RuntimeException e) {
-            System.err.println("Configuración de red inválida en el Sistema Cliente: " + e.getMessage());
-            System.exit(1);
-            return;
-        }
+        ConfiguracionNetwork configuracion = leerConfiguracionOSalir();
+        imprimirResumen(configuracion);
+        InterfazConfiguracion.aplicarConfiguracion();
+        SwingUtilities.invokeLater(() -> abrirVentana(configuracion));
+    }
 
+    private static ConfiguracionNetwork leerConfiguracionOSalir() {
+        try {
+            return ConfiguracionNetwork.desdeEntorno();
+        } catch (RuntimeException e) {
+            String mensaje = "Configuración de red inválida en el Sistema Cliente: " + e.getMessage();
+            System.err.println(mensaje);
+            if (!GraphicsEnvironment.isHeadless()) {
+                JOptionPane.showMessageDialog(null, mensaje, "No se pudo iniciar", JOptionPane.ERROR_MESSAGE);
+            }
+            System.exit(1);
+            throw e;
+        }
+    }
+    /**
+     * Imprime en consola un resumen
+     *
+     * <p>Requisitos: RF-39, RF-40, RNF-05.</p>
+     *
+     * @param configuracion configuración de red a imprimir
+     */
+    private static void imprimirResumen(ConfiguracionNetwork configuracion) {
         System.out.println("==================================================");
         System.out.println("  Iniciando Sistema Cliente del Proveedor");
         System.out.println("  Sistema de Trazabilidad e Inventarios UADY");
-        System.out.println("  Broker Destino: " + configRed.brokerHost() + ":" + configRed.brokerPuerto());
-        System.out.println("  Timeout configurado: " + configRed.timeoutMs() + " ms");
+        System.out.println("  Broker Destino: " + configuracion.brokerHost() + ":" + configuracion.brokerPuerto());
+        System.out.println("  Timeout configurado: " + configuracion.timeoutMs() + " ms");
         System.out.println("==================================================");
-
-        try {
-            UIManager.setLookAndFeel(new FlatIntelliJLaf());
-            
-            // Propiedades estéticas globales para componentes FlatLaf
-            UIManager.put("TextComponent.arc", 8);
-            UIManager.put("Button.arc", 8);
-            UIManager.put("Component.arrowType", "chevron");
-            
-        } catch (Exception ex) {
-            System.err.println("Fallo al inicializar FlatLaf: " + ex.getMessage());
+        if (configuracion.timeoutInferiorAlRecomendado()) {
+            System.err.println("ADVERTENCIA: " + ConfiguracionNetwork.VAR_CLIENT_TIMEOUT + " es menor a "
+                    + ConfiguracionNetwork.TIMEOUT_MINIMO_RECOMENDADO_MS
+                    + " ms; el cliente podría rendirse antes de recibir la respuesta del Broker.");
         }
+    }
 
-        // Lanzar la ventana en el hilo de despacho de eventos de Swing (EDT)
-        SwingUtilities.invokeLater(() -> {
-            RegistroVentaFrame ventana = new RegistroVentaFrame();
-            ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            ventana.setVisible(true);
-        });
-        // Bloquear el hilo principal para que el proceso no muera y la app permanezca viva
-        try {
-            Thread.currentThread().join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    /**
+     * Inicializa las dependencias principales del cliente (capa de red, servicios, vista y controlador)
+     * y dispara la carga de catálogos e inventario.
+     *
+     * <p>Requisitos: RF-25 (apertura de ventana y carga en segundo plano), RF-39 (conectividad con Broker).</p>
+     *
+     * @param configuracion parámetros de red para inicializar el cliente TCP
+     */
+    private static void abrirVentana(ConfiguracionNetwork configuracion) {
+        ClienteTCP cliente = new ClienteTCP(configuracion.brokerHost(), configuracion.brokerPuerto(), configuracion.timeoutMs());
+        VentaService servicio = new VentaService(cliente);
+
+        RegistroVentaFrame ventana = new RegistroVentaFrame();
+        RegistroVentaController controlador = new RegistroVentaController(ventana, servicio, EjecutorAsincrono.swing());
+        ventana.setOperaciones(controlador);
+        ventana.setVisible(true);
+        controlador.cargarListas();
     }
 }

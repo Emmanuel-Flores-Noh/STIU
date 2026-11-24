@@ -48,7 +48,7 @@ las pruebas de integracion con la base de datos.
 [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in mx.uady.inventario.central.view.VentaHistorialPanelTest
 [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in mx.uady.inventario.central.view.VentaPanelTest
 [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.286 s -- in mx.uady.inventario.cliente.controller.RegistroVentaControllerTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in mx.uady.inventario.cliente.util.ConfiguracionNetworkTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in mx.uady.inventario.cliente.network.ConfiguracionNetworkTest
 [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in mx.uady.inventario.cliente.view.RegistroVentaFrameTest
 
 ## Resultado por modulo
