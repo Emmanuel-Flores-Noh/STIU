@@ -11,6 +11,8 @@ import javax.swing.JViewport;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.service.memoria.AlmacenMemoria;
@@ -20,6 +22,9 @@ import mx.uady.inventario.central.view.ProductosPanel;
 class ProductoControllerTest {
 
     @Test
+    @Tag("RF-04")
+    @Tag("RNF-12")
+    @DisplayName("RF-04, RNF-12 · Cargar llena la tabla con los productos del servicio")
     void cargarLlenaLaTablaConLosProductosDelServicio() throws Exception {
         ProductosPanel panel = new ProductosPanel();
         ProductoServiceMemoria servicio = new ProductoServiceMemoria(AlmacenMemoria.conDatosDeEjemplo(Duration.ZERO));

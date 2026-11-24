@@ -1,0 +1,158 @@
+classDiagram 
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente service
+    %% Paquete: mx.uady.inventario.central.service y service.jdbc
+
+    class AccesoDatosException {
+        +AccesoDatosException(String detalle, Throwable causa)
+    }
+    class ConsultasVentaService {
+        <<interface>>
+        +String ROL_PROVEEDOR$
+        +listarHistorial()* List~VentaHistorial~
+        +listarTiendas()* List~TiendaAlmacen~
+        +listarUsuarios()* List~Usuario~
+        +listarUsuariosProveedores() List~Usuario~
+        +nombreCompleto(Usuario usuario)$ String
+    }
+    class MercanciaService {
+        <<interface>>
+        +listar(Integer idProducto, EstadoMercancia estado)* List~Mercancia~
+        +registrar(int idProducto, String numeroSerie)* Mercancia
+        +asegurarQr(String numeroSerie)* Mercancia
+    }
+    class MercanciaValidator {
+        ~int LONGITUD_MAXIMA_SERIE$
+        -MercanciaValidator()
+        +normalizarSerie(String numeroSerie)$ String
+    }
+    class NegocioException {
+        +NegocioException(String mensajeParaUsuario)
+        +NegocioException(String mensajeParaUsuario, Throwable causa)
+    }
+    class ProductoService {
+        <<interface>>
+        +listarConUnidades()* List~ProductoConUnidades~
+        +guardar(Producto producto)* Producto
+        +listarHistorialPrecios(int idProducto) List~HistorialPrecio~
+    }
+    class ProductoValidator {
+        ~int LONGITUD_MAXIMA_NOMBRE$
+        ~BigDecimal PRECIO_MAXIMO$
+        -ProductoValidator()
+        +errores(String nombre, BigDecimal precio)$ Map~Campo, String~
+        +normalizar(Producto producto)$ Producto
+        +exigirValido(Producto producto)$ void
+    }
+    class Campo["ProductoValidator.Campo"] {
+        <<enumeration>>
+        NOMBRE
+        DESCRIPCION
+        PRECIO
+    }
+    class QrGenerationException {
+        +QrGenerationException(String message)
+        +QrGenerationException(String message, Throwable cause)
+    }
+    class QrService {
+        -int QR_SIZE$
+        -String DEFAULT_STORAGE_DIRECTORY$
+        -Path storageDirectory
+        +QrService()
+        +QrService(Path storageDirectory)
+        +generarCodigoQR(String numeroSerie, int idProducto, String nombreProducto) String
+        +obtenerImagenQRBytes(String rutaQr) byte[]
+        -validarDatos(String numeroSerie, int idProducto, String nombreProducto) void
+    }
+    class QrUnidades {
+        -QrUnidades()
+        +generar(QrService qrService, String numeroSerie, Producto producto)$ String
+        +existe(String rutaQr)$ boolean
+        +borrarSilenciosamente(String rutaQr)$ void
+    }
+    class SerieDuplicadaException {
+        -String numeroSerie
+        +SerieDuplicadaException(String numeroSerie)
+        +SerieDuplicadaException(String numeroSerie, Throwable causa)
+        +getNumeroSerie() String
+    }
+    class ValidacionException {
+        +ValidacionException(String mensajeParaUsuario)
+    }
+    class VentaService {
+        -VentaRegistrador registrador
+        +VentaService()
+        +VentaService(ConfiguracionBD configuracion)
+        +VentaService(VentaRegistrador registrador)
+        +registrarVenta(JsonObject parametros) JsonObject
+        -textoObligatorio(JsonObject parametros, String nombre) String
+        -enteroPositivo(JsonObject parametros, String nombre) int
+    }
+    class VentaRegistrador["VentaService.VentaRegistrador"] {
+        <<interface>>
+        +registrar(String numeroSerie, int idTienda, int idUsuario)* VentaResultado
+    }
+    class ConsultasVentaJdbc {
+        -Transacciones transacciones
+        -VentaRepository ventas
+        -CatalogoRepository catalogo
+        +ConsultasVentaJdbc(ProveedorConexion conexiones)
+        +listarHistorial() List~VentaHistorial~
+        +listarTiendas() List~TiendaAlmacen~
+        +listarUsuarios() List~Usuario~
+        +listarUsuariosProveedores() List~Usuario~
+    }
+    class MercanciaServiceJdbc {
+        -Transacciones transacciones
+        -QrService qrService
+        -MercanciaRepository mercancia
+        -ProductoRepository productos
+        +MercanciaServiceJdbc(ProveedorConexion conexiones, QrService qrService)
+        +listar(Integer idProducto, EstadoMercancia estado) List~Mercancia~
+        +registrar(int idProducto, String numeroSerie) Mercancia
+        +asegurarQr(String numeroSerie) Mercancia
+        -insertar(Connection conexion, Mercancia unidad) void
+    }
+    class ProductoServiceJdbc {
+        -Transacciones transacciones
+        -ProductoRepository productos
+        -HistorialPrecioRepository historial
+        +ProductoServiceJdbc(ProveedorConexion conexiones)
+        +ProductoServiceJdbc(ProveedorConexion conexiones, ProductoRepository productos, HistorialPrecioRepository historial)
+        +listarConUnidades() List~ProductoConUnidades~
+        +guardar(Producto producto) Producto
+        +listarHistorialPrecios(int idProducto) List~HistorialPrecio~
+    }
+    class Transacciones {
+        -ProveedorConexion conexiones
+        +Transacciones(ProveedorConexion conexiones)
+        +leer(String operacion, Trabajo~T~ trabajo) T
+        +escribir(String operacion, Trabajo~T~ trabajo) T
+        -deshacer(Connection conexion, Exception causa)$ void
+    }
+    class Trabajo~T~["Transacciones.Trabajo"] {
+        <<interface>>
+        +ejecutar(Connection conexion)* T
+    }
+
+    NegocioException <|-- SerieDuplicadaException
+    NegocioException <|-- ValidacionException
+    VentaService "1" --> "1" VentaRegistrador : registrador
+    ConsultasVentaService <|.. ConsultasVentaJdbc
+    ConsultasVentaJdbc "1" *-- "1" Transacciones : transacciones
+    MercanciaService <|.. MercanciaServiceJdbc
+    MercanciaServiceJdbc "1" *-- "1" Transacciones : transacciones
+    MercanciaServiceJdbc "1" --> "1" QrService : qrService
+    ProductoService <|.. ProductoServiceJdbc
+    ProductoServiceJdbc "1" *-- "1" Transacciones : transacciones
+    Transacciones "1" ..> "0..*" Trabajo : ejecuta
+    Transacciones ..> AccesoDatosException : lanza
+    ProductoServiceJdbc ..> ProductoValidator : usa
+    MercanciaServiceJdbc ..> QrUnidades : usa
+    MercanciaServiceJdbc ..> MercanciaValidator : usa
+    MercanciaServiceJdbc ..> SerieDuplicadaException : lanza
+    QrUnidades ..> QrService : usa
+    QrService ..> QrGenerationException : lanza
+    ProductoValidator ..> ValidacionException : lanza
+    MercanciaValidator ..> ValidacionException : lanza
+    ProductoValidator -- Campo : clase interna

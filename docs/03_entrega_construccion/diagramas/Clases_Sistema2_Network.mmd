@@ -1,0 +1,68 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente network
+    %% Paquete: mx.uady.inventario.cliente.network
+
+    class ClienteTCP {
+        -ConexionTCP conexion
+        -Gson gson
+        +ClienteTCP(String host, int puerto, int timeoutMs)
+        +ClienteTCP(ConexionTCP conexion)
+        +invocar(String servicio, String operacion, JsonObject parametros) JsonElement
+        +enviarSolicitud(Solicitud solicitud) Respuesta
+        -interpretar(String linea) Respuesta
+        -validarCorrelacion(Solicitud solicitud, Respuesta respuesta)$ void
+    }
+    class ConexionTCP {
+        -String host
+        -int puerto
+        -int timeoutMs
+        +ConexionTCP(String host, int puerto, int timeoutMs)
+        +intercambiar(String linea) String
+        -conectar(Socket socket) void
+        -enviar(Socket socket, String linea)$ void
+        -recibir(Socket socket)$ String
+        -milisRestantes(long limiteNanos) int
+    }
+    class ConfiguracionNetwork {
+        <<record>>
+        -String brokerHost
+        -int brokerPuerto
+        -int timeoutMs
+        +String VAR_BROKER_HOST$
+        +String VAR_BROKER_PUERTO$
+        +String VAR_CLIENT_TIMEOUT$
+        +int TIMEOUT_MINIMO_RECOMENDADO_MS$
+        -String HOST_POR_DEFECTO$
+        -String PUERTO_BROKER_POR_DEFECTO$
+        -String TIMEOUT_POR_DEFECTO$
+        +ConfiguracionNetwork(String brokerHost, int brokerPuerto, int timeoutMs)
+        +desdeEntorno()$ ConfiguracionNetwork
+        +desdeMapa(Map~String, String~ variables)$ ConfiguracionNetwork
+        +timeoutInferiorAlRecomendado() boolean
+        -validarPuerto(int puerto, String variable)$ void
+        -valorODefecto(String valor, String defecto)$ String
+        -requerirTexto(String valor, String campo)$ String
+        -parseEntero(String valor, String variable)$ int
+    }
+    class VentaService {
+        -ClienteTCP cliente
+        -ExecutorService hilos
+        -Gson gson
+        +VentaService(ClienteTCP cliente)
+        +VentaService(ClienteTCP cliente, ExecutorService hilos)
+        +listarTiendas() List~TiendaDTO~
+        +listarUsuarios() List~UsuarioDTO~
+        +listarInventarioDisponible() List~MercanciaDTO~
+        +cargarCatalogos() Catalogos
+        +registrarVenta(String numeroSerie, Long idTienda, Long idUsuario) String
+        +obtenerQr(String numeroSerie) QrDTO
+        +obtenerHistorialPrecios(Integer idProducto) PrecioHistorialDTO
+        -consultarLista(String servicio, String operacion, Type tipo) List~T~
+        -convertirObjeto(JsonElement resultado, Class~T~ clase, String mensajeSiFalta) T
+        -extraerFechaVenta(JsonElement resultado)$ String
+        -esperar(Future~T~ consulta)$ T
+    }
+
+    VentaService "0..*" --> "1" ClienteTCP : cliente
+    ClienteTCP "1" *-- "1" ConexionTCP : conexion

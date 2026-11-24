@@ -13,6 +13,8 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,6 +27,7 @@ import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 
 /** Requiere MariaDB con el esquema y las variables {@code DB_*}; no modifica los datos del seed. */
+@Tag("mariadb")
 @EnabledIfEnvironmentVariable(named = "DB_PASSWORD", matches = ".+",
         disabledReason = "Requiere MariaDB real y las variables DB_* definidas")
 class MercanciaServiceJdbcIntegracionTest {
@@ -54,6 +57,10 @@ class MercanciaServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @Tag("RF-08")
+    @Tag("RF-10")
+    @DisplayName("RF-06, RF-08, RF-10 · Registra la unidad en almacén y guarda la ruta del QR")
     void registraLaUnidadEnAlmacenYGuardaLaRutaDelQr() throws SQLException {
         Mercancia unidad = servicio.registrar(idProducto, "  " + serie("A") + " ");
 
@@ -65,6 +72,8 @@ class MercanciaServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-07")
+    @DisplayName("RF-07 · Rechaza una serie duplicada sin importar mayúsculas")
     void rechazaUnaSerieDuplicadaSinImportarMayusculas() throws SQLException {
         servicio.registrar(idProducto, serie("B"));
 
@@ -74,6 +83,9 @@ class MercanciaServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @Tag("RNF-16")
+    @DisplayName("RF-06, RNF-16 · Si falla el QR se deshace el registro")
     void siFallaElQrSeDeshaceElRegistro() throws Exception {
         Path noEsCarpeta = Files.createFile(directorioQr.resolve("ocupado"));
         MercanciaServiceJdbc conQrRoto = new MercanciaServiceJdbc(base.conexiones, new QrService(noEsCarpeta));
@@ -84,11 +96,15 @@ class MercanciaServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-06")
+    @DisplayName("RF-06 · Rechaza un producto inexistente")
     void rechazaUnProductoInexistente() {
         assertThrows(NegocioException.class, () -> servicio.registrar(Integer.MAX_VALUE, serie("D")));
     }
 
     @Test
+    @Tag("RF-11")
+    @DisplayName("RF-11 · Asegurar QR genera y guarda la ruta de una unidad sin QR")
     void asegurarQrGeneraYGuardaLaRutaDeUnaUnidadSinQr() throws SQLException {
         insertarSinQr(serie("E"));
         assertNull(base.rutaQrEnBase(serie("E")));
@@ -101,6 +117,8 @@ class MercanciaServiceJdbcIntegracionTest {
     }
 
     @Test
+    @Tag("RF-09")
+    @DisplayName("RF-09 · Lista filtrando por producto y estado")
     void listaFiltrandoPorProductoYEstado() throws SQLException {
         servicio.registrar(idProducto, serie("F"));
         insertarSinQr(serie("G"));

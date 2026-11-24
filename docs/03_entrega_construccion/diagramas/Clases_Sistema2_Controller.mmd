@@ -1,0 +1,71 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente controller
+    %% Paquete: mx.uady.inventario.cliente.controller
+
+    class EjecutorAsincrono {
+        <<interface>>
+        +ejecutar(Callable~T~ trabajo, Consumer~T~ alTerminar, Consumer~Throwable~ alFallar)* void
+        +swing()$ EjecutorAsincrono
+    }
+    class PresentadorErrores {
+        -Logger BITACORA$
+        -VistaController vista
+        +PresentadorErrores(VistaController vista)
+        +informar(String contexto, Throwable error, Runnable reintento) void
+    }
+    class ProductoController {
+        -VistaController vista
+        -VentaService servicio
+        -EjecutorAsincrono ejecutor
+        -PresentadorErrores errores
+        +ProductoController(VistaController vista, VentaService servicio, EjecutorAsincrono ejecutor)
+        +consultarQr(String numeroSerie) void
+        +consultarHistorialPrecios(Integer idProducto) void
+    }
+    class RegistroVentaController {
+        -VistaController vista
+        -VentaService servicio
+        -EjecutorAsincrono ejecutor
+        -ProductoController productos
+        -PresentadorErrores errores
+        -AtomicBoolean ventaEnCurso
+        +RegistroVentaController(VistaController vista, VentaService servicio, EjecutorAsincrono ejecutor)
+        +RegistroVentaController(VistaController vista, VentaService servicio, EjecutorAsincrono ejecutor, ProductoController productos)
+        +esVentaCompleta(MercanciaDTO unidad, TiendaDTO tienda, UsuarioDTO usuario)$ boolean
+        +cargarListas() void
+        +registrarVenta(MercanciaDTO unidad, TiendaDTO tienda, UsuarioDTO usuario) void
+        +consultarQr(String numeroSerie) void
+        +consultarHistorialPrecios(Integer idProducto) void
+        -alVenderConExito(MercanciaDTO unidad, TiendaDTO tienda, String fechaVenta) void
+    }
+    class VentaOperaciones {
+        <<interface>>
+        +VentaOperaciones OPERACIONES_BASE$
+        +cargarListas()* void
+        +registrarVenta(MercanciaDTO unidad, TiendaDTO tienda, UsuarioDTO usuario)* void
+        +consultarQr(String numeroSerie)* void
+        +consultarHistorialPrecios(Integer idProducto)* void
+    }
+    class VistaController {
+        <<interface>>
+        +mostrarIndicadorCarga(String mensaje, boolean cargando)* void
+        +actualizarListasCombos(List~TiendaDTO~ tiendas, List~UsuarioDTO~ usuarios)* void
+        +actualizarTablaMercancia(List~MercanciaDTO~ unidades)* void
+        +limpiarFormulario()* void
+        +mostrarMensajeExito(String mensaje)* void
+        +mostrarMensajeError(String mensaje)* void
+        +mostrarDialogoReintentar(String tipoError, String mensaje, Runnable reintento)* void
+        +mostrarQr(QrDTO qr)* void
+        +mostrarHistorialPrecios(PrecioHistorialDTO historial)* void
+    }
+
+    VentaOperaciones <|.. RegistroVentaController
+    RegistroVentaController "1" --> "1" VistaController : vista
+    RegistroVentaController "1" --> "1" EjecutorAsincrono : ejecutor
+    RegistroVentaController "1" --> "1" ProductoController : productos
+    RegistroVentaController "1" *-- "1" PresentadorErrores : errores
+    ProductoController "1" --> "1" VistaController : vista
+    ProductoController "1" --> "1" EjecutorAsincrono : ejecutor
+    ProductoController "1" *-- "1" PresentadorErrores : errores
+    PresentadorErrores "0..*" --> "1" VistaController : vista

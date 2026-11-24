@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.model.VentaHistorial;
@@ -24,6 +26,9 @@ class VentasMemoriaTest {
     }
 
     @Test
+    @Tag("RF-08")
+    @Tag("RF-15")
+    @DisplayName("RF-08, RF-15 · Registrar marca la unidad como vendida y aparece en el historial")
     void registrarMarcaLaUnidadComoVendidaYApareceEnElHistorial() {
         ventas.registrar("sn-uady-0001", 2, 3);
 
@@ -36,6 +41,9 @@ class VentasMemoriaTest {
     }
 
     @Test
+    @Tag("RF-17")
+    @Tag("RF-18")
+    @DisplayName("RF-17, RF-18 · Aplica las mismas reglas que la base de datos")
     void aplicaLasMismasReglasQueLaBaseDeDatos() {
         assertEquals("La mercancía ya fue vendida",
                 assertThrows(IllegalArgumentException.class, () -> ventas.registrar("SN-UADY-0002", 1, 1))
@@ -47,6 +55,8 @@ class VentasMemoriaTest {
     }
 
     @Test
+    @Tag("RF-13")
+    @DisplayName("RF-13 · Los catálogos coinciden con el seed")
     void losCatalogosCoincidenConElSeed() {
         assertEquals(3, ventas.listarTiendas().size());
         assertEquals(4, ventas.listarUsuarios().size());

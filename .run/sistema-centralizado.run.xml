@@ -2,6 +2,9 @@
   <configuration default="false" name="sistema-centralizado" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="envFilePaths">
+      <option value="$PROJECT_DIR$/.env" />
+    </option>
     <option name="MAIN_CLASS_NAME" value="mx.uady.inventario.central.Main" />
     <module name="sistema-centralizado" />
     <method v="2">

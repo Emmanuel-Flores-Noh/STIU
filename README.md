@@ -65,6 +65,8 @@ docker compose up --build
 | Broker | 5000 |
 | Sistema 1 | 6000 |
 
+**Zona horaria.** Todos los contenedores usan la variable `TZ` (por defecto `America/Merida`), de modo que la bitácora del Broker, `fecha_venta` y la `fechaHora` de los mensajes muestran la hora local. Para cambiarla, define `TZ` en `.env` con un identificador IANA (por ejemplo `TZ=America/Mexico_City`). Las interfaces que se ejecutan fuera de Docker (Sistema 2 y la interfaz del Sistema 1 desde el IDE) usan la zona horaria del equipo.
+
 El **Sistema 2** se ejecuta desde el IDE o como jar; también puede levantarse en Docker con un servidor X11:
 
 ```bash

@@ -7,6 +7,8 @@ import mx.uady.inventario.common.error.CodigoError;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -93,6 +95,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Registra los tres servicios con el host y puerto del proveedor")
     void registraLosTresServiciosConElHostYPuertoDelProveedor() throws Exception {
         try (BrokerFalso broker = new BrokerFalso(0)) {
             RegistradorBroker registrador = new RegistradorBroker(
@@ -119,6 +123,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Reintenta cuando el Broker rechaza y termina al tercer intento")
     void reintentaCuandoElBrokerRechazaYTerminaAlTercerIntento() throws Exception {
         try (BrokerFalso broker = new BrokerFalso(2)) {
             RegistradorBroker registrador = new RegistradorBroker(
@@ -133,6 +139,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Se rinde tras agotar los intentos")
     void seRindeTrasAgotarLosIntentos() throws Exception {
         try (BrokerFalso broker = new BrokerFalso(Integer.MAX_VALUE)) {
             RegistradorBroker registrador = new RegistradorBroker(
@@ -145,6 +153,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Devuelve falso si el Broker no está escuchando")
     void devuelveFalsoSiElBrokerNoEstaEscuchando() throws Exception {
         int puertoLibre;
         try (ServerSocket temporal = new ServerSocket(0)) {
@@ -159,6 +169,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Registra en segundo plano sin bloquear al llamador")
     void registraEnSegundoPlanoSinBloquearAlLlamador() throws Exception {
         try (BrokerFalso broker = new BrokerFalso(0)) {
             RegistradorBroker registrador = new RegistradorBroker(
@@ -174,6 +186,8 @@ class RegistradorBrokerTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @DisplayName("RF-16 · Valida sus parámetros")
     void validaSusParametros() {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new RegistradorBroker("localhost", 5000, "localhost", 6000, List.of(), 3, 10));

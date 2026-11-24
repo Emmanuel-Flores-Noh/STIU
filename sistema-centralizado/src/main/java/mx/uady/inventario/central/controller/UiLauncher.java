@@ -1,6 +1,5 @@
 package mx.uady.inventario.central.controller;
 
-import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,14 +11,12 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import mx.uady.inventario.central.model.ProductoConUnidades;
 import mx.uady.inventario.central.view.MercanciaPanel;
-import mx.uady.inventario.central.view.Mensajes;
 import mx.uady.inventario.central.view.ProductosPanel;
 import mx.uady.inventario.central.view.VentaHistorialPanel;
 import mx.uady.inventario.central.view.VentaPanel;
 import mx.uady.inventario.central.view.VentanaPrincipal;
-import mx.uady.inventario.central.view.components.QrPreviewDialog;
+import mx.uady.inventario.central.view.components.QrVista;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
-import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
 
 /**
@@ -77,7 +74,7 @@ public final class UiLauncher {
                 contexto.consultasVenta()::listarHistorial,
                 historial,
                 contexto.mercanciaService()::asegurarQr,
-                (venta, unidad) -> mostrarQr(historial, unidad, venta.producto()));
+                (venta, unidad) -> QrVista.mostrar(historial, unidad, venta.producto()));
         JTabbedPane secciones = new JTabbedPane();
         secciones.addTab("Registrar venta", ventas);
         secciones.addTab("Historial", historial);
@@ -112,14 +109,5 @@ public final class UiLauncher {
         return contexto.productoService().listarConUnidades().stream()
                 .map(ProductoConUnidades::producto)
                 .collect(Collectors.toMap(Producto::idProducto, Producto::nombre, (a, b) -> a));
-    }
-
-    private static void mostrarQr(Component origen, Mercancia unidad, String producto) {
-        try {
-            new QrPreviewDialog(SwingUtilities.getWindowAncestor(origen), unidad.numeroSerie(),
-                    unidad.idProducto(), producto, unidad.rutaQr()).setVisible(true);
-        } catch (IllegalArgumentException error) {
-            Mensajes.mostrarError(origen, error);
-        }
     }
 }

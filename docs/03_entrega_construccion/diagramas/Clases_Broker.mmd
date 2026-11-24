@@ -1,0 +1,72 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    direction TB
+    %% Diagrama de clases general - Broker
+    %% Paquete raíz: mx.uady.inventario.broker
+    %% Muestra las clases de cada componente y las relaciones entre ellas.
+    %% Los atributos y métodos están en el diagrama de cada componente.
+
+    namespace raiz {
+        class Main
+    }
+
+    namespace network {
+        class BrokerServer
+        class ManejadorConexion
+    }
+
+    namespace registry {
+        class AdministradorRegistro
+        class RegistroServicios
+    }
+
+    namespace routing {
+        class Enrutador
+        class ConectorProveedor
+        class PoliticaReintentos
+    }
+
+    namespace model {
+        class Proveedor {
+            <<record>>
+        }
+    }
+
+    namespace util {
+        class ConfiguracionBroker {
+            <<record>>
+        }
+        class BitacoraBroker
+        class JsonBroker
+    }
+
+    %% --- Arranque ---
+    Main ..> ConfiguracionBroker : desdeEntorno()
+    Main "1" ..> "1" BrokerServer : crea e inicia
+
+    %% --- network ---
+    BrokerServer "1" --> "1" ConfiguracionBroker : configuracion
+    BrokerServer "1" *-- "1" RegistroServicios : registro
+    BrokerServer "1" *-- "1" Enrutador : enrutador
+    BrokerServer "1" --> "1" BitacoraBroker : bitacora
+    BrokerServer "1" ..> "0..*" ManejadorConexion : crea por conexión
+    ManejadorConexion "0..*" --> "1" RegistroServicios : registro
+    ManejadorConexion "0..*" --> "1" Enrutador : enrutador
+    ManejadorConexion "1" *-- "1" AdministradorRegistro : administrador
+    ManejadorConexion ..> JsonBroker : deserializa / serializa
+
+    %% --- registry ---
+    AdministradorRegistro "0..*" --> "1" RegistroServicios : registro
+    AdministradorRegistro ..> Proveedor : crea
+    RegistroServicios "1" o-- "0..*" Proveedor : servicios
+
+    %% --- routing ---
+    Enrutador "1" *-- "1" ConectorProveedor : conector
+    Enrutador "1" *-- "1" PoliticaReintentos : politica
+    Enrutador ..> RegistroServicios : busca proveedor
+    ConectorProveedor ..> Proveedor : envía a
+

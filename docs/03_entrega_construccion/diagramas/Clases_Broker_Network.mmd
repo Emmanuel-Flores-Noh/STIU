@@ -1,0 +1,50 @@
+classDiagram
+    %% Diagrama de clases - Broker, componente network
+    %% Paquete: mx.uady.inventario.broker.network
+
+    class BrokerServer {
+        -int puerto
+        -int tamanoPool
+        -int timeoutMillis
+        -ConfiguracionBroker configuracion
+        -RegistroServicios registro
+        -Enrutador enrutador
+        -BitacoraBroker bitacora
+        -ExecutorService pool
+        -boolean activo
+        -ServerSocket serverSocket
+        -Thread hiloAceptor
+        +BrokerServer(int puerto, int tamanoPool)
+        +BrokerServer(int puerto, int tamanoPool, int timeoutMillis)
+        +BrokerServer(ConfiguracionBroker configuracion)
+        +BrokerServer(ConfiguracionBroker configuracion, BitacoraBroker bitacora)
+        -configuracionCompatible(int puerto, int tamanoPool, int timeoutMillis)$ ConfiguracionBroker
+        +iniciar() void
+        -aceptarConexiones() void
+        +detener() void
+        +getRegistro() RegistroServicios
+        +getEnrutador() Enrutador
+        +getConfiguracion() ConfiguracionBroker
+        +getBitacora() BitacoraBroker
+        +getPuerto() int
+        +isActivo() boolean
+        +getRegistry() RegistroServicios
+        +getRouter() Enrutador
+    }
+    class ManejadorConexion {
+        -String DESTINO_BROKER$
+        -Socket socket
+        -RegistroServicios registro
+        -Enrutador enrutador
+        -int timeoutMillis
+        -BitacoraBroker bitacora
+        -AdministradorRegistro administrador
+        +ManejadorConexion(Socket socket, RegistroServicios registro, Enrutador enrutador, int timeoutMillis)
+        +ManejadorConexion(Socket socket, RegistroServicios registro, Enrutador enrutador, int timeoutMillis, BitacoraBroker bitacora)
+        +run() void
+        -procesarSolicitud(String linea) Respuesta
+        -atenderSolicitud(Solicitud solicitud) Respuesta
+        -destinoDe(Solicitud solicitud) String
+    }
+
+    BrokerServer "1" ..> "0..*" ManejadorConexion : crea por conexión

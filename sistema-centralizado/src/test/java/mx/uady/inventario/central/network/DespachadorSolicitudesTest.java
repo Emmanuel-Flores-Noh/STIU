@@ -8,6 +8,8 @@ import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.error.CodigoError;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,6 +26,9 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-16")
+    @Tag("RF-24")
+    @DisplayName("RF-16, RF-24 · El catálogo estándar reconoce los servicios y operaciones del contrato")
     void catalogoEstandarReconoceLosServiciosYOperacionesDelContrato() {
         DespachadorSolicitudes despachador = DespachadorSolicitudes.estandar();
 
@@ -38,6 +43,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Una operación sin manejador responde OPERACION_NO_SOPORTADA conservando el id")
     void operacionSinManejadorRespondeNoSoportadaConservandoElId() {
         Respuesta respuesta = DespachadorSolicitudes.estandar()
                 .despachar(solicitud("req-1", Servicios.INVENTARIO, Operaciones.LISTAR_INVENTARIO, null));
@@ -49,6 +56,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Un servicio desconocido devuelve el error del catálogo")
     void servicioDesconocidoDevuelveErrorDelCatalogo() {
         Respuesta respuesta = DespachadorSolicitudes.estandar()
                 .despachar(solicitud("req-2", "servicioFantasma", Operaciones.LISTAR_INVENTARIO, null));
@@ -58,6 +67,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Una operación desconocida devuelve el error del catálogo")
     void operacionDesconocidaDevuelveErrorDelCatalogo() {
         Respuesta respuesta = DespachadorSolicitudes.estandar()
                 .despachar(solicitud("req-3", Servicios.INVENTARIO, "operacionFantasma", null));
@@ -67,6 +78,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Ejecuta el manejador registrado y devuelve éxito")
     void ejecutaElManejadorRegistradoYDevuelveExito() {
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();
         despachador.registrarOperacion(Servicios.INVENTARIO, Operaciones.LISTAR_INVENTARIO,
@@ -83,6 +96,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Los parámetros nulos llegan al manejador como objeto vacío")
     void parametrosNulosLleganAlManejadorComoObjetoVacio() {
         AtomicReference<JsonObject> recibidos = new AtomicReference<>();
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();
@@ -100,6 +115,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Una excepción del manejador se convierte en ERROR_INTERNO")
     void excepcionDelManejadorSeConvierteEnErrorInterno() {
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();
         despachador.registrarOperacion(Servicios.INVENTARIO, Operaciones.LISTAR_INVENTARIO,
@@ -116,6 +133,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · IllegalArgumentException se convierte en PARAMETROS_INVALIDOS")
     void illegalArgumentSeConvierteEnParametrosInvalidos() {
         DespachadorSolicitudes despachador = new DespachadorSolicitudes();
         despachador.registrarOperacion(Servicios.GESTOR_TIENDAS, Operaciones.ACTUALIZAR_TIENDA_VENTA,
@@ -132,6 +151,8 @@ class DespachadorSolicitudesTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Una solicitud nula devuelve error")
     void solicitudNulaDevuelveError() {
         Respuesta respuesta = DespachadorSolicitudes.estandar().despachar(null);
 

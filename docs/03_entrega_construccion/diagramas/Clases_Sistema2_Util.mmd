@@ -1,0 +1,33 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente util
+    %% Paquete: mx.uady.inventario.cliente.util
+
+    class FormateadorTexto {
+        -Pattern MARCAS_DIACRITICAS$
+        -String EN_ALMACEN$
+        -String SIN_DATO$
+        -DateTimeFormatter FECHA_HORA$
+        -DateTimeFormatter SOLO_FECHA$
+        -Locale LOCALE_MX$
+        -FormateadorTexto()
+        +normalizar(String texto)$ String
+        +esEnAlmacen(String estado)$ boolean
+        +estadoATexto(String estado)$ String
+        +fecha(String texto)$ String
+        +fecha(String texto, ZoneId zona)$ String
+        +precio(BigDecimal precio)$ String
+        -formatearSoloFecha(String limpio, String original)$ String
+    }
+    class PantallaTipo {
+        <<enumeration>>
+        ESTADO_CARGANDO
+        ESTADO_LISTO
+        ERROR_LISTAS
+        ERROR_DATOS_INCOMPLETOS
+        ERROR_VENTA
+        -String mensaje
+        -PantallaTipo(String mensaje)
+        +getMensaje() String
+        +toString() String
+    }

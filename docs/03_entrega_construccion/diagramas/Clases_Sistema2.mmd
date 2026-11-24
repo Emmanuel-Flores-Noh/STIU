@@ -1,0 +1,91 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    direction TB
+    %% Diagrama de clases general - Sistema 2 (Cliente del Proveedor)
+    %% Paquete raíz: mx.uady.inventario.cliente
+    %% Muestra la clase principal de cada componente y las relaciones entre componentes.
+    %% Los atributos y métodos están en el diagrama de cada componente.
+
+    namespace raiz {
+        class Main
+    }
+
+    namespace controller {
+        class VistaController {
+            <<interface>>
+        }
+        class VentaOperaciones {
+            <<interface>>
+        }
+        class EjecutorAsincrono {
+            <<interface>>
+        }
+        class RegistroVentaController
+        class ProductoController
+        class PresentadorErrores
+    }
+
+    namespace view {
+        class InterfazConfiguracion
+        class RegistroVentaFrame
+    }
+
+    namespace network {
+        class ConfiguracionNetwork {
+            <<record>>
+        }
+        class VentaService
+        class ClienteTCP
+        class ConexionTCP
+    }
+
+    namespace error {
+        class ComunicacionException
+        class TraductorErrores
+    }
+
+    namespace model {
+        class Catalogos {
+            <<record>>
+        }
+        class QrDTO
+        class PrecioHistorialDTO
+    }
+
+    %% --- Arranque ---
+    Main ..> ConfiguracionNetwork : desdeEntorno()
+    Main ..> InterfazConfiguracion : aplicarConfiguracion()
+    Main "1" ..> "1" ClienteTCP : crea
+    Main "1" ..> "1" VentaService : crea
+    Main "1" ..> "1" RegistroVentaFrame : crea
+    Main "1" ..> "1" RegistroVentaController : crea
+    Main ..> EjecutorAsincrono : swing()
+
+    %% --- controller <-> view ---
+    VistaController <|.. RegistroVentaFrame
+    VentaOperaciones <|.. RegistroVentaController
+    RegistroVentaFrame "1" --> "1" VentaOperaciones : operaciones
+    RegistroVentaController "1" --> "1" VistaController : vista
+    RegistroVentaController "1" --> "1" EjecutorAsincrono : ejecutor
+    RegistroVentaController "1" --> "1" ProductoController : productos
+    RegistroVentaController "1" *-- "1" PresentadorErrores : errores
+    ProductoController "1" *-- "1" PresentadorErrores : errores
+
+    %% --- controller -> network / error ---
+    RegistroVentaController "1" --> "1" VentaService : servicio
+    ProductoController "1" --> "1" VentaService : servicio
+    PresentadorErrores ..> TraductorErrores : describir()
+
+    %% --- network -> model / error ---
+    VentaService "1" --> "1" ClienteTCP : cliente
+    ClienteTCP "1" *-- "1" ConexionTCP : conexion
+    VentaService ..> Catalogos : devuelve
+    VentaService ..> QrDTO : devuelve
+    VentaService ..> PrecioHistorialDTO : devuelve
+    ClienteTCP ..> ComunicacionException : lanza
+    ConexionTCP ..> ComunicacionException : lanza
+    TraductorErrores ..> ComunicacionException : traduce

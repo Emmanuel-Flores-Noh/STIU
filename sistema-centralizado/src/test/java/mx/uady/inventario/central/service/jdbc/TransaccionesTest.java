@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.service.AccesoDatosException;
@@ -21,12 +23,16 @@ class TransaccionesTest {
     private final Transacciones transacciones = new Transacciones(this::conexionFalsa);
 
     @Test
+    @Tag("RNF-16")
+    @DisplayName("RNF-16 · Escribir hace commit al terminar bien")
     void escribirHaceCommitAlTerminarBien() {
         assertEquals("ok", transacciones.escribir("probar", c -> "ok"));
         assertEquals(List.of("setAutoCommit(false)", "commit", "close"), llamadas);
     }
 
     @Test
+    @Tag("RNF-16")
+    @DisplayName("RNF-16 · Escribir hace rollback y propaga los errores de negocio")
     void escribirHaceRollbackYPropagaLosErroresDeNegocio() {
         NegocioException negocio = new NegocioException("regla");
         assertSame(negocio, assertThrows(NegocioException.class,
@@ -35,6 +41,8 @@ class TransaccionesTest {
     }
 
     @Test
+    @Tag("RNF-16")
+    @DisplayName("RNF-16 · Escribir hace rollback y convierte los errores SQL")
     void escribirHaceRollbackYConvierteLosErroresSql() {
         SQLException sql = new SQLException("falla");
         AccesoDatosException e = assertThrows(AccesoDatosException.class,
@@ -45,6 +53,8 @@ class TransaccionesTest {
     }
 
     @Test
+    @Tag("RNF-16")
+    @DisplayName("RNF-16 · Leer no abre transacción y convierte los errores SQL")
     void leerNoAbreTransaccionYConvierteLosErroresSql() {
         Integer resultado = transacciones.leer("contar", c -> 7);
         assertEquals(7, resultado);
@@ -55,6 +65,8 @@ class TransaccionesTest {
     }
 
     @Test
+    @Tag("RNF-16")
+    @DisplayName("RNF-16 · Si no se puede abrir la conexión es error de acceso a datos")
     void siNoSePuedeAbrirLaConexionEsErrorDeAccesoADatos() {
         Transacciones sinBase = new Transacciones(() -> {
             throw new SQLException("Socket fail to connect", "08000");

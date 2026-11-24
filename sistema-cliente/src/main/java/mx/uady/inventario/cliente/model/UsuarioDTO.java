@@ -1,13 +1,25 @@
 package mx.uady.inventario.cliente.model;
 
 /**
- * Objeto de transferencia de datos (DTO) para representar a un usuario 
+ * Objeto de transferencia de datos (DTO) para representar a un usuario
  * con rol de proveedor en las opciones de la interfaz de ventas.
  */
 public class UsuarioDTO {
     private Long idUsuario;
     private String nombres;
     private String apellidoPaterno;
+
+    /**
+     * Constructor
+     * @param idUsuario ID
+     * @param nombres Nombres
+     * @param apellidoPaterno Apellido paterno
+     */
+    public UsuarioDTO(Long idUsuario, String nombres, String apellidoPaterno) {
+        this.idUsuario = idUsuario;
+        this.nombres = nombres;
+        this.apellidoPaterno = apellidoPaterno;
+    }
 
     /**
      * Obtiene el identificador único del usuario.
@@ -19,16 +31,12 @@ public class UsuarioDTO {
     }
 
     /**
-     * Obtiene los nombres del usuario.
-     * 
      * @return Los nombres del usuario.
      */
     public String getNombres() {
         return nombres;
     }
     /**
-     * Obtiene el apellido paterno del usuario.
-     * 
      * @return El apellido paterno.
      */
     public String getApellidoPaterno() {
@@ -36,14 +44,11 @@ public class UsuarioDTO {
     }
 
     /**
-     * Representación en cadena para mostrar el usuario amigablemente en el componente {@link javax.swing.JComboBox}.
-     * 
-     * @return Nombre completo formateado del proveedor.
+     *
+     * @return Nombre completo
      */
     @Override
     public String toString() {
-        String n = nombres != null ? nombres : "";
-        String ap = apellidoPaterno != null ? apellidoPaterno : "";
-        return (n + " " + ap).trim();
+        return getNombres() + " " + getApellidoPaterno(); // ajusta según los nombres exactos de campos en UsuarioDTO
     }
 }

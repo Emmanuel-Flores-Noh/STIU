@@ -1,0 +1,54 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Common, componente contrato
+    %% Paquete: mx.uady.inventario.common.contrato
+
+    class EstadoRespuesta {
+        <<enumeration>>
+        EXITO
+        ERROR
+    }
+    class Respuesta {
+        -String idSolicitud
+        -JsonElement resultado
+        -EstadoRespuesta estado
+        -CodigoError codigoError
+        -String mensajeError
+        -LocalDateTime fechaHora
+        -Respuesta(String idSolicitud, JsonElement resultado, EstadoRespuesta estado, CodigoError codigoError, String mensajeError, LocalDateTime fechaHora)
+        +exito(String idSolicitud, JsonElement resultado)$ Respuesta
+        +error(String idSolicitud, CodigoError codigoError, String mensajeError)$ Respuesta
+        -mensajeErrorValido(String mensajeError)$ boolean
+        -codigoErrorValido(CodigoError codigoError)$ boolean
+        +getIdSolicitud() String
+        +getResultado() JsonElement
+        +getEstado() EstadoRespuesta
+        +getCodigoError() CodigoError
+        +getMensajeError() String
+        +getFechaHora() LocalDateTime
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Solicitud {
+        -String idSolicitud
+        -String nombreServicio
+        -String nombreOperacion
+        -JsonObject parametros
+        -LocalDateTime fechaHora
+        -Solicitud(String idSolicitud, String nombreServicio, String nombreOperacion, JsonObject parametros, LocalDateTime fechaHora)
+        -validarCreacion(String idSolicitud, String nombreServicio, String nombreOperacion)$ void
+        +crear(String idSolicitud, String nombreServicio, String nombreOperacion, JsonObject parametros)$ Solicitud
+        #crearConFechaEspecifica(String idSolicitud, String nombreServicio, String nombreOperacion, JsonObject parametros, LocalDateTime fecha)$ Solicitud
+        +getIdSolicitud() String
+        +getNombreServicio() String
+        +getNombreOperacion() String
+        +getParametros() JsonObject
+        +getFechaHora() LocalDateTime
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+
+    Respuesta "0..*" --> "1" EstadoRespuesta : estado
+    Respuesta ..> Solicitud : responde a idSolicitud

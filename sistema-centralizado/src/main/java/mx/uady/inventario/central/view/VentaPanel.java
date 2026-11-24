@@ -11,24 +11,19 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.table.TableRowSorter;
 
 import mx.uady.inventario.central.service.ConsultasVentaService;
+import mx.uady.inventario.central.view.comun.Combos;
+import mx.uady.inventario.central.view.comun.Documentos;
+import mx.uady.inventario.central.view.comun.ResumenTabla;
+import mx.uady.inventario.central.view.comun.TablaFiltrable;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.TiendaAlmacen;
 import mx.uady.inventario.common.modelo.Usuario;
@@ -40,10 +35,15 @@ import mx.uady.inventario.common.modelo.Usuario;
 public final class VentaPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final ResumenTabla RESUMEN = new ResumenTabla(
+            "No hay mercancías disponibles para vender.", "Ninguna mercancía coincide con «%s».",
+            "%d de %d mercancías", "1 mercancía disponible", "%d mercancías disponibles");
 
     private final VentaTableModel modelo = new VentaTableModel();
-    private final JTable tabla = new JTable(modelo);
-    private final TableRowSorter<VentaTableModel> ordenador = new TableRowSorter<>(modelo);
+    private final TablaFiltrable<VentaTableModel, Mercancia> tablaFiltrable =
+            new TablaFiltrable<VentaTableModel, Mercancia>(modelo, modelo::getFila)
+                    .ordenarPor(VentaTableModel.COL_SERIE);
+    private final JTable tabla = tablaFiltrable.tabla();
     private final JTextField busqueda = new JTextField(18);
     private final JComboBox<TiendaAlmacen> tienda = new JComboBox<>();
     private final JComboBox<Usuario> usuario = new JComboBox<>();
@@ -73,16 +73,17 @@ public final class VentaPanel extends JPanel {
         actualizar.setName("actualizarVentas");
         vender.setName("registrarVenta");
         tabla.setName("tablaVentas");
+        estado.setName("estadoVentas");
     }
 
     private JPanel construirFormulario() {
         busqueda.putClientProperty("JTextField.placeholderText", "Buscar número de serie");
         busqueda.putClientProperty("JTextField.showClearButton", true);
-        busqueda.getDocument().addDocumentListener(documento(this::aplicarBusqueda));
+        busqueda.getDocument().addDocumentListener(Documentos.alCambiar(this::aplicarBusqueda));
 
-        tienda.setRenderer(new RenderCatalogo());
+        tienda.setRenderer(Combos.renderTexto(VentaPanel::textoDe));
         tienda.addActionListener(e -> actualizarDisponibilidad());
-        usuario.setRenderer(new RenderCatalogo());
+        usuario.setRenderer(Combos.renderTexto(VentaPanel::textoDe));
         usuario.addActionListener(e -> actualizarDisponibilidad());
         actualizar.addActionListener(e -> alActualizar.run());
         vender.addActionListener(e -> alVender.run());
@@ -123,51 +124,22 @@ public final class VentaPanel extends JPanel {
     }
 
     private JTable construirTabla() {
-        tabla.setRowSorter(ordenador);
-        ordenador.setSortKeys(List.of(new RowSorter.SortKey(VentaTableModel.COL_SERIE, SortOrder.ASCENDING)));
-        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabla.setFillsViewportHeight(true);
-        tabla.setRowHeight(26);
-        tabla.getSelectionModel().addListSelectionListener(e -> actualizarDisponibilidad());
+        tablaFiltrable.alSeleccionar(this::actualizarDisponibilidad);
         return tabla;
     }
 
     private void aplicarBusqueda() {
-        String texto = busqueda.getText();
-        ordenador.setRowFilter(texto.isBlank() ? null : new RowFilter<VentaTableModel, Integer>() {
-            @Override
-            public boolean include(Entry<? extends VentaTableModel, ? extends Integer> fila) {
-                return FiltroTexto.contiene(fila.getStringValue(VentaTableModel.COL_SERIE), texto);
-            }
-        });
+        tablaFiltrable.filtrarPorTexto(VentaTableModel.COL_SERIE, busqueda.getText());
         actualizarResumen();
     }
 
     private void actualizarResumen() {
-        int total = modelo.getRowCount();
-        int visibles = tabla.getRowCount();
-        if (total == 0) {
-            estado.setText("No hay mercancías disponibles para vender.");
-        } else if (visibles == 0) {
-            estado.setText("Ninguna mercancía coincide con «" + busqueda.getText().strip() + "».");
-        } else if (visibles < total) {
-            estado.setText(visibles + " de " + total + " mercancías");
-        } else {
-            estado.setText(total == 1 ? "1 mercancía disponible" : total + " mercancías disponibles");
-        }
+        estado.setText(RESUMEN.texto(tablaFiltrable.totalFilas(), tablaFiltrable.filasVisibles(), busqueda.getText()));
     }
 
     private void actualizarDisponibilidad() {
         vender.setEnabled(seleccionada().isPresent() && tienda.getSelectedItem() != null
                 && usuario.getSelectedItem() != null);
-    }
-
-    private static DocumentListener documento(Runnable accion) {
-        return new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void removeUpdate(DocumentEvent e) { accion.run(); }
-            @Override public void changedUpdate(DocumentEvent e) { accion.run(); }
-        };
     }
 
     // ---- API para el controlador ----
@@ -187,45 +159,21 @@ public final class VentaPanel extends JPanel {
     }
 
     public void mostrarTiendas(List<TiendaAlmacen> tiendas) {
-        Integer anterior = tiendaSeleccionada().map(TiendaAlmacen::idTienda).orElse(null);
-        tienda.removeAllItems();
-        tiendas.forEach(tienda::addItem);
-        for (int i = 0; anterior != null && i < tienda.getItemCount(); i++) {
-            if (tienda.getItemAt(i).idTienda() == anterior) {
-                tienda.setSelectedIndex(i);
-            }
-        }
+        Combos.rellenarConservando(tienda, tiendas, TiendaAlmacen::idTienda);
         actualizarDisponibilidad();
     }
 
     public void mostrarUsuarios(List<Usuario> usuarios) {
-        Integer anterior = usuarioSeleccionado().map(Usuario::idUsuario).orElse(null);
-        usuario.removeAllItems();
-        usuarios.forEach(usuario::addItem);
-        for (int i = 0; anterior != null && i < usuario.getItemCount(); i++) {
-            if (usuario.getItemAt(i).idUsuario() == anterior) {
-                usuario.setSelectedIndex(i);
-            }
-        }
+        Combos.rellenarConservando(usuario, usuarios, Usuario::idUsuario);
         actualizarDisponibilidad();
     }
 
     public Optional<Mercancia> seleccionada() {
-        int enVista = tabla.getSelectedRow();
-        return enVista < 0
-                ? Optional.empty()
-                : Optional.of(modelo.getFila(tabla.convertRowIndexToModel(enVista)));
+        return tablaFiltrable.seleccionada();
     }
 
     public boolean seleccionarMercancia(String numeroSerie) {
-        int enModelo = modelo.indiceDe(numeroSerie);
-        int enVista = enModelo < 0 ? -1 : tabla.convertRowIndexToView(enModelo);
-        if (enVista < 0) {
-            return false;
-        }
-        tabla.setRowSelectionInterval(enVista, enVista);
-        tabla.scrollRectToVisible(tabla.getCellRect(enVista, 0, true));
-        return true;
+        return tablaFiltrable.seleccionarFilaDelModelo(modelo.indiceDe(numeroSerie));
     }
 
     public Optional<TiendaAlmacen> tiendaSeleccionada() {
@@ -249,16 +197,9 @@ public final class VentaPanel extends JPanel {
     }
 
     /** Muestra tiendas y usuarios por nombre. */
-    private static final class RenderCatalogo extends DefaultListCellRenderer {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> lista, Object valor, int indice,
-                boolean seleccionado, boolean foco) {
-            Object texto = valor instanceof TiendaAlmacen t ? t.nombre()
-                    : valor instanceof Usuario u ? ConsultasVentaService.nombreCompleto(u)
-                    : valor;
-            return super.getListCellRendererComponent(lista, texto, indice, seleccionado, foco);
-        }
+    private static Object textoDe(Object valor) {
+        return valor instanceof TiendaAlmacen t ? t.nombre()
+                : valor instanceof Usuario u ? ConsultasVentaService.nombreCompleto(u)
+                : valor;
     }
 }

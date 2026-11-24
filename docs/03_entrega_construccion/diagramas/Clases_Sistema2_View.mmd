@@ -1,0 +1,133 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente view
+    %% Paquete: mx.uady.inventario.cliente.view y view.components
+
+    class InterfazConfiguracion {
+        -Logger LOGGER$
+        -InterfazConfiguracion()
+        +aplicarConfiguracion()$ void
+    }
+    class RegistroVentaFrame {
+        -JTextField txtBuscarMercancia
+        -JButton btnRefrescar
+        -JLabel lblIndicadorCarga
+        -MercanciaTabla tabla
+        -VentaFormulario formulario
+        -OperacionDialog dialogos
+        -VentaOperaciones operaciones
+        -boolean cargando
+        +RegistroVentaFrame()
+        +setOperaciones(VentaOperaciones operaciones) void
+        +getTablaMercancia() MercanciaTabla
+        -crearPanelPrincipal() JPanel
+        -crearPanelTitulo() JPanel
+        -crearBarraHerramientas() JPanel
+        -conectarEventos() void
+        -actualizarHabilitacion() void
+        +mostrarIndicadorCarga(String mensaje, boolean cargando) void
+        +actualizarListasCombos(List~TiendaDTO~ tiendas, List~UsuarioDTO~ usuarios) void
+        +actualizarTablaMercancia(List~MercanciaDTO~ unidades) void
+        +limpiarFormulario() void
+        +mostrarMensajeExito(String mensaje) void
+        +mostrarMensajeError(String mensaje) void
+        +mostrarDialogoReintentar(String tipoError, String mensaje, Runnable reintento) void
+        +mostrarQr(QrDTO qr) void
+        +mostrarHistorialPrecios(PrecioHistorialDTO historial) void
+    }
+    class HistorialPrecioDialog {
+        -PrecioHistorialDTO historial
+        +HistorialPrecioDialog(Window parent, PrecioHistorialDTO historial)
+        -crearPanelResumen() JPanel
+        -crearPanelPrecios() Component
+        -crearPanelBotones() JPanel
+    }
+    class MercanciaFiltro {
+        -TableRowSorter~Modelo~ sorter
+        -JTextField campoBusqueda
+        +MercanciaFiltro(JTable tabla, Modelo modelo, JTextField campoBusqueda)
+        -actualizar() void
+        +crearFiltro(String texto)$ RowFilter~Modelo, Integer~
+    }
+    class MercanciaTabla {
+        -Modelo modelo
+        -JTable tabla
+        -Runnable alCambiarSeleccion
+        -Consumer~MercanciaDTO~ alDobleClic
+        +MercanciaTabla(JTextField campoBusqueda)
+        +getTabla() JTable
+        +reemplazarUnidades(List~MercanciaDTO~ unidades) void
+        +getUnidadSeleccionada() MercanciaDTO
+        +limpiarSeleccion() void
+        +setAlCambiarSeleccion(Runnable accion) void
+        +setAlDobleClic(Consumer~MercanciaDTO~ accion) void
+        -unidadEnFila(int filaVista) MercanciaDTO
+    }
+    class Modelo {
+        +int COLUMNA_SERIE$
+        +int COLUMNA_PRODUCTO$
+        +int COLUMNA_ESTADO$
+        -String[] COLUMNAS$
+        -List~MercanciaDTO~ unidades
+        +reemplazar(List~MercanciaDTO~ nuevas) void
+        +getUnidad(int filaModelo) MercanciaDTO
+        +getRowCount() int
+        +getColumnCount() int
+        +getColumnName(int columna) String
+        +getValueAt(int fila, int columna) Object
+    }
+    class OperacionDialog {
+        +String PREGUNTA_REINTENTO$
+        -String[] OPCIONES_REINTENTO$
+        -Component padre
+        +OperacionDialog(Component padre)
+        +textoReintento(String mensaje)$ String
+        +exito(String mensaje) void
+        +informar(String titulo, String mensaje) void
+        +error(String mensaje) void
+        +error(String titulo, String mensaje) void
+        +preguntarReintento(String tipoError, String mensaje) boolean
+    }
+    class QrPreviewDialog {
+        +String TEXTO_SIN_IMAGEN$
+        -int TAMANO_IMAGEN$
+        -QrDTO qr
+        -byte[] png
+        -OperacionDialog mensajes
+        +QrPreviewDialog(Window parent, QrDTO qr)
+        -crearPanelInfo() JPanel
+        -textoProducto() String
+        -crearPanelImagen(BufferedImage imagen) JPanel
+        -crearPanelBotones(boolean puedeGuardar) JPanel
+        -guardarComoPng() void
+        -nombreSeguro(String nombre)$ String
+        -leerImagen(byte[] bytes)$ BufferedImage
+    }
+    class VentaFormulario {
+        -JComboBox~TiendaDTO~ comboTiendas
+        -JComboBox~UsuarioDTO~ comboUsuarios
+        -JButton btnRegistrarVenta
+        -JButton btnHistorialPrecios
+        +VentaFormulario()
+        +getTienda() TiendaDTO
+        +getUsuario() UsuarioDTO
+        +actualizarCatalogos(List~TiendaDTO~ tiendas, List~UsuarioDTO~ usuarios) void
+        +limpiar() void
+        +setAlCambiarSeleccion(Runnable accion) void
+        +setAlRegistrar(Runnable accion) void
+        +setAlVerHistorial(Runnable accion) void
+        +setRegistrarHabilitado(boolean habilitado) void
+        +setHistorialHabilitado(boolean habilitado) void
+        +setSelectoresHabilitados(boolean habilitado) void
+        -reemplazarOpciones(JComboBox~T~ combo, List~T~ opciones, Function~T, Object~ id)$ void
+    }
+
+    RegistroVentaFrame "1" *-- "1" MercanciaTabla : tabla
+    RegistroVentaFrame "1" *-- "1" VentaFormulario : formulario
+    RegistroVentaFrame "1" *-- "1" OperacionDialog : dialogos
+    RegistroVentaFrame "1" ..> "0..*" QrPreviewDialog : crea
+    RegistroVentaFrame "1" ..> "0..*" HistorialPrecioDialog : crea
+    MercanciaTabla "1" *-- "1" Modelo : modelo
+    MercanciaTabla "1" ..> "1" MercanciaFiltro : crea
+    MercanciaFiltro ..> Modelo : filtra
+    QrPreviewDialog "1" *-- "1" OperacionDialog : mensajes

@@ -1,0 +1,86 @@
+classDiagram 
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente repository
+    %% Paquete: mx.uady.inventario.central.repository
+
+    class CatalogoRepository {
+        -String TIENDAS$
+        -String USUARIOS$
+        -String USUARIOS_POR_ROL$
+        +listarTiendas(Connection conexion) List~TiendaAlmacen~
+        +listarUsuarios(Connection conexion) List~Usuario~
+        +listarUsuariosPorRol(Connection conexion, String nombreRol) List~Usuario~
+        -leerUsuarios(ResultSet filas)$ List~Usuario~
+    }
+    class HistorialPrecioRepository {
+        -String INSERTAR$
+        -String LISTAR$
+        +insertar(Connection conexion, int idProducto, BigDecimal precioAnterior) void
+        +listar(Connection conexion, int idProducto) List~HistorialPrecio~
+    }
+    class MercanciaRepository {
+        ~int ERROR_CLAVE_DUPLICADA$
+        -String COLUMNAS$
+        -String BUSCAR$
+        -String INSERTAR$
+        -String ACTUALIZAR_QR$
+        +listar(Connection conexion, Integer idProducto, EstadoMercancia estado) List~Mercancia~
+        +buscar(Connection conexion, String numeroSerie, boolean bloquear) Optional~Mercancia~
+        +insertar(Connection conexion, Mercancia unidad) void
+        +actualizarRutaQr(Connection conexion, String numeroSerie, String rutaQr) boolean
+        +esClaveDuplicada(SQLException error)$ boolean
+        -leer(ResultSet fila)$ Mercancia
+    }
+    class ProductoRepository {
+        -String COLUMNAS$
+        -String LISTAR_CON_UNIDADES$
+        -String BUSCAR$
+        -String INSERTAR$
+        -String ACTUALIZAR$
+        +listarConUnidades(Connection conexion) List~ProductoConUnidades~
+        +buscar(Connection conexion, int idProducto, boolean bloquear) Optional~Producto~
+        +insertar(Connection conexion, Producto producto) Producto
+        +actualizar(Connection conexion, Producto producto) boolean
+        -asignarDatos(PreparedStatement sentencia, Producto producto)$ void
+        -leer(ResultSet fila)$ Producto
+    }
+    class ProveedorConexion {
+        <<interface>>
+        +abrir()* Connection
+        +de(ConfiguracionBD configuracion)$ ProveedorConexion
+    }
+    class VentaRepository {
+        -String CONSULTAR_MERCANCIA$
+        -String EXISTE_TIENDA$
+        -String EXISTE_USUARIO$
+        -String INSERTAR_VENTA$
+        -String ACTUALIZAR_ESTADO$
+        -String LISTAR_HISTORIAL$
+        -ProveedorConexion connectionProvider
+        +VentaRepository()
+        +VentaRepository(ConfiguracionBD configuracion)
+        +VentaRepository(ProveedorConexion connectionProvider)
+        +registrarVenta(String numeroSerie, int idTienda, int idUsuario) VentaResultado
+        -validarMercanciaDisponible(Connection conexion, String numeroSerie) void
+        -validarExistencia(Connection conexion, String consulta, int id, String mensaje) void
+        -insertarVenta(Connection conexion, String numeroSerie, int idTienda, int idUsuario) void
+        -actualizarEstado(Connection conexion, String numeroSerie) void
+        -obtenerFechaVenta(Connection conexion, String numeroSerie) LocalDateTime
+        -rollback(Connection conexion, Throwable causa) void
+        -restaurarAutoCommit(Connection conexion) void
+        +listarHistorial(Connection conexion) List~VentaHistorial~
+    }
+    class VentaRepositoryException {
+        +VentaRepositoryException(String message)
+        +VentaRepositoryException(String message, Throwable cause)
+    }
+    class VentaResultado {
+        <<record>>
+        -String numeroSerie
+        -int idTienda
+        -LocalDateTime fechaVenta
+    }
+
+    VentaRepository "1" --> "1" ProveedorConexion : connectionProvider
+    VentaRepository "1" ..> "0..*" VentaResultado : crea
+    VentaRepository ..> VentaRepositoryException : lanza

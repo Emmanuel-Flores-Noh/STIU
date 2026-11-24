@@ -11,6 +11,8 @@ services:
       MARIADB_DATABASE: ${DB_NAME:-almacenes_uady}
       MARIADB_USER: ${DB_USER:-uady_user}
       MARIADB_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+      # Zona horaria del servidor: CURRENT_TIMESTAMP (fecha_venta) y NOW() usan la hora local.
+      TZ: ${TZ:-America/Merida}
     ports:
       - "3306:3306"
     volumes:
@@ -42,6 +44,8 @@ services:
       BROKER_ESPERA_REINTENTO_MS: ${BROKER_ESPERA_REINTENTO_MS:-200}
       BROKER_FALLOS_PARA_INDISPONIBLE: ${BROKER_FALLOS_PARA_INDISPONIBLE:-3}
       BROKER_INDISPONIBLE_MS: ${BROKER_INDISPONIBLE_MS:-30000}
+      # Zona horaria de la JVM: la bitacora muestra la hora local.
+      TZ: ${TZ:-America/Merida}
     ports:
       - "${BROKER_PORT:-5000}:${BROKER_PORT:-5000}"
     healthcheck:
@@ -79,6 +83,8 @@ services:
       QR_DIR: /app/storage/qr
       REGISTRO_INTENTOS: ${REGISTRO_INTENTOS:-30}
       REGISTRO_ESPERA_MS: ${REGISTRO_ESPERA_MS:-2000}
+      # Zona horaria de la JVM: fechaHora de las respuestas y lectura de fecha_venta.
+      TZ: ${TZ:-America/Merida}
     ports:
       - "${SERVICE_PORT:-6000}:${SERVICE_PORT:-6000}"
     volumes:
@@ -101,6 +107,7 @@ services:
       BROKER_HOST: ${BROKER_HOST:-broker}
       BROKER_PORT: ${BROKER_PORT:-5000}
       DISPLAY: ${DISPLAY:-:0}
+      TZ: ${TZ:-America/Merida}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
     depends_on:

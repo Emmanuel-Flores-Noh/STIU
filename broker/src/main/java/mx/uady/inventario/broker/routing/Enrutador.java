@@ -7,16 +7,9 @@ import mx.uady.inventario.broker.util.ConfiguracionBroker;
 import mx.uady.inventario.common.contrato.Respuesta;
 import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.error.CodigoError;
-import mx.uady.inventario.common.json.GsonFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,12 +26,13 @@ import java.util.Optional;
  *
  * <p>Cada intento fallido y cada proveedor que queda marcado como no disponible
  * se registran en la {@link BitacoraBroker}.</p>
+ *
+ * <p>El envio por socket lo hace el {@link ConectorProveedor} y la repeticion de
+ * intentos la decide la {@link PoliticaReintentos}.</p>
  */
 public class Enrutador {
-    private final int timeoutConexionMillis;
-    private final int timeoutLecturaMillis;
-    private final int reintentos;
-    private final long esperaReintentoMillis;
+    private final ConectorProveedor conector;
+    private final PoliticaReintentos politica;
     private final BitacoraBroker bitacora;
 
     /**
@@ -105,22 +99,22 @@ public class Enrutador {
      */
     public Enrutador(int timeoutConexionMillis, int timeoutLecturaMillis, int reintentos, long esperaReintentoMillis,
                      BitacoraBroker bitacora) {
-        if (timeoutConexionMillis <= 0) {
-            throw new IllegalArgumentException("timeoutConexionMillis debe ser positivo");
-        }
-        if (timeoutLecturaMillis <= 0) {
-            throw new IllegalArgumentException("timeoutLecturaMillis debe ser positivo");
-        }
-        if (reintentos < 0) {
-            throw new IllegalArgumentException("reintentos no puede ser negativo");
-        }
-        if (esperaReintentoMillis < 0) {
-            throw new IllegalArgumentException("esperaReintentoMillis no puede ser negativo");
-        }
-        this.timeoutConexionMillis = timeoutConexionMillis;
-        this.timeoutLecturaMillis = timeoutLecturaMillis;
-        this.reintentos = reintentos;
-        this.esperaReintentoMillis = esperaReintentoMillis;
+        this(new ConectorProveedor(timeoutConexionMillis, timeoutLecturaMillis),
+                new PoliticaReintentos(reintentos, esperaReintentoMillis),
+                bitacora);
+    }
+
+    /**
+     * Constructor con los colaboradores ya creados.
+     *
+     * @param conector envia la solicitud al proveedor
+     * @param politica decide cuantas veces se intenta el envio
+     * @param bitacora bitacora donde se registran los intentos fallidos
+     * @throws NullPointerException si algun colaborador es nulo
+     */
+    Enrutador(ConectorProveedor conector, PoliticaReintentos politica, BitacoraBroker bitacora) {
+        this.conector = Objects.requireNonNull(conector, "El conector es obligatorio");
+        this.politica = Objects.requireNonNull(politica, "La politica de reintentos es obligatoria");
         this.bitacora = Objects.requireNonNull(bitacora, "La bitacora es obligatoria");
     }
 
@@ -161,90 +155,42 @@ public class Enrutador {
         }
 
         Proveedor proveedor = proveedorOpt.get();
-        int intentosTotales = reintentos + 1;
-        CodigoError ultimoCodigo = CodigoError.ERROR_INTERNO;
-        String ultimoMensaje = "Error de comunicacion con el proveedor";
-
-        for (int intento = 1; intento <= intentosTotales; intento++) {
-            try (Socket socket = new Socket()) {
-                Respuesta respuesta = redireccionarSolicitud(solicitud, socket, proveedor);
-                // La comunicacion funciono aunque el proveedor haya respondido con error.
-                registro.marcarExito(solicitud.getNombreServicio());
-                return respuesta;
-            } catch (SocketTimeoutException e) {
-                ultimoCodigo = CodigoError.TIMEOUT;
-                ultimoMensaje = "Tiempo de espera agotado al contactar al proveedor";
-            } catch (IOException | RuntimeException e) {
-                ultimoCodigo = CodigoError.ERROR_INTERNO;
-                ultimoMensaje = "Error de comunicacion con el proveedor: " + e.getMessage();
-            }
-            bitacora.registrarIntentoFallido(solicitud, proveedor, intento, intentosTotales,
-                    ultimoCodigo, ultimoMensaje);
-
-            if (intento < intentosTotales && !esperarAntesDelSiguienteIntento()) {
-                break;
-            }
-        }
-
         String servicio = solicitud.getNombreServicio();
-        boolean disponibleAntes = registro.estaDisponible(servicio);
-        registro.marcarFallo(servicio);
-        if (disponibleAntes && !registro.estaDisponible(servicio)) {
-            bitacora.registrarNoDisponible(servicio, registro.fallos(servicio));
-        }
-        return Respuesta.error(solicitud.getIdSolicitud(), ultimoCodigo, ultimoMensaje);
-    }
-
-    /**
-     * Espera entre intentos. Devuelve {@code false} si el hilo fue interrumpido,
-     * en cuyo caso se dejan de reintentar para no demorar el apagado.
-     */
-    private boolean esperarAntesDelSiguienteIntento() {
-        if (esperaReintentoMillis <= 0) {
-            return true;
-        }
         try {
-            Thread.sleep(esperaReintentoMillis);
-            return true;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
+            Respuesta respuesta = politica.ejecutar(() -> conector.enviar(solicitud, proveedor),
+                    (intento, intentosTotales, error) -> bitacora.registrarIntentoFallido(solicitud, proveedor,
+                            intento, intentosTotales, codigoDe(error), mensajeDe(error)));
+            // La comunicacion funciono aunque el proveedor haya respondido con error.
+            registro.marcarExito(servicio);
+            return respuesta;
+        } catch (IOException | RuntimeException e) {
+            boolean disponibleAntes = registro.estaDisponible(servicio);
+            registro.marcarFallo(servicio);
+            if (disponibleAntes && !registro.estaDisponible(servicio)) {
+                bitacora.registrarNoDisponible(servicio, registro.fallos(servicio));
+            }
+            return Respuesta.error(solicitud.getIdSolicitud(), codigoDe(e), mensajeDe(e));
         }
     }
 
     /**
-     * Redirecciona la solicitud a un proveedor proporcionado
-     * @param solicitud La solicitud a redireccionar
-     * @param socket El socket para la conexion al proveedor
-     * @param proveedor El proveedor a cual el socket se va a conectar
-     * @return La respuesta del servicio, sea exitosa o no
-     * @throws IOException si no se pudo conectar, leer o la respuesta no es utilizable
+     * Codigo de error del contrato para un fallo de comunicacion.
+     * @param error el fallo de un intento
+     * @return {@code TIMEOUT} si se agoto el tiempo de espera; {@code ERROR_INTERNO} en otro caso
      */
-    private Respuesta redireccionarSolicitud(Solicitud solicitud, Socket socket, Proveedor proveedor) throws IOException {
-        socket.connect(new InetSocketAddress(proveedor.host(), proveedor.puerto()), timeoutConexionMillis);
-        socket.setSoTimeout(timeoutLecturaMillis);
+    private static CodigoError codigoDe(Exception error) {
+        return error instanceof SocketTimeoutException ? CodigoError.TIMEOUT : CodigoError.ERROR_INTERNO;
+    }
 
-        PrintWriter salida = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
-        BufferedReader entrada = new BufferedReader(
-                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-
-        salida.println(GsonFactory.DEFAULT.toJson(solicitud));
-        salida.flush();
-
-        String respuestaJson = entrada.readLine();
-        if (respuestaJson == null || respuestaJson.isBlank()) {
-            throw new IOException("El proveedor no devolvio respuesta");
+    /**
+     * Mensaje para el cliente y la bitacora de un fallo de comunicacion.
+     * @param error el fallo de un intento
+     * @return el mensaje del fallo
+     */
+    private static String mensajeDe(Exception error) {
+        if (error instanceof SocketTimeoutException) {
+            return "Tiempo de espera agotado al contactar al proveedor";
         }
-
-        Respuesta respuesta = GsonFactory.DEFAULT.fromJson(respuestaJson, Respuesta.class);
-        if (respuesta == null) {
-            throw new IOException("Respuesta invalida del proveedor");
-        }
-
-        if (!Objects.equals(respuesta.getIdSolicitud(), solicitud.getIdSolicitud())) {
-            throw new IOException("El id de la respuesta no coincide con la solicitud");
-        }
-
-        return respuesta;
+        return "Error de comunicacion con el proveedor: " + error.getMessage();
     }
 }
