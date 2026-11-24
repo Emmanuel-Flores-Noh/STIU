@@ -1,0 +1,426 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente view
+    %% Paquete: mx.uady.inventario.central.view, view.comun y view.components
+
+    class CriteriosHistorialVentas {
+        <<record>>
+        -String serie
+        -String tienda
+        -String producto
+        -LocalDate desde
+        -LocalDate hasta
+        -boolean fechaInvalida
+        ~de(String serie, String tienda, String producto, String desde, String hasta)$ CriteriosHistorialVentas
+        ~cumple(VentaHistorial venta) boolean
+        -vacio(String texto)$ boolean
+        -fecha(String texto)$ LocalDate
+    }
+    class FiltroTexto {
+        -FiltroTexto()
+        +contiene(String texto, String busqueda)$ boolean
+        ~normalizar(String texto)$ String
+    }
+    class FiltrosMercanciaBar {
+        ~String TODOS$
+        -JComboBox~Object~ producto
+        -JComboBox~Object~ estado
+        -JTextField busqueda
+        -JButton actualizar
+        -JButton verQr
+        -Runnable alCambiarFiltros
+        -Runnable alBuscar
+        -Runnable alVerQr
+        -boolean ajustandoCombos
+        ~FiltrosMercanciaBar()
+        -notificarFiltros() void
+        ~alCambiarFiltros(Runnable accion) void
+        ~alBuscar(Runnable accion) void
+        ~alVerQr(Runnable accion) void
+        ~mostrarProductos(List~Producto~ productos) void
+        ~productoSeleccionado() Integer
+        ~estadoSeleccionado() EstadoMercancia
+        ~hayFiltros() boolean
+        ~textoBusqueda() String
+        ~setVerQrHabilitado(boolean habilitado) void
+        ~verQrHabilitado() boolean
+        ~controles() Component[]
+        -claveProducto(Object opcion)$ Object
+        -textoDe(Object valor)$ Object
+    }
+    class Mensajes {
+        ~String ERROR_CONEXION$
+        ~String ERROR_ALMACENAMIENTO$
+        ~String ERROR_INESPERADO$
+        -Logger LOG$
+        ~long SILENCIO_TRAS_CERRAR_MS$
+        -Set~String~ ERRORES_VISIBLES$
+        -Map~String, Long~ ERRORES_CERRADOS$
+        -Mensajes()
+        +mostrarError(Component padre, Throwable error)$ void
+        ~marcarCerrado(String texto, long momento)$ void
+        ~debeMostrarse(String texto, long ahora)$ boolean
+        +mostrarInfo(Component padre, String texto)$ void
+        +confirmar(Component padre, String pregunta)$ boolean
+        ~describir(Throwable error)$ String
+        -esFalloDeConexion(Throwable error)$ boolean
+        -buscar(Throwable error, Class~E~ tipo)$ E
+        -enEdt(Runnable accion)$ void
+    }
+    class MercanciaPanel {
+        ~String TODOS$
+        ~String SIN_PRODUCTOS$
+        -String SIN_RESULTADOS_FILTRADOS$
+        -ResumenTabla RESUMEN$
+        -RegistroMercanciaForm registro
+        -FiltrosMercanciaBar filtros
+        -MercanciaTableModel modelo
+        -TablaFiltrable~MercanciaTableModel, Mercancia~ tablaFiltrable
+        -JTable tabla
+        -JLabel estado
+        -Runnable alVerQr
+        -boolean cargado
+        +MercanciaPanel()
+        -construirTabla() JTable
+        -aplicarBusqueda() void
+        -actualizarResumen() void
+        +alRegistrar(Runnable accion) void
+        +alCambiarFiltros(Runnable accion) void
+        +alVerQr(Runnable accion) void
+        +mostrarProductos(List~Producto~ productos) void
+        +mostrarUnidades(List~Mercancia~ unidades, List~Producto~ productos) void
+        +actualizarUnidad(Mercancia unidad) void
+        +seleccionarUnidad(String numeroSerie) boolean
+        +seleccionada() Optional~Mercancia~
+        +nombreProducto(int idProducto) String
+        +productoParaRegistrar() Optional~Producto~
+        +serieCapturada() String
+        +limpiarSerie() void
+        +mostrarErrorSerie(String error) void
+        +filtroProductoSeleccionado() Integer
+        +filtroEstadoSeleccionado() EstadoMercancia
+        +mostrarQr(Mercancia unidad) void
+        +setEstado(String texto) void
+        +controles() Component[]
+    }
+    class MercanciaTableModel {
+        +int COL_SERIE$
+        +int COL_PRODUCTO$
+        +int COL_ESTADO$
+        +int COL_QR$
+        -String[] COLUMNAS$
+        -List~Mercancia~ filas
+        -Map~Integer, String~ nombresProducto
+        +setFilas(List~Mercancia~ unidades, Map~Integer, String~ nombres) void
+        +actualizar(Mercancia unidad) void
+        +getFila(int fila) Mercancia
+        +indiceDe(String numeroSerie) int
+        +nombreProducto(int idProducto) String
+        +texto(EstadoMercancia estado)$ String
+        +getRowCount() int
+        +getColumnCount() int
+        +getColumnName(int columna) String
+        +getValueAt(int fila, int columna) Object
+    }
+    class ProductoDialog {
+        -Pattern MILES_CON_COMA$
+        ~String PRECIO_ILEGIBLE$
+        -int idProducto
+        -JTextField nombre
+        -JTextArea descripcion
+        -JTextField precio
+        -JLabel errorNombre
+        -JLabel errorPrecio
+        -JButton guardar
+        -JButton cancelar
+        -Consumer~Producto~ alGuardar
+        +ProductoDialog(Window propietario, Producto inicial)
+        -construirCampos() JPanel
+        -agregarFila(JPanel panel, GridBagConstraints c, int fila, String titulo, Component campo, JLabel error)$ void
+        -construirBotones() JPanel
+        -intentarGuardar() void
+        -cerrarSiSePuede() void
+        ~parsearPrecio(String texto)$ BigDecimal
+        -marcar(JTextComponent campo, JLabel etiqueta, String error)$ void
+        -limpiarErrorAlEscribir(JTextComponent campo, JLabel etiqueta)$ void
+        -etiquetaError()$ JLabel
+        +alGuardar(Consumer~Producto~ accion) void
+        +controles() Component[]
+    }
+    class ProductosPanel {
+        -NumberFormat MONEDA$
+        -ProductosTableModel modelo
+        -JTable tabla
+        -TableRowSorter~ProductosTableModel~ ordenador
+        -JTextField busqueda
+        -JButton nuevo
+        -JButton editar
+        -JButton actualizar
+        -JLabel estado
+        -Consumer~ProductoConUnidades~ alEditar
+        -boolean cargado
+        +ProductosPanel()
+        -construirBarra() JPanel
+        -construirTabla() JTable
+        -aplicarFiltro() void
+        -actualizarResumen() void
+        +alNuevo(Runnable accion) void
+        +alEditar(Consumer~ProductoConUnidades~ accion) void
+        +alActualizar(Runnable accion) void
+        +mostrarProductos(List~ProductoConUnidades~ productos) void
+        +seleccionarProducto(int idProducto) void
+        +seleccionado() Optional~ProductoConUnidades~
+        +setEstado(String texto) void
+        +controles() Component[]
+        ~getModelo() ProductosTableModel
+        ~getTabla() JTable
+        ~getBusqueda() JTextField
+    }
+    class ProductosTableModel {
+        +int COL_NOMBRE$
+        +int COL_DESCRIPCION$
+        +int COL_PRECIO$
+        +int COL_UNIDADES$
+        -String[] COLUMNAS$
+        -Class~?~[] TIPOS$
+        -List~ProductoConUnidades~ filas
+        +setFilas(List~ProductoConUnidades~ nuevas) void
+        +getFila(int fila) ProductoConUnidades
+        +indiceDe(int idProducto) int
+        +getRowCount() int
+        +getColumnCount() int
+        +getColumnName(int columna) String
+        +getColumnClass(int columna) Class~?~
+        +getValueAt(int fila, int columna) Object
+    }
+    class RegistroMercanciaForm {
+        ~String SIN_PRODUCTOS$
+        -JComboBox~Producto~ producto
+        -JTextField serie
+        -JButton registrar
+        -JLabel error
+        -Runnable alRegistrar
+        -boolean cargado
+        -boolean hayProductos
+        ~RegistroMercanciaForm()
+        -construir() void
+        -actualizarHabilitado() void
+        ~alRegistrar(Runnable accion) void
+        ~mostrarProductos(List~Producto~ productos) void
+        ~productoElegido() Optional~Producto~
+        ~serieCapturada() String
+        ~limpiarSerie() void
+        ~mostrarError(String texto) void
+        ~controles() Component[]
+    }
+    class VentaHistorialPanel {
+        ~String TODAS$
+        ~String TODOS$
+        -String FECHA_INVALIDA$
+        -ResumenTabla RESUMEN$
+        -VentaHistorialTableModel modelo
+        -TablaFiltrable~VentaHistorialTableModel, VentaHistorial~ tablaFiltrable
+        -JTable tabla
+        -JTextField serie
+        -JComboBox~String~ tienda
+        -JComboBox~String~ producto
+        -JTextField desde
+        -JTextField hasta
+        -JButton actualizar
+        -JButton abrirQr
+        -JLabel estado
+        -Runnable alActualizar
+        -Runnable alAbrirQr
+        -boolean ajustandoCombos
+        +VentaHistorialPanel()
+        -construirControles() void
+        -aplicarFiltros() void
+        -actualizarResumen(boolean fechaInvalida) void
+        -elegido(JComboBox~String~ combo)$ String
+        -rellenar(JComboBox~String~ combo, String opcionTodos, List~VentaHistorial~ ventas, Function~VentaHistorial, String~ valor) void
+        +mostrarVentas(List~VentaHistorial~ ventas) void
+        +seleccionada() Optional~VentaHistorial~
+        +setEstado(String texto) void
+        +alActualizar(Runnable accion) void
+        +alAbrirQr(Runnable accion) void
+        +controles() Componentes
+    }
+    class Componentes["VentaHistorialPanel.Componentes"] {
+        <<record>>
+        -JButton actualizar
+        -JButton abrirQr
+        -JTable tabla
+    }
+    class VentaHistorialTableModel {
+        -DateTimeFormatter FORMATO$
+        +int COL_ID$
+        +int COL_SERIE$
+        +int COL_PRODUCTO$
+        +int COL_TIENDA$
+        +int COL_USUARIO$
+        +int COL_FECHA$
+        -String[] COLUMNAS$
+        -List~VentaHistorial~ filas
+        +setFilas(List~VentaHistorial~ ventas) void
+        +getFila(int fila) VentaHistorial
+        +getRowCount() int
+        +getColumnCount() int
+        +getColumnName(int columna) String
+        +getValueAt(int fila, int columna) Object
+    }
+    class VentaPanel {
+        -ResumenTabla RESUMEN$
+        -VentaTableModel modelo
+        -TablaFiltrable~VentaTableModel, Mercancia~ tablaFiltrable
+        -JTable tabla
+        -JTextField busqueda
+        -JComboBox~TiendaAlmacen~ tienda
+        -JComboBox~Usuario~ usuario
+        -JButton actualizar
+        -JButton vender
+        -JLabel estado
+        -Runnable alActualizar
+        -Runnable alVender
+        +VentaPanel()
+        -nombrarComponentes() void
+        -construirFormulario() JPanel
+        -construirTabla() JTable
+        -aplicarBusqueda() void
+        -actualizarResumen() void
+        -actualizarDisponibilidad() void
+        +alActualizar(Runnable accion) void
+        +alVender(Runnable accion) void
+        +mostrarMercancias(List~Mercancia~ mercancias, Map~Integer, String~ nombresProducto) void
+        +mostrarTiendas(List~TiendaAlmacen~ tiendas) void
+        +mostrarUsuarios(List~Usuario~ usuarios) void
+        +seleccionada() Optional~Mercancia~
+        +seleccionarMercancia(String numeroSerie) boolean
+        +tiendaSeleccionada() Optional~TiendaAlmacen~
+        +nombreProducto(int idProducto) String
+        +usuarioSeleccionado() Optional~Usuario~
+        +setEstado(String texto) void
+        +controles() Component[]
+        -textoDe(Object valor)$ Object
+    }
+    class VentaTableModel {
+        +int COL_SERIE$
+        +int COL_PRODUCTO$
+        +int COL_ESTADO$
+        -String[] COLUMNAS$
+        -List~Mercancia~ filas
+        -Map~Integer, String~ nombresProducto
+        +setFilas(List~Mercancia~ mercancias, Map~Integer, String~ nombres) void
+        +getFila(int fila) Mercancia
+        +indiceDe(String numeroSerie) int
+        +nombreProducto(int idProducto) String
+        +textoEstado(EstadoMercancia estado)$ String
+        +getRowCount() int
+        +getColumnCount() int
+        +getColumnName(int columna) String
+        +getValueAt(int fila, int columna) Object
+    }
+    class VentanaPrincipal {
+        -JTabbedPane pestanas
+        +VentanaPrincipal()
+        +setPestana(String titulo, JComponent contenido) void
+        -marcador(String texto)$ JComponent
+    }
+    class QrExportador {
+        +String GUARDADO$
+        +String NO_GUARDADO$
+        -QrExportador()
+        +guardar(Path origen, Path destino)$ Optional~Resultado~
+    }
+    class Resultado["QrExportador.Resultado"] {
+        <<record>>
+        -boolean guardado
+        -String mensaje
+    }
+    class QrPreviewDialog {
+        -int IMAGE_SIZE$
+        -String rutaQr
+        +QrPreviewDialog(Window owner, String numeroSerie, int idProducto, String nombreProducto, String rutaQr)
+        -construirVista(String numeroSerie, int idProducto, String nombreProducto) void
+        -cargarImagen() ImageIcon
+        -guardarComo() void
+        -escaparHtml(String valor) String
+    }
+    class QrVista {
+        -QrVista()
+        +mostrar(Component origen, Mercancia unidad, String nombreProducto)$ void
+    }
+    class Combos {
+        -Combos()
+        +rellenarConservando(JComboBox~T~ combo, List~? extends T~ elementos, Function~? super T, ?~ clave)$ void
+        +seleccionarOPrimero(JComboBox~T~ combo, Predicate~? super T~ criterio)$ void
+        +renderTexto(Function~Object, Object~ texto)$ ListCellRenderer~Object~
+    }
+    class RenderTexto["Combos.RenderTexto"] {
+        -Function~Object, Object~ texto
+        ~RenderTexto(Function~Object, Object~ texto)
+        +getListCellRendererComponent(JList~?~ lista, Object valor, int indice, boolean seleccionado, boolean foco) Component
+    }
+    class Documentos {
+        -Documentos()
+        +alCambiar(Runnable accion)$ DocumentListener
+    }
+    class ResumenTabla {
+        <<record>>
+        -String sinFilas
+        -String sinCoincidencias
+        -String parcial
+        -String una
+        -String varias
+        +ResumenTabla(String sinFilas, String sinCoincidencias, String parcial, String una, String varias)
+        +texto(int total, int visibles, String busqueda) String
+    }
+    class TablaFiltrable~M,F~ {
+        +int ALTO_FILA$
+        -M modelo
+        -IntFunction~F~ filaDelModelo
+        -JTable tabla
+        -TableRowSorter~M~ ordenador
+        +TablaFiltrable(M modelo, IntFunction~F~ filaDelModelo)
+        +tabla() JTable
+        +ordenarPor(int columna) TablaFiltrable~M, F~
+        +seleccionada() Optional~F~
+        +seleccionarFilaDelModelo(int indice) boolean
+        +alSeleccionar(Runnable accion) void
+        +alDobleClic(Runnable accion) void
+        +filtrarPorTexto(int columna, String texto) void
+        +filtrar(Predicate~? super F~ criterio) void
+        +totalFilas() int
+        +filasVisibles() int
+    }
+
+    MercanciaPanel "1" *-- "1" RegistroMercanciaForm : registro
+    MercanciaPanel "1" *-- "1" FiltrosMercanciaBar : filtros
+    MercanciaPanel "1" *-- "1" MercanciaTableModel : modelo
+    MercanciaPanel "1" *-- "1" TablaFiltrable : tablaFiltrable
+    MercanciaPanel "1" *-- "1" ResumenTabla : RESUMEN
+    ProductosPanel "1" *-- "1" ProductosTableModel : modelo
+    VentaHistorialPanel "1" *-- "1" VentaHistorialTableModel : modelo
+    VentaHistorialPanel "1" *-- "1" TablaFiltrable : tablaFiltrable
+    VentaHistorialPanel "1" *-- "1" ResumenTabla : RESUMEN
+    VentaPanel "1" *-- "1" VentaTableModel : modelo
+    VentaPanel "1" *-- "1" TablaFiltrable : tablaFiltrable
+    VentaPanel "1" *-- "1" ResumenTabla : RESUMEN
+    ProductosPanel ..> FiltroTexto : usa
+    CriteriosHistorialVentas ..> FiltroTexto : usa
+    TablaFiltrable ..> FiltroTexto : usa
+    VentaHistorialPanel "1" ..> "0..*" CriteriosHistorialVentas : crea
+    RegistroMercanciaForm ..> Combos : usa
+    FiltrosMercanciaBar ..> Combos : usa
+    VentaPanel ..> Combos : usa
+    VentaHistorialPanel ..> Combos : usa
+    RegistroMercanciaForm ..> Documentos : usa
+    FiltrosMercanciaBar ..> Documentos : usa
+    VentaPanel ..> Documentos : usa
+    VentaHistorialPanel ..> Documentos : usa
+    MercanciaPanel ..> QrVista : usa
+    QrVista "1" ..> "0..1" QrPreviewDialog : crea
+    QrVista ..> Mensajes : usa
+    QrPreviewDialog ..> QrExportador : usa
+    QrExportador "1" ..> "1" Resultado : devuelve
+    Combos "1" ..> "0..*" RenderTexto : crea
+    VentaHistorialPanel -- Componentes : clase interna

@@ -1,0 +1,68 @@
+classDiagram 
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente util
+    %% Paquete: mx.uady.inventario.central.util
+
+    class ConexionBD {
+        -ConexionBD()
+        +abrir()$ Connection
+        +abrir(ConfiguracionBD configuracion)$ Connection
+    }
+    class ConfiguracionBD {
+        <<record>>
+        -String host
+        -int puerto
+        -String nombre
+        -String usuario
+        -String contrasena
+        +String VAR_HOST$
+        +String VAR_PUERTO$
+        +String VAR_NOMBRE$
+        +String VAR_USUARIO$
+        +String VAR_CONTRASENA$
+        -String HOST_POR_DEFECTO$
+        -String PUERTO_POR_DEFECTO$
+        -String NOMBRE_POR_DEFECTO$
+        +ConfiguracionBD(String host, int puerto, String nombre, String usuario, String contrasena)
+        +desdeEntorno()$ ConfiguracionBD
+        +desdeMapa(Map~String, String~ variables)$ ConfiguracionBD
+        +url() String
+        ~valor.trim() return
+    }
+    class ConfiguracionServicio {
+        <<record>>
+        -int puertoServicio
+        -String hostServicio
+        -int tamanoPool
+        -String hostBroker
+        -int puertoBroker
+        -int intentosRegistro
+        -long esperaReintentoMillis
+        +String VAR_PUERTO_SERVICIO$
+        +String VAR_HOST_SERVICIO$
+        +String VAR_TAMANO_POOL$
+        +String VAR_HOST_BROKER$
+        +String VAR_PUERTO_BROKER$
+        +String VAR_INTENTOS_REGISTRO$
+        +String VAR_ESPERA_REINTENTO$
+        -String HOST_POR_DEFECTO$
+        -String PUERTO_SERVICIO_POR_DEFECTO$
+        -String TAMANO_POOL_POR_DEFECTO$
+        -String PUERTO_BROKER_POR_DEFECTO$
+        -String INTENTOS_REGISTRO_POR_DEFECTO$
+        -String ESPERA_REINTENTO_POR_DEFECTO$
+        +ConfiguracionServicio(int puertoServicio, String hostServicio, int tamanoPool, String hostBroker, int puertoBroker, int intentosRegistro, long esperaReintentoMillis)
+        +desdeEntorno()$ ConfiguracionServicio
+        +desdeMapa(Map~String, String~ variables)$ ConfiguracionServicio
+        -validarPuerto(int puerto, String variable)$ void
+        -valorODefecto(String valor, String defecto)$ String
+        -requerirTexto(String valor, String campo)$ String
+        -parseEntero(String valor, String variable)$ int
+        -parseLargo(String valor, String variable)$ long
+    }
+    class QrUtil {
+        -QrUtil()
+        +escribirPng(String contenido, Path destino, int ancho, int alto)$ void
+    }
+
+    ConexionBD ..> ConfiguracionBD : usa

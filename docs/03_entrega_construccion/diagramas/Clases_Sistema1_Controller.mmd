@@ -1,0 +1,166 @@
+classDiagram 
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente controller
+    %% Paquete: mx.uady.inventario.central.controller
+
+    class AppContext {
+        <<record>>
+        -ProductoService productoService
+        -MercanciaService mercanciaService
+        -VentaService ventaService
+        -ConsultasVentaService consultasVenta
+        +String VAR_DIRECTORIO_QR$
+        +String DIRECTORIO_QR_POR_DEFECTO$
+        +AppContext(ProductoService productoService, MercanciaService mercanciaService, VentaService ventaService, ConsultasVentaService consultasVenta)
+        +jdbc(ConfiguracionBD configuracion, Path directorioQr)$ AppContext
+        +directorioQr(Map~String, String~ entorno)$ Path
+    }
+    class MercanciaController {
+        -MercanciaService mercancia
+        -ProductoService productos
+        -MercanciaPanel vista
+        -Runnable alCambiarUnidades
+        -boolean cargando
+        -boolean recargaPendiente
+        -String serieASeleccionar
+        -String avisoTrasCargar
+        +MercanciaController(MercanciaService mercancia, ProductoService productos, MercanciaPanel vista)
+        +setAlCambiarUnidades(Runnable accion) void
+        +cargar() void
+        -seleccionarYAvisar() void
+        -terminarCarga() void
+        -registrar() void
+        -verQr() void
+    }
+    class MercanciaController_Datos["MercanciaController.Datos"] {
+        <<record>>
+        -List~Producto~ productos
+        -List~Mercancia~ unidades
+    }
+    class ProductoController {
+        -ProductoService servicio
+        -ProductosPanel vista
+        -Runnable alCambiarProductos
+        -boolean cargando
+        -boolean recargaPendiente
+        -Integer idASeleccionar
+        +ProductoController(ProductoService servicio, ProductosPanel vista)
+        +setAlCambiarProductos(Runnable accion) void
+        +cargar() void
+        -cargar(Integer idASeleccionar) void
+        -terminarCarga() void
+        -abrirFormulario(Producto inicial) void
+        -guardar(ProductoDialog dialogo, Producto producto) void
+    }
+    class TareaAsync~T~ {
+        -Callable~T~ operacion
+        -List~Component~ bloqueados
+        -Consumer~? super T~ alExito
+        -Consumer~Throwable~ alError
+        -TareaAsync(Callable~T~ operacion)
+        +de(Callable~T~ operacion)$ TareaAsync~T~
+        +deAccion(Accion accion)$ TareaAsync~Void~
+        +bloqueando(Component... componentes) TareaAsync~T~
+        +alTerminar(Consumer~? super T~ callback) TareaAsync~T~
+        +alFallar(Consumer~Throwable~ callback) TareaAsync~T~
+        +ejecutar(Component origen) SwingWorker~T, Void~
+        -notificarError(Component origen, Throwable error) void
+    }
+    class Accion["TareaAsync.Accion"] {
+        <<interface>>
+        +ejecutar()* void
+    }
+    class UiLauncher {
+        -UiLauncher()
+        +iniciar(AppContext contexto)$ boolean
+        ~abrirVentana(AppContext contexto)$ VentanaPrincipal
+        -nombresProducto(AppContext contexto)$ Map~Integer, String~
+    }
+    class VentaController {
+        -DateTimeFormatter FECHA$
+        -MercanciasCargador cargarMercancias
+        -CatalogosCargador cargarCatalogos
+        -VentaService ventaService
+        -VentaPanel vista
+        -Predicate~String~ confirmar
+        -Runnable alRegistrarVenta
+        -boolean cargando
+        -boolean recargaPendiente
+        -String avisoTrasCargar
+        +VentaController(MercanciasCargador cargarMercancias, CatalogosCargador cargarCatalogos, VentaService ventaService, VentaPanel vista)
+        +setConfirmar(Predicate~String~ confirmar) void
+        +setAlRegistrarVenta(Runnable accion) void
+        +cargar() void
+        -vender() void
+        -registrar(JsonObject parametros) JsonObject
+        -fecha(JsonObject resultado)$ String
+        -terminarCarga() void
+    }
+    class VentaController_Datos["VentaController.Datos"] {
+        <<record>>
+        -DatosMercancias mercancias
+        -Catalogos catalogos
+    }
+    class DatosMercancias["VentaController.DatosMercancias"] {
+        <<record>>
+        -List~Mercancia~ mercancias
+        -Map~Integer, String~ nombresProducto
+        +DatosMercancias(List~Mercancia~ mercancias, Map~Integer, String~ nombresProducto)
+    }
+    class Catalogos["VentaController.Catalogos"] {
+        <<record>>
+        -List~TiendaAlmacen~ tiendas
+        -List~Usuario~ usuarios
+        +Catalogos(List~TiendaAlmacen~ tiendas, List~Usuario~ usuarios)
+    }
+    class MercanciasCargador["VentaController.MercanciasCargador"] {
+        <<interface>>
+        +cargar()* DatosMercancias
+    }
+    class CatalogosCargador["VentaController.CatalogosCargador"] {
+        <<interface>>
+        +cargar()* Catalogos
+    }
+    class VentaHistorialController {
+        -VentasCargador cargarVentas
+        -VentaHistorialPanel vista
+        -QrAsegurador asegurarQr
+        -BiConsumer~VentaHistorial, Mercancia~ mostrarQr
+        -boolean cargando
+        -boolean recargaPendiente
+        +VentaHistorialController(VentasCargador cargarVentas, VentaHistorialPanel vista, QrAsegurador asegurarQr, BiConsumer~VentaHistorial, Mercancia~ mostrarQr)
+        +cargar() void
+        -abrirQr() void
+        -terminarCarga() void
+    }
+    class VentasCargador["VentaHistorialController.VentasCargador"] {
+        <<interface>>
+        +cargar()* List~VentaHistorial~
+    }
+    class QrAsegurador["VentaHistorialController.QrAsegurador"] {
+        <<interface>>
+        +asegurar(String numeroSerie)* Mercancia
+    }
+
+    VentaController "1" --> "1" MercanciasCargador : cargarMercancias
+    VentaController "1" --> "1" CatalogosCargador : cargarCatalogos
+    VentaController_Datos "1" --> "1" DatosMercancias : mercancias
+    VentaController_Datos "1" --> "1" Catalogos : catalogos
+    VentaHistorialController "1" --> "1" VentasCargador : cargarVentas
+    VentaHistorialController "1" --> "1" QrAsegurador : asegurarQr
+    UiLauncher ..> AppContext : usa
+    UiLauncher "1" ..> "1" ProductoController : crea
+    UiLauncher "1" ..> "1" MercanciaController : crea
+    UiLauncher "1" ..> "1" VentaController : crea
+    UiLauncher "1" ..> "1" VentaHistorialController : crea
+    ProductoController "1" ..> "0..*" TareaAsync : lanza
+    MercanciaController "1" ..> "0..*" TareaAsync : lanza
+    VentaController "1" ..> "0..*" TareaAsync : lanza
+    VentaHistorialController "1" ..> "0..*" TareaAsync : lanza
+    TareaAsync ..> Accion : adapta
+    MercanciasCargador "1" ..> "1" DatosMercancias : devuelve
+    CatalogosCargador "1" ..> "1" Catalogos : devuelve
+    MercanciaController -- MercanciaController_Datos : clase interna
+    VentaController -- VentaController_Datos : clase interna
+    VentaController -- DatosMercancias : clase interna
+    VentaController -- Catalogos : clase interna

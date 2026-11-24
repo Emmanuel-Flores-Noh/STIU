@@ -1,0 +1,145 @@
+classDiagram 
+    direction TB
+    %% Diagrama de clases - Sistema 1, componente network
+    %% Paquete: mx.uady.inventario.central.network
+
+    class ActualizarTiendaVentaManejador {
+        -VentaService ventas
+        ~ActualizarTiendaVentaManejador(VentaService ventas)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class CatalogoOperaciones {
+        -CatalogoOperaciones()
+        ~crear(VentaService ventaService, ConsultasVentaService consultasVenta, MercanciaService mercanciaService, ProductoService productoService, QrService qrService)$ DespachadorSolicitudes
+    }
+    class DespachadorSolicitudes {
+        -ManejadorOperacion PENDIENTE$
+        -Map‹String, Map‹String, ManejadorOperacion›› operaciones
+        +DespachadorSolicitudes()
+        +estandar()$ DespachadorSolicitudes
+        +estandar(VentaService ventaService)$ DespachadorSolicitudes
+        +estandar(VentaService ventaService, ConsultasVentaService consultasVenta, MercanciaService mercanciaService, ProductoService productoService, QrService qrService)$ DespachadorSolicitudes
+        +registrarServicio(String servicio, String... nombresOperacion) void
+        +registrarOperacion(String servicio, String operacion, ManejadorOperacion manejador) void
+        +conoceServicio(String servicio) boolean
+        +conoceOperacion(String servicio, String operacion) boolean
+        +despachar(Solicitud solicitud) Respuesta
+        -validarNombre(String valor)$ String
+    }
+    class JsonServicio {
+        -JsonServicio()
+        +deserializarSolicitud(String json)$ Solicitud
+        +serializarRespuesta(Respuesta respuesta)$ String
+    }
+    class ListarInventarioManejador {
+        -MercanciaService mercancia
+        -ProductoService productos
+        ~ListarInventarioManejador(MercanciaService mercancia, ProductoService productos)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class ListarPreciosProductoManejador {
+        -ProductoService productos
+        ~ListarPreciosProductoManejador(ProductoService productos)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class ListarTiendasManejador {
+        -ConsultasVentaService consultas
+        ~ListarTiendasManejador(ConsultasVentaService consultas)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class ListarUsuariosManejador {
+        -ConsultasVentaService consultas
+        ~ListarUsuariosManejador(ConsultasVentaService consultas)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class ManejadorConexionServicio {
+        -Socket socket
+        -DespachadorSolicitudes despachador
+        -int timeoutMillis
+        +ManejadorConexionServicio(Socket socket, DespachadorSolicitudes despachador, int timeoutMillis)
+        +run() void
+        -procesarSolicitud(String linea) Respuesta
+    }
+    class ManejadorOperacion {
+        <<interface>>
+        +ejecutar(JsonObject parametros)* JsonElement
+    }
+    class NombresProducto {
+        ~String DESCONOCIDO$
+        -NombresProducto()
+        ~porId(ProductoService productos)$ Map~Integer, String~
+    }
+    class ObtenerQrManejador {
+        -MercanciaService mercancia
+        -ProductoService productos
+        -QrService qr
+        ~ObtenerQrManejador(MercanciaService mercancia, ProductoService productos, QrService qr)
+        +ejecutar(JsonObject parametros) JsonElement
+    }
+    class ParametrosSolicitud {
+        -ParametrosSolicitud()
+        ~textoObligatorio(JsonObject parametros, String nombre)$ String
+        ~enteroPositivo(JsonObject parametros, String nombre)$ int
+        -leer(JsonObject parametros, String nombre, Function~JsonElement, T~ conversion)$ T
+    }
+    class RegistradorBroker {
+        -int TIMEOUT_CONEXION_MILLIS$
+        -String hostBroker
+        -int puertoBroker
+        -String hostServicio
+        -int puertoServicio
+        -List~String~ servicios
+        -int maxIntentos
+        -long esperaReintentoMillis
+        +RegistradorBroker(ConfiguracionServicio configuracion, List~String~ servicios)
+        +RegistradorBroker(String hostBroker, int puertoBroker, String hostServicio, int puertoServicio, List~String~ servicios, int maxIntentos, long esperaReintentoMillis)
+        +registrarUnaVez() boolean
+        +registrarConReintentos() boolean
+        +iniciarEnSegundoPlano() Thread
+        -registrar(String servicio) boolean
+        -crearSolicitudRegistro(String servicio) Solicitud
+        -esperar() boolean
+        +serviciosDelSistema()$ List~String~
+    }
+    class ServidorServicio {
+        -int TIMEOUT_POR_DEFECTO_MILLIS$
+        -int puerto
+        -int tamanoPool
+        -int timeoutMillis
+        -DespachadorSolicitudes despachador
+        -ExecutorService pool
+        -boolean activo
+        -ServerSocket serverSocket
+        -Thread hiloAceptor
+        +ServidorServicio(int puerto, int tamanoPool, DespachadorSolicitudes despachador)
+        +ServidorServicio(int puerto, int tamanoPool, int timeoutMillis, DespachadorSolicitudes despachador)
+        +iniciar() void
+        -aceptarConexiones() void
+        +detener() void
+        +getPuerto() int
+        +isActivo() boolean
+        +getTamanoPool() int
+    }
+
+    ManejadorOperacion <|.. ActualizarTiendaVentaManejador
+    DespachadorSolicitudes "1" --> "0..*" ManejadorOperacion : operaciones
+    ManejadorOperacion <|.. ListarInventarioManejador
+    ManejadorOperacion <|.. ListarPreciosProductoManejador
+    ManejadorOperacion <|.. ListarTiendasManejador
+    ManejadorOperacion <|.. ListarUsuariosManejador
+    ManejadorConexionServicio "0..*" --> "1" DespachadorSolicitudes : despachador
+    ManejadorOperacion <|.. ObtenerQrManejador
+    ServidorServicio "1" --> "1" DespachadorSolicitudes : despachador
+    ServidorServicio "1" ..> "0..*" ManejadorConexionServicio : crea por conexión
+    ManejadorConexionServicio ..> JsonServicio : usa
+    DespachadorSolicitudes ..> CatalogoOperaciones : usa
+    CatalogoOperaciones "1" ..> "0..1" ActualizarTiendaVentaManejador : crea
+    CatalogoOperaciones "1" ..> "0..1" ListarTiendasManejador : crea
+    CatalogoOperaciones "1" ..> "0..1" ListarUsuariosManejador : crea
+    CatalogoOperaciones "1" ..> "0..1" ListarInventarioManejador : crea
+    CatalogoOperaciones "1" ..> "0..1" ObtenerQrManejador : crea
+    CatalogoOperaciones "1" ..> "0..1" ListarPreciosProductoManejador : crea
+    ListarInventarioManejador ..> NombresProducto : usa
+    ObtenerQrManejador ..> NombresProducto : usa
+    ObtenerQrManejador ..> ParametrosSolicitud : usa
+    ListarPreciosProductoManejador ..> ParametrosSolicitud : usa
