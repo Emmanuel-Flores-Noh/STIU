@@ -7,6 +7,8 @@ import mx.uady.inventario.common.contrato.Respuesta;
 import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -20,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BrokerServerTest {
 
     @Test
+    @Tag("RF-47")
+    @DisplayName("RF-47 · El broker inicia y responde PARAMETROS_INVALIDOS a un JSON malformado")
     void iniciaYRespondeJsonMalformado() throws Exception {
         BrokerServer broker = new BrokerServer(0, 4);
         broker.iniciar();
@@ -38,6 +42,10 @@ class BrokerServerTest {
     }
 
     @Test
+    @Tag("RF-41")
+    @Tag("RF-45")
+    @Tag("RF-46")
+    @DisplayName("RF-41, RF-45, RF-46 · Registra un proveedor y enruta una solicitud por la misma conexión")
     void registraProveedorYEnruta() throws Exception {
         // proveedor falso
         java.net.ServerSocket provider = new java.net.ServerSocket(0);
@@ -93,6 +101,9 @@ class BrokerServerTest {
     }
 
     @Test
+    @Tag("RF-52")
+    @Tag("RNF-13")
+    @DisplayName("RF-52, RNF-13 · Usa la configuración de resiliencia recibida para marcar al proveedor no disponible")
     void usaLaConfiguracionDeResilienciaRecibida() throws Exception {
         ConfiguracionBroker configuracion = new ConfiguracionBroker(0, 2, 300, 400, 1, 5, 1, 60_000);
         BrokerServer broker = new BrokerServer(configuracion);
@@ -126,6 +137,10 @@ class BrokerServerTest {
      * (con su proveedor y resultado) y las solicitudes a servicios desconocidos.
      */
     @Test
+    @Tag("RF-54")
+    @Tag("RF-55")
+    @Tag("RF-56")
+    @DisplayName("RF-54, RF-55, RF-56 · La bitácora anota el registro, cada solicitud con su hilo del pool y los errores")
     void laBitacoraAnotaRegistroSolicitudesYErrores() throws Exception {
         java.net.ServerSocket provider = new java.net.ServerSocket(0);
         int providerPort = provider.getLocalPort();
@@ -185,6 +200,9 @@ class BrokerServerTest {
     }
 
     @Test
+    @Tag("RF-48")
+    @Tag("RF-53")
+    @DisplayName("RF-48, RF-53 · Un servicio desconocido responde SERVICIO_DESCONOCIDO sin tumbar el servidor")
     void servicioDesconocidoNoTumbaServidor() throws Exception {
         BrokerServer broker = new BrokerServer(0, 4);
         broker.iniciar();
