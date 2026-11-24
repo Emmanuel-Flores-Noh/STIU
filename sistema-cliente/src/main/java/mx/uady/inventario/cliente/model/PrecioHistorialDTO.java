@@ -7,16 +7,7 @@ import java.util.List;
 
 /**
  * Resultado de {@code listarPreciosProducto}: nombre, precio actual y precios anteriores del más
- * antiguo al más reciente, tal como los envía el Sistema 1 ({@code {idProducto, nombre, precioActual,
- * historial}}).
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-36:</b> Consulta del historial de precios del producto de la unidad seleccionada.
- *   Si el producto nunca ha cambiado de precio, el historial se presenta como una lista vacía
- *   junto con el precio actual.</li>
- * </ul>
- * </p>
+ * antiguo al más reciente, tal como los envía el Sistema 1 ({@code {idProducto, nombre, precioActual, historial}}).
  */
 
 public class PrecioHistorialDTO {

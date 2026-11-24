@@ -10,14 +10,6 @@ import java.util.logging.Logger;
  * Decide cómo se informa un error al encargado: un mensaje simple si reintentar no sirve, o la
  * pregunta «¿Desea reintentar la operación?» si el fallo fue de red o del servidor. Nunca reintenta
  * por su cuenta.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-33:</b> Presentación de rechazos de venta sin ofrecer reintentar.</li>
- *   <li><b>RF-37:</b> Presentación de cada error de servidor o de red con su causa.</li>
- *   <li><b>RF-38:</b> Ofrecimiento interactivo de reintento sin reintentar automáticamente.</li>
- * </ul>
- * </p>
  */
 public class PresentadorErrores {
 

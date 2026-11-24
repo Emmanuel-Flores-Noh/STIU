@@ -24,30 +24,9 @@ import java.util.concurrent.Future;
  * Operaciones del Sistema 1 que necesita el Sistema 2, expuestas con objetos de datos. Es la única
  * clase del cliente que conoce servicios, operaciones y nombres de parámetros del contrato; habla
  * exclusivamente con el Broker a través de {@link ClienteTCP}.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Carga asíncrona y paralela de tiendas, usuarios proveedores e inventario disponible.</li>
- *   <li><b>RF-26:</b> Consulta del inventario disponible en estado «En almacén» ({@code listarInventario}).</li>
- *   <li><b>RF-28:</b> Consulta de tiendas destino ({@code listarTiendas}).</li>
- *   <li><b>RF-29:</b> Consulta de usuarios con rol de proveedor ({@code listarUsuarios}).</li>
- *   <li><b>RF-32:</b> Registro de venta de la unidad seleccionada ({@code actualizarTiendaVenta}).</li>
- *   <li><b>RF-34:</b> Consulta de imagen PNG de código QR en Base64 ({@code obtenerQr}).</li>
- *   <li><b>RF-36:</b> Consulta del historial cronológico de precios de un producto ({@code listarPreciosProducto}).</li>
- *   <li><b>RF-39:</b> Comunicación exclusiva a través del Broker.</li>
- *   <li><b>RNF-06:</b> Rendimiento de carga concurrente de catálogos e inventario.</li>
- * </ul>
- * </p>
- *
  * <p>Todas las operaciones son bloqueantes: deben llamarse fuera del hilo de la interfaz.</p>
  */
 public class VentaService {
-
-    /**
-     * Operación del Sistema 1 que devuelve el historial de precios de un producto.
-     * Verificar contra {@code Operaciones} de {@code common} y reemplazar por su constante.
-     */
-    static final String OPERACION_HISTORIAL_PRECIOS = "obtenerHistorialPrecios";
 
     private final ClienteTCP cliente;
     private final ExecutorService hilos;
@@ -104,7 +83,7 @@ public class VentaService {
     }
 
     /**
-     * Consulta las unidades disponibles (solo las que están «En almacén»).
+     * Consulta las unidades disponibles (El sistema 1 envia solo los que esten en almacen).
      *
      * <p>Requisito: RF-26 (inventario de mercancía disponible).</p>
      * @return unidades disponibles; lista vacía si no hay
@@ -113,7 +92,7 @@ public class VentaService {
     public List<MercanciaDTO> listarInventarioDisponible() throws ComunicacionException {
         List<MercanciaDTO> unidades = consultarLista(Servicios.INVENTARIO, Operaciones.LISTAR_INVENTARIO,
                 new TypeToken<List<MercanciaDTO>>() { }.getType());
-        return unidades.stream().toList();
+        return unidades;
     }
 
     /**
@@ -188,7 +167,6 @@ public class VentaService {
         JsonObject params = new JsonObject();
         params.addProperty("id_producto", idProducto);
         JsonElement resultado = cliente.invocar(Servicios.GESTOR_PRECIOS, Operaciones.LISTAR_PRECIOS_PRODUCTO, params);
-        System.out.println("JSON historial precios (" + idProducto + "): " + gson.toJson(resultado));
         return convertirObjeto(resultado, PrecioHistorialDTO.class, "El servidor no devolvió el historial de precios.");
     }
 

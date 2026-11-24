@@ -9,14 +9,6 @@ import java.util.function.Consumer;
 /**
  * Ejecuta un trabajo bloqueante en segundo plano y entrega su resultado, o su error, en el hilo de
  * la interfaz. Permite probar los controladores con una implementación síncrona.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Ejecución de consultas de tiendas, usuarios e inventario en segundo plano.</li>
- *   <li><b>RF-30:</b> Actualización de catálogos e inventario sin bloquear la interfaz.</li>
- *   <li><b>RNF-06:</b> No congelamiento de la ventana durante operaciones de entrada y salida de red.</li>
- * </ul>
- * </p>
  */
 public interface EjecutorAsincrono {
 

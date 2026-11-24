@@ -13,12 +13,6 @@ import javax.swing.table.TableRowSorter;
 /**
  * Filtro en tiempo real del inventario sin distinguir mayúsculas ni acentos.
  *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-27:</b> Filtrado de inventario por número de serie o nombre de producto (búsqueda parcial insensible a mayúsculas y acentos, actualización en tiempo real).</li>
- *   <li><b>RNF-07:</b> Actualización fluida y eficiente por cada evento del teclado sobre el inventario.</li>
- * </ul>
- * </p>
  */
 public class MercanciaFiltro {
 

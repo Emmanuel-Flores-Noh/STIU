@@ -1,12 +1,11 @@
 package mx.uady.inventario.cliente;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import mx.uady.inventario.cliente.controller.EjecutorAsincrono;
 import mx.uady.inventario.cliente.controller.RegistroVentaController;
 import mx.uady.inventario.cliente.network.ClienteTCP;
 import mx.uady.inventario.cliente.network.ConfiguracionNetwork;
 import mx.uady.inventario.cliente.network.VentaService;
-import mx.uady.inventario.cliente.view.IntefazConfiguracion;
+import mx.uady.inventario.cliente.view.InterfazConfiguracion;
 import mx.uady.inventario.cliente.view.RegistroVentaFrame;
 
 import javax.swing.*;
@@ -16,14 +15,6 @@ import java.awt.*;
  * Punto de entrada del Sistema 2 (Cliente del Proveedor). Valida la configuración de red, arma los
  * objetos de la aplicación (cliente TCP, servicio, controlador y ventana) y abre la ventana.
  *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Carga inicial de listas e inventario al abrir la ventana.</li>
- *   <li><b>RF-39:</b> Comunicación exclusiva con el Broker mediante host y puerto configurados.</li>
- *   <li><b>RF-40:</b> Verificación y cumplimiento del tiempo de espera mínimo requerido ({@code CLIENT_TIMEOUT_MS}).</li>
- *   <li><b>RNF-05:</b> Alineación de timeouts entre el cliente y el peor caso del Broker.</li>
- * </ul>
- * </p>
  */
 public final class Main {
 
@@ -39,7 +30,7 @@ public final class Main {
     public static void main(String[] args) {
         ConfiguracionNetwork configuracion = leerConfiguracionOSalir();
         imprimirResumen(configuracion);
-        IntefazConfiguracion.aplicarConfiguracion();
+        InterfazConfiguracion.aplicarConfiguracion();
         SwingUtilities.invokeLater(() -> abrirVentana(configuracion));
     }
 

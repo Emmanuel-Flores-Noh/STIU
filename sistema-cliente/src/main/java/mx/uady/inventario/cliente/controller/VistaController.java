@@ -8,23 +8,6 @@ import java.util.List;
  * Contrato entre la pantalla de ventas (vista) y sus controladores.
  * Define los métodos necesarios para que los controladores actualicen componentes gráficos,
  * indicadores de estado, tablas, selectores y cuadros de diálogo sin acoplar la vista al transporte TCP ni al formato JSON.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Actualización de componentes al cargar catálogos e inventario disponible, y barra de estado («Cargando» / «Listo»).</li>
- *   <li><b>RF-26:</b> Actualización de la tabla de mercancía disponible ({@link #actualizarTablaMercancia(List)}).</li>
- *   <li><b>RF-28:</b> Actualización de la lista desplegable de tiendas destino.</li>
- *   <li><b>RF-29:</b> Actualización de la lista desplegable de usuarios proveedores.</li>
- *   <li><b>RF-31:</b> Habilitación/deshabilitación contextual y reseteo del formulario.</li>
- *   <li><b>RF-32:</b> Notificación de venta exitosa y limpieza del formulario ({@link #limpiarFormulario()}).</li>
- *   <li><b>RF-33:</b> Notificación de venta rechazada sin opción a reintento ({@link #mostrarMensajeError(String)}).</li>
- *   <li><b>RF-34:</b> Despliegue de la ventana modal con código QR ({@link #mostrarQr(QrDTO)}).</li>
- *   <li><b>RF-36:</b> Despliegue de la ventana modal con historial de precios ({@link #mostrarHistorialPrecios(PrecioHistorialDTO)}).</li>
- *   <li><b>RF-37:</b> Notificación de errores comprensibles en español.</li>
- *   <li><b>RF-38:</b> Despliegue del diálogo interactivo de reintento («¿Desea reintentar la operación?»).</li>
- *   <li><b>RNF-23:</b> Desacoplamiento arquitectónico de la vista respecto a la capa de red y serialización.</li>
- * </ul>
- * </p>
  */
 public interface VistaController {
 

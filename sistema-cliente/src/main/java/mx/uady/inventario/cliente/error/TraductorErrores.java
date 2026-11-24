@@ -10,16 +10,6 @@ import java.util.concurrent.ExecutionException;
  * Convierte errores técnicos (fallos de comunicación y códigos de error del contrato) en mensajes
  * que el encargado de ventas pueda entender, y decide si tiene sentido ofrecer reintentar.
  *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-33:</b> Informar rechazos de venta ({@code PARAMETROS_INVALIDOS}, {@code RECURSO_NO_ENCONTRADO}) sin ofrecer reintentar.</li>
- *   <li><b>RF-37:</b> Presentar cada error del catálogo o de red con un mensaje descriptivo comprensible.</li>
- *   <li><b>RF-38:</b> Ofrecer reintentar operaciones que fallaron por red o servidor transitorio sin reintentar automáticamente.</li>
- *   <li><b>RF-40:</b> Traducción y explicación del error {@code TIMEOUT} (E005) recibido del Broker.</li>
- *   <li><b>RNF-05:</b> Tiempos máximos de espera alineados con el Broker.</li>
- *   <li><b>RNF-33:</b> Mensajes en español sin exposición de trazas ni JSON crudo.</li>
- * </ul>
- * </p>
  */
 public final class TraductorErrores {
 

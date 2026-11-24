@@ -1,6 +1,7 @@
 package mx.uady.inventario.cliente.controller;
 
 
+import com.google.gson.JsonElement;
 import mx.uady.inventario.cliente.model.MercanciaDTO;
 import mx.uady.inventario.cliente.model.TiendaDTO;
 import mx.uady.inventario.cliente.model.UsuarioDTO;
@@ -9,8 +10,6 @@ import mx.uady.inventario.cliente.util.FormateadorTexto;
 import mx.uady.inventario.cliente.util.PantallaTipo;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import mx.uady.inventario.cliente.util.ConfiguracionNetwork;
-import mx.uady.inventario.cliente.util.TraductorErrores;
 import mx.uady.inventario.cliente.view.RegistroVentaFrame;
 import mx.uady.inventario.common.contrato.EstadoRespuesta;
 import mx.uady.inventario.common.contrato.Respuesta;
@@ -31,23 +30,6 @@ import java.util.UUID;
 /**
  * Controlador encargado de coordinar la lógica de negocio para el registro de ventas
  * y la comunicación asíncrona con el Broker de servicios.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Carga en segundo plano de listas de tiendas, usuarios proveedores e inventario disponible al iniciar la vista.</li>
- *   <li><b>RF-26:</b> Actualización de la tabla con unidades disponibles en almacén.</li>
- *   <li><b>RF-28:</b> Poblado del selector de tiendas destino.</li>
- *   <li><b>RF-29:</b> Poblado del selector de encargados de venta (usuarios proveedores).</li>
- *   <li><b>RF-30:</b> Recarga manual de catálogos e inventario con indicador visual de carga.</li>
- *   <li><b>RF-31:</b> Habilitación y validación estricta de que exista unidad, tienda y usuario antes de permitir la venta.</li>
- *   <li><b>RF-32:</b> Registro de la venta con actualización de vista, limpieza de campos y recarga de listas.</li>
- *   <li><b>RF-33:</b> Notificación clara cuando el servidor rechaza la venta sin reintento automático.</li>
- *   <li><b>RF-34:</b> Delegación de la consulta del código QR de la unidad seleccionada.</li>
- *   <li><b>RF-36:</b> Delegación de la consulta del historial de precios del producto.</li>
- *   <li><b>RF-37:</b> Presentación individualizada y entendible de fallos de red o servidor.</li>
- *   <li><b>RF-38:</b> Opción de reintento controlado sin retransmisión automática espontánea.</li>
- * </ul>
- * </p>
  */
 public class RegistroVentaController implements VentaOperaciones {
     private final VistaController vista;
@@ -160,23 +142,5 @@ public class RegistroVentaController implements VentaOperaciones {
                 + "\nFecha: " + FormateadorTexto.fecha(fechaVenta));
         vista.limpiarFormulario();
         cargarListas();
-    }
-    /**
-     * Obtiene la fecha de venta de la confirmación del servidor con formato legible.
-     *
-     * @param resultado resultado de {@code actualizarTiendaVenta}
-     * @return fecha en formato {@code dd/MM/yyyy HH:mm}, el texto original si no se puede
-     *         interpretar, o "N/D" si no viene
-     */
-    private static String extraerFecha(JsonElement resultado) {
-        if (resultado == null || !resultado.isJsonObject() || !resultado.getAsJsonObject().has("fecha_venta")) {
-            return "N/D";
-        }
-        String texto = resultado.getAsJsonObject().get("fecha_venta").getAsString();
-        try {
-            return LocalDateTimeAdapter.parsear(texto).format(FORMATO_FECHA);
-        } catch (DateTimeParseException e) {
-            return texto;
-        }
     }
 }

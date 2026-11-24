@@ -5,13 +5,6 @@ import java.util.Base64;
 /**
  * Código QR de una unidad tal como lo devuelve {@code obtenerQr}: {@code {numeroSerie, idProducto,
  * nombreProducto, pngBase64}}. La imagen PNG llega codificada en Base64.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-34:</b> Visualización del código QR de la unidad seleccionada al hacer doble clic.</li>
- *   <li><b>RF-35:</b> Guardado del código QR mostrado como archivo PNG local en disco.</li>
- * </ul>
- * </p>
  */
 public class QrDTO {
     private String numeroSerie;

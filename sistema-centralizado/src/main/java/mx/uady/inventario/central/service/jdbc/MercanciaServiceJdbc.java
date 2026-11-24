@@ -63,16 +63,6 @@ public final class MercanciaServiceJdbc implements MercanciaService {
         }
     }
 
-    /**
-     * @param idProducto  producto a filtrar, o {@code null} para todos 
-     * @param numeroSerie estado a filtrar, o {@code null} para todos
-     * @return
-     */
-    @Override
-    public Mercancia historialPrecio(int idProducto, String numeroSerie) {
-        return null;
-    }
-
     @Override
     public Mercancia asegurarQr(String numeroSerie) {
         Objects.requireNonNull(numeroSerie, "numeroSerie");

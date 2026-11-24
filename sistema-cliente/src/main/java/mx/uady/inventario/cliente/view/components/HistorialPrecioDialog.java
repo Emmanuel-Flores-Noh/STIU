@@ -27,12 +27,6 @@ import java.util.List;
  * precios anteriores con su fecha, del más antiguo al más reciente. Si el producto nunca cambió de
  * precio, muestra solo el precio actual y lo indica.
  *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-36:</b> Consulta y despliegue del historial de precios de un producto (nombre, precio actual y tabla cronológica de precios anteriores).</li>
- *   <li><b>RNF-23:</b> Desacoplamiento de componentes de presentación visual.</li>
- * </ul>
- * </p>
  */
 public class HistorialPrecioDialog extends JDialog {
 
@@ -73,8 +67,8 @@ public class HistorialPrecioDialog extends JDialog {
         lblNombre.setFont(lblNombre.getFont().deriveFont(Font.BOLD, 14f));
 
         // Mantener precio si es nulo
-        Boolean precioNulo = historial.getPrecioActual() != null;
-        String precioTexto = precioNulo ? FormateadorTexto.precio(historial.getPrecioActual()) : "N/D";
+        Boolean cambioPrecio = historial.getPrecioActual() != null;
+        String precioTexto = cambioPrecio ? FormateadorTexto.precio(historial.getPrecioActual()) : "N/D";
         JLabel lblPrecio = new JLabel("Precio actual: " + precioTexto);
         lblPrecio.setName("lblPrecioActual");
         resumen.add(lblNombre);

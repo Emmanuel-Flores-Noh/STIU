@@ -17,7 +17,7 @@ class SolicitudRespuestaTest {
 
     @Test
     @Tag("RF-39")
-    @DisplayName("Test de serialización y deserialización de Solicitud (RF-39)")
+    @DisplayName("RF-39 · Serialización y deserialización de Solicitud")
     void roundTripSolicitud() {
         JsonObject params = new JsonObject();
         params.addProperty("numero_serie", "SN-001");
@@ -34,7 +34,7 @@ class SolicitudRespuestaTest {
 
     @Test
     @Tags({@Tag("RF-17"), @Tag("RF-24")})
-    @DisplayName("Test de serialización y deserialización de Respuesta de éxito (RF-17, RF-24)")
+    @DisplayName("RF-17, RF-24 · Serialización y deserialización de Respuesta de éxito")
     void roundTripRespuestaExito() {
         Respuesta original = Respuesta.exito("req-2", new JsonPrimitive("OK"));
         String json = GsonFactory.DEFAULT.toJson(original);
@@ -47,7 +47,7 @@ class SolicitudRespuestaTest {
 
     @Test
     @Tag("RF-24")
-    @DisplayName("Test de serialización y deserialización de Respuesta de error (RF-24)")
+    @DisplayName("RF-24 · Serialización y deserialización de Respuesta de error")
     void roundTripRespuestaError() {
         Respuesta original = Respuesta.error("req-3", mx.uady.inventario.common.error.CodigoError.PARAMETROS_INVALIDOS, null);
         String json = GsonFactory.DEFAULT.toJson(original);
@@ -59,7 +59,7 @@ class SolicitudRespuestaTest {
 
     @Test
     @Tag("RF-39")
-    @DisplayName("Test para fechaHoraSeSerializa: Serialización y deserialización de LocalDateTime en formato ISO 8601")
+    @DisplayName("RF-39 · Serialización y deserialización de LocalDateTime en ISO-8601")
     void fechaHoraSeSerializa() {
         LocalDateTime fecha = LocalDateTime.of(2026, 11, 11, 10, 30, 0);
         Solicitud solicitud = Solicitud.crearConFechaEspecifica("id", "svc", "op", new JsonObject(), fecha);

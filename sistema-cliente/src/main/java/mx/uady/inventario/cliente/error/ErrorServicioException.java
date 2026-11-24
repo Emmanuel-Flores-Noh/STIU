@@ -5,14 +5,6 @@ import mx.uady.inventario.common.error.CodigoError;
 /**
  * Señala que el Broker o el Sistema 1 respondieron la solicitud con estado de error. Conserva el
  * código y el mensaje del contrato para traducirlos a un texto entendible.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-33:</b> Rechazo de venta con la causa descriptiva enviada por el servidor remoto sin reintentar.</li>
- *   <li><b>RF-37:</b> Presentación individualizada de cada código de error del catálogo estandarizado.</li>
- *   <li><b>RF-38:</b> Discriminación de errores que permiten ofrecer el reintento de la operación.</li>
- * </ul>
- * </p>
  */
 public class ErrorServicioException extends ComunicacionException {
 

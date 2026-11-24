@@ -8,12 +8,6 @@ import java.math.BigDecimal;
  * Precio anterior de un producto con la fecha en que cambió. Corresponde a un elemento del arreglo
  * {@code historial} que devuelve {@code listarPreciosProducto}, serializado desde el modelo
  * {@code HistorialPrecio} de {@code common} ({@code precioHistorico}, {@code fechaCambio}).
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-36:</b> Consulta del historial de precios de un producto (lista cronológica de precios anteriores y fecha de cambio).</li>
- * </ul>
- * </p>
  */
 public class PrecioDTO {
 

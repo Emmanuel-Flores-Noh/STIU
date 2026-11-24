@@ -6,15 +6,6 @@ import mx.uady.inventario.cliente.util.PantallaTipo;
 /**
  * Casos de uso sobre el producto de una unidad: consulta de su código QR y de su historial de precios.
  * Las consultas corren en segundo plano y los errores se informan con {@link PresentadorErrores}.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-34:</b> Visualización del código QR de la unidad seleccionada al hacer doble clic.</li>
- *   <li><b>RF-36:</b> Consulta del historial de precios del producto de la unidad elegida.</li>
- *   <li><b>RF-37:</b> Notificación adecuada de errores si falla la consulta remota.</li>
- *   <li><b>RF-38:</b> Reintento interactivo de la consulta en caso de problemas de red.</li>
- * </ul>
- * </p>
  */
 public class ProductoController {
 

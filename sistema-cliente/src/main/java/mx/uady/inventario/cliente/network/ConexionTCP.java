@@ -20,15 +20,6 @@ import java.util.concurrent.TimeUnit;
  * <p>El tiempo límite es <b>total</b> (conexión + espera de respuesta): lo que se gasta conectando
  * se descuenta del tiempo de lectura. No reintenta; cada fallo se clasifica en una
  * {@link ComunicacionException}.</p>
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-37:</b> Identificación de causas de error de red (sin conexión, tiempo agotado, conexión interrumpida).</li>
- *   <li><b>RF-39:</b> Conexión de sockets TCP exclusivamente contra el Broker.</li>
- *   <li><b>RF-40:</b> Respeto estricto del tiempo límite de respuesta configurado ({@code timeoutMs}).</li>
- *   <li><b>RNF-05:</b> Gestión del timeout general para evitar bloqueos indefinidos.</li>
- * </ul>
- * </p>
  */
 public class ConexionTCP {
 

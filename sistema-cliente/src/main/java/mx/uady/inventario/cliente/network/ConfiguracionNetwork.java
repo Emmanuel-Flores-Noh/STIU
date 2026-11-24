@@ -7,14 +7,6 @@ import java.util.Objects;
  * Configuración de red del cliente. Define el parámetro CLIENT_TIMEOUT_MS garantizando
  * que supere el tiempo de respuesta en el peor caso del Broker (~15s) (documentado en README y docker-compose.yml).
  *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-39:</b> Comunicación exclusiva con el Broker a través de {@code BROKER_HOST} y {@code BROKER_PORT}.</li>
- *   <li><b>RF-40:</b> Tiempo límite del cliente ({@code CLIENT_TIMEOUT_MS}) de al menos 22,000 ms; rechaza valores no numéricos o &le; 0.</li>
- *   <li><b>RNF-05:</b> Tiempos máximos de espera alineados con los reintentos del Broker.</li>
- * </ul>
- * </p>
- *
  * @param brokerHost   host o dirección IP del Broker
  * @param brokerPuerto puerto del Broker
  * @param timeoutMs    tiempo límite total de una solicitud, en milisegundos

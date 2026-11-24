@@ -5,15 +5,6 @@ import java.awt.Component;
 
 /**
  * Cuadros de diálogo con el resultado de una operación: éxito, error y la pregunta de reintento.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-32:</b> Notificación modal de éxito al registrar venta.</li>
- *   <li><b>RF-33:</b> Notificación modal ante rechazo de venta sin opción a reintentar.</li>
- *   <li><b>RF-37:</b> Despliegue de mensajes comprensibles para errores de red o servidor.</li>
- *   <li><b>RF-38:</b> Ventana con el tipo de error y la pregunta «¿Desea reintentar la operación?» con opciones «Sí» / «No».</li>
- * </ul>
- * </p>
  */
 public class OperacionDialog {
 

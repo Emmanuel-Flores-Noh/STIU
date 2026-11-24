@@ -16,16 +16,6 @@ import java.util.UUID;
 /**
  * Gestiona la comunicación de sockets TCP con el Broker, controlando el establecimiento
  * de conexiones, el envío de tramas JSON y el manejo de timeouts de lectura.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-37:</b> Manejo de errores de servidor y red.</li>
- *   <li><b>RF-39:</b> Comunicación exclusiva con el Broker; asignación de {@code idSolicitud} único por solicitud
- *       y rechazo inmediato de respuestas con {@code idSolicitud} discrepante o formato inválido.</li>
- *   <li><b>RF-40:</b> Respeto al tiempo de respuesta configurado del Broker.</li>
- *   <li><b>RNF-28:</b> Detección de respuestas inválidas y correlación estricta por {@code idSolicitud}.</li>
- * </ul>
- * </p>
  */
 public class ClienteTCP {
 

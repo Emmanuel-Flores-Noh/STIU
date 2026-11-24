@@ -6,17 +6,6 @@ import mx.uady.inventario.cliente.model.UsuarioDTO;
 
 /**
  * Define las acciones que los componentes de la vista pueden solicitar al controlador.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-25:</b> Carga inicial de listas y mercancía al abrir la pantalla.</li>
- *   <li><b>RF-30:</b> Recarga manual de catálogos e inventario a través de {@link #cargarListas()}.</li>
- *   <li><b>RF-31:</b> Validación de datos completos para registrar venta.</li>
- *   <li><b>RF-32:</b> Registro de venta de la unidad seleccionada mediante {@link #registrarVenta(MercanciaDTO, TiendaDTO, UsuarioDTO)}.</li>
- *   <li><b>RF-34:</b> Consulta y visualización del código QR mediante {@link #consultarQr(String)}.</li>
- *   <li><b>RF-36:</b> Consulta del historial de precios de un producto mediante {@link #consultarHistorialPrecios(Integer)}.</li>
- * </ul>
- * </p>
  */
 public interface VentaOperaciones {
 

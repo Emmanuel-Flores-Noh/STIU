@@ -16,16 +16,6 @@ import java.util.regex.Pattern;
 /**
  * Normalización y presentación de texto para el encargado: comparación sin acentos ni mayúsculas,
  * estado de las unidades, fechas {@code dd/MM/yyyy HH:mm} y precios en pesos.
- *
- * <p>Trazabilidad con Requisitos:
- * <ul>
- *   <li><b>RF-26:</b> Filtrado y despliegue exclusivo de unidades en estado «En almacén».</li>
- *   <li><b>RF-27:</b> Búsqueda parcial de inventario insensible a mayúsculas y acentos diacríticos.</li>
- *   <li><b>RF-32:</b> Formateo de fecha de confirmación de venta en formato {@code dd/MM/yyyy HH:mm}.</li>
- *   <li><b>RF-36:</b> Formateo de precios en moneda y fechas cronológicas para el historial de precios.</li>
- *   <li><b>RNF-07:</b> Eficiencia de procesamiento para filtros de inventario en tiempo real.</li>
- * </ul>
- * </p>
  */
 public final class FormateadorTexto {
 
