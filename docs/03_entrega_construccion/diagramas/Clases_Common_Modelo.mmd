@@ -1,0 +1,89 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Common, componente modelo
+    %% Paquete: mx.uady.inventario.common.modelo
+
+    class EstadoMercancia {
+        <<enumeration>>
+        EN_ALMACEN
+        VENDIDO
+        +desdeCadena(String valor)$ EstadoMercancia
+    }
+    class HistorialPrecio {
+        <<record>>
+        -int idHistorial
+        -int idProducto
+        -BigDecimal precioHistorico
+        -LocalDateTime fechaCambio
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Mercancia {
+        <<record>>
+        -String numeroSerie
+        -int idProducto
+        -EstadoMercancia estado
+        -String rutaQr
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Producto {
+        <<record>>
+        -int idProducto
+        -String nombre
+        -String descripcion
+        -BigDecimal precioActual
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Rol {
+        <<record>>
+        -int idRol
+        -String nombreRol
+        -String descripcion
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class TiendaAlmacen {
+        <<record>>
+        -int idTienda
+        -String nombre
+        -String direccion
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Usuario {
+        <<record>>
+        -int idUsuario
+        -int idRol
+        -String nombres
+        -String apellidoPaterno
+        -String apellidoMaterno
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+    class Venta {
+        <<record>>
+        -int idVenta
+        -String numeroSerie
+        -int idTienda
+        -int idUsuario
+        -LocalDateTime fechaVenta
+        +equals(Object o) boolean
+        +hashCode() int
+        +toString() String
+    }
+
+    Mercancia "0..*" --> "1" EstadoMercancia : estado
+    Mercancia "0..*" ..> "1" Producto : idProducto
+    HistorialPrecio "0..*" ..> "1" Producto : idProducto
+    Venta "0..1" ..> "1" Mercancia : numeroSerie
+    Venta "0..*" ..> "1" TiendaAlmacen : idTienda
+    Venta "0..*" ..> "1" Usuario : idUsuario
+    Usuario "0..*" ..> "1" Rol : idRol

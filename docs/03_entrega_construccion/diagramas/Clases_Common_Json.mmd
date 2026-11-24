@@ -1,0 +1,19 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Common, componente json
+    %% Paquete: mx.uady.inventario.common.json
+
+    class GsonFactory {
+        +Gson DEFAULT$
+        -GsonFactory()
+        -create()$ Gson
+    }
+    class LocalDateTimeAdapter {
+        +DateTimeFormatter FORMATO_ISO$
+        +formatear(LocalDateTime valor)$ String
+        +parsear(String texto)$ LocalDateTime
+        +write(JsonWriter out, LocalDateTime value) void
+        +read(JsonReader in) LocalDateTime
+    }
+
+    GsonFactory "1" ..> "1" LocalDateTimeAdapter : registra

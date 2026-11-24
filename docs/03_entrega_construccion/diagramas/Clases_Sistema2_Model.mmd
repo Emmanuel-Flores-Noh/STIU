@@ -1,0 +1,80 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente model
+    %% Paquete: mx.uady.inventario.cliente.model
+
+    class Catalogos {
+        <<record>>
+        -List~TiendaDTO~ tiendas
+        -List~UsuarioDTO~ usuarios
+        -List~MercanciaDTO~ mercancia
+    }
+    class MercanciaDTO {
+        -String numeroSerie
+        -Integer idProducto
+        -String nombreProducto
+        -String estado
+        +MercanciaDTO()
+        +MercanciaDTO(String numeroSerie, Integer idProducto, String nombreProducto, String estado)
+        +getNumeroSerie() String
+        +getIdProducto() Integer
+        +getNombreProducto() String
+        +getEstado() String
+    }
+    class PrecioDTO {
+        -BigDecimal precio
+        -String fecha
+        +PrecioDTO(BigDecimal precio, String fecha)
+        +getPrecio() BigDecimal
+        +getFecha() String
+    }
+    class PrecioHistorialDTO {
+        -Integer idProducto
+        -String nombre
+        -BigDecimal precioActual
+        -List~PrecioDTO~ historialPrecios
+        +PrecioHistorialDTO()
+        +PrecioHistorialDTO(Integer idProducto, String nombre, BigDecimal precioActual, List~PrecioDTO~ historialPrecios)
+        +getIdProducto() Integer
+        +getNombre() String
+        +getPrecioActual() BigDecimal
+        +getHistorialPrecios() List~PrecioDTO~
+    }
+    class QrDTO {
+        -String numeroSerie
+        -Integer idProducto
+        -String nombreProducto
+        -String pngBase64
+        +QrDTO()
+        +QrDTO(String numeroSerie, Integer idProducto, String nombreProducto, String pngBase64)
+        +getNumeroSerie() String
+        +getIdProducto() Integer
+        +getNombreProducto() String
+        +getPngBase64() String
+        +decodificarPng() byte[]
+    }
+    class TiendaDTO {
+        -Long idTienda
+        -String nombre
+        -String direccion
+        +TiendaDTO(Long idTienda, String nombre, String direccion)
+        +getIdTienda() Long
+        +getNombre() String
+        +getDireccion() String
+        +toString() String
+    }
+    class UsuarioDTO {
+        -Long idUsuario
+        -String nombres
+        -String apellidoPaterno
+        +UsuarioDTO(Long idUsuario, String nombres, String apellidoPaterno)
+        +getIdUsuario() Long
+        +getNombres() String
+        +getApellidoPaterno() String
+        +toString() String
+    }
+
+    Catalogos "1" o-- "0..*" TiendaDTO : tiendas
+    Catalogos "1" o-- "0..*" UsuarioDTO : usuarios
+    Catalogos "1" o-- "0..*" MercanciaDTO : mercancia
+    PrecioHistorialDTO "1" *-- "0..*" PrecioDTO : historialPrecios

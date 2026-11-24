@@ -1,0 +1,21 @@
+classDiagram
+    %% Diagrama de clases - Sistema 1, componente model
+    %% Paquete: mx.uady.inventario.central.model
+
+    class ProductoConUnidades {
+        <<record>>
+        -Producto producto
+        -int unidades
+        +ProductoConUnidades(Producto producto, int unidades)
+    }
+    class VentaHistorial {
+        <<record>>
+        -int idVenta
+        -String numeroSerie
+        -String producto
+        -String tienda
+        -String usuario
+        -LocalDateTime fechaVenta
+        -int idProducto
+    }
+

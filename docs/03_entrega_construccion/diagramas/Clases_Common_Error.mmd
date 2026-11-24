@@ -1,0 +1,20 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Common, componente error
+    %% Paquete: mx.uady.inventario.common.error
+
+    class CodigoError {
+        <<enumeration>>
+        SERVICIO_DESCONOCIDO
+        OPERACION_NO_SOPORTADA
+        PARAMETROS_INVALIDOS
+        PROVEEDOR_NO_REGISTRADO
+        TIMEOUT
+        RECURSO_NO_ENCONTRADO
+        ERROR_INTERNO
+        -String codigo
+        -String mensajePorDefecto
+        -CodigoError(String codigo, String mensajePorDefecto)
+        +getCodigo() String
+        +getMensajePorDefecto() String
+    }

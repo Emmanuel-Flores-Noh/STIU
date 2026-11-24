@@ -1,0 +1,109 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    direction TB
+    %% Diagrama de clases general - Sistema 1 (Centralizado / Proveedor)
+    %% Paquete raíz: mx.uady.inventario.central
+    %% Muestra la clase principal de cada componente y las relaciones entre componentes.
+    %% Los atributos y métodos están en el diagrama de cada componente.
+
+    namespace raiz {
+        class Main
+    }
+
+    namespace util {
+        class ConfiguracionServicio {
+            <<record>>
+        }
+        class ConfiguracionBD {
+            <<record>>
+        }
+        class QrUtil
+    }
+
+    namespace controller {
+        class AppContext {
+            <<record>>
+        }
+        class UiLauncher
+    }
+
+    namespace view {
+        class VentanaPrincipal
+    }
+
+    namespace network {
+        class ServidorServicio
+        class DespachadorSolicitudes
+        class RegistradorBroker
+    }
+
+    namespace service {
+        class ProductoService {
+            <<interface>>
+        }
+        class MercanciaService {
+            <<interface>>
+        }
+        class ConsultasVentaService {
+            <<interface>>
+        }
+        class VentaService
+        class QrService
+    }
+
+    namespace repository {
+        class ProveedorConexion {
+            <<interface>>
+        }
+        class VentaRepository
+    }
+
+    namespace model {
+        class ProductoConUnidades {
+            <<record>>
+        }
+        class VentaHistorial {
+            <<record>>
+        }
+    }
+
+    %% --- Arranque ---
+    Main ..> ConfiguracionServicio : desdeEntorno()
+    Main ..> ConfiguracionBD : desdeEntorno()
+    Main "1" ..> "1" AppContext : crea
+    Main "1" ..> "1" ServidorServicio : crea e inicia
+    Main "1" ..> "1" RegistradorBroker : crea e inicia
+    Main ..> UiLauncher : inicia la interfaz
+
+    %% --- controller -> service / view / repository ---
+    AppContext "1" --> "1" ProductoService : productoService
+    AppContext "1" --> "1" MercanciaService : mercanciaService
+    AppContext "1" --> "1" VentaService : ventaService
+    AppContext "1" --> "1" ConsultasVentaService : consultasVenta
+    AppContext "1" ..> "1" ProveedorConexion : crea
+    UiLauncher ..> AppContext : usa
+    UiLauncher "1" ..> "1" VentanaPrincipal : crea
+
+    %% --- network -> service / util ---
+    ServidorServicio "1" --> "1" DespachadorSolicitudes : despachador
+    DespachadorSolicitudes "1" ..> "0..1" VentaService : usa
+    DespachadorSolicitudes "1" ..> "0..1" ConsultasVentaService : usa
+    DespachadorSolicitudes "1" ..> "0..1" MercanciaService : usa
+    DespachadorSolicitudes "1" ..> "0..1" ProductoService : usa
+    RegistradorBroker ..> ConfiguracionServicio : usa
+
+    %% --- service -> repository / model / util ---
+    MercanciaService "0..*" ..> "1" QrService : genera QR
+    QrService ..> QrUtil : escribe PNG
+    VentaService "1" ..> "1" VentaRepository : registra la venta con
+    ConsultasVentaService "1" ..> "1" VentaRepository : usa
+    ProductoService "1" ..> "0..*" ProductoConUnidades : devuelve
+    ConsultasVentaService "1" ..> "0..*" VentaHistorial : devuelve
+
+    %% --- repository -> util / model ---
+    VentaRepository "0..*" --> "1" ProveedorConexion : connectionProvider
+    ProveedorConexion ..> ConfiguracionBD : usa
