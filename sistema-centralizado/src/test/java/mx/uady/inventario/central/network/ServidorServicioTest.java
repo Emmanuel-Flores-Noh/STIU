@@ -8,6 +8,8 @@ import mx.uady.inventario.common.error.CodigoError;
 import mx.uady.inventario.common.json.GsonFactory;
 import mx.uady.inventario.common.servicio.Operaciones;
 import mx.uady.inventario.common.servicio.Servicios;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -47,6 +49,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Atiende una solicitud y conserva el id")
     void atiendeUnaSolicitudYConservaElId() throws Exception {
         ServidorServicio servidor = new ServidorServicio(0, 4, despachadorDePrueba());
         servidor.iniciar();
@@ -63,6 +67,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Un JSON malformado devuelve PARAMETROS_INVALIDOS y no tumba el servidor")
     void jsonMalformadoDevuelveParametrosInvalidosYNoTumbaElServidor() throws Exception {
         ServidorServicio servidor = new ServidorServicio(0, 4, despachadorDePrueba());
         servidor.iniciar();
@@ -87,6 +93,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Una operación pendiente devuelve OPERACION_NO_SOPORTADA")
     void operacionPendienteDevuelveNoSoportada() throws Exception {
         ServidorServicio servidor = new ServidorServicio(0, 4, DespachadorSolicitudes.estandar());
         servidor.iniciar();
@@ -102,6 +110,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RF-24")
+    @DisplayName("RF-24 · Atiende varias solicitudes en la misma conexión")
     void atiendeVariasSolicitudesEnLaMismaConexion() throws Exception {
         ServidorServicio servidor = new ServidorServicio(0, 4, despachadorDePrueba());
         servidor.iniciar();
@@ -122,6 +132,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RNF-02")
+    @DisplayName("RNF-02 · Atiende clientes concurrentes sin mezclar respuestas")
     void atiendeClientesConcurrentesSinMezclarRespuestas() throws Exception {
         int clientes = 20;
         ServidorServicio servidor = new ServidorServicio(0, 8, despachadorDePrueba());
@@ -153,6 +165,8 @@ class ServidorServicioTest {
     }
 
     @Test
+    @Tag("RNF-18")
+    @DisplayName("RNF-18 · Detener cierra el puerto")
     void detenerCierraElPuerto() throws Exception {
         ServidorServicio servidor = new ServidorServicio(0, 2, despachadorDePrueba());
         servidor.iniciar();

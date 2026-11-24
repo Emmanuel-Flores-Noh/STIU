@@ -5,6 +5,7 @@ import mx.uady.inventario.central.repository.VentaRepository;
 import mx.uady.inventario.central.repository.VentaRepositoryException;
 import mx.uady.inventario.central.repository.VentaResultado;
 import mx.uady.inventario.central.util.ConfiguracionBD;
+import mx.uady.inventario.common.json.LocalDateTimeAdapter;
 
 import java.util.Objects;
 
@@ -65,7 +66,7 @@ public class VentaService {
         JsonObject confirmacion = new JsonObject();
         confirmacion.addProperty("numero_serie", resultado.numeroSerie());
         confirmacion.addProperty("id_tienda", resultado.idTienda());
-        confirmacion.addProperty("fecha_venta", resultado.fechaVenta().toString());
+        confirmacion.addProperty("fecha_venta", LocalDateTimeAdapter.formatear(resultado.fechaVenta()));
         return confirmacion;
     }
 

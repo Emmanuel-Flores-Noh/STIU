@@ -1,5 +1,7 @@
 package mx.uady.inventario.central.util;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ConfiguracionBDTest {
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Construye la URL con todas las variables")
     void construyeUrlConTodasLasVariables() {
         ConfiguracionBD configuracion = ConfiguracionBD.desdeMapa(Map.of(
                 "DB_HOST", "mariadb",
@@ -26,6 +30,8 @@ class ConfiguracionBDTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Usa valores por defecto para host, puerto y nombre")
     void usaValoresPorDefectoParaHostPuertoYNombre() {
         ConfiguracionBD configuracion = ConfiguracionBD.desdeMapa(Map.of(
                 "DB_USER", "uady_user",
@@ -35,6 +41,9 @@ class ConfiguracionBDTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @Tag("RNF-27")
+    @DisplayName("RNF-13, RNF-27 · Exige usuario y contraseña")
     void exigeUsuarioYContrasena() {
         Map<String, String> sinUsuario = new HashMap<>();
         sinUsuario.put("DB_PASSWORD", "secreto");
@@ -50,6 +59,8 @@ class ConfiguracionBDTest {
     }
 
     @Test
+    @Tag("RNF-13")
+    @DisplayName("RNF-13 · Rechaza un puerto inválido")
     void rechazaPuertoInvalido() {
         Map<String, String> variables = Map.of(
                 "DB_PORT", "no-es-un-puerto",

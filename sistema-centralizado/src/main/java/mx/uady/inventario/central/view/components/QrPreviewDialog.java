@@ -20,7 +20,6 @@ import java.awt.Window;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 /**
  * Diálogo modal reutilizable para visualizar y guardar un código QR.
@@ -99,27 +98,15 @@ public class QrPreviewDialog extends JDialog {
         selector.setDialogTitle("Guardar código QR como PNG");
         selector.setSelectedFile(Path.of(rutaQr).toFile());
 
-        if (selector.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-            return;
-        }
-
-        Path destino = selector.getSelectedFile().toPath();
-        try {
-            Files.copy(Path.of(rutaQr), destino, StandardCopyOption.REPLACE_EXISTING);
-            JOptionPane.showMessageDialog(
-                    this,
-                    "El código QR se guardó correctamente.",
-                    "Código QR",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        } catch (IOException error) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No se pudo guardar el código QR: " + error.getMessage(),
-                    "Error al guardar",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        Path destino = selector.showSaveDialog(this) == JFileChooser.APPROVE_OPTION
+                ? selector.getSelectedFile().toPath()
+                : null;
+        QrExportador.guardar(Path.of(rutaQr), destino).ifPresent(resultado -> JOptionPane.showMessageDialog(
+                this,
+                resultado.mensaje(),
+                resultado.guardado() ? "Código QR" : "Error al guardar",
+                resultado.guardado() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        ));
     }
 
     private String escaparHtml(String valor) {

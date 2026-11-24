@@ -3,8 +3,6 @@ package mx.uady.inventario.central.controller;
 import java.util.List;
 import java.util.Objects;
 
-import javax.swing.SwingUtilities;
-
 import mx.uady.inventario.central.model.ProductoConUnidades;
 import mx.uady.inventario.central.service.MercanciaService;
 import mx.uady.inventario.central.service.ProductoService;
@@ -12,7 +10,6 @@ import mx.uady.inventario.central.service.SerieDuplicadaException;
 import mx.uady.inventario.central.service.ValidacionException;
 import mx.uady.inventario.central.view.MercanciaPanel;
 import mx.uady.inventario.central.view.Mensajes;
-import mx.uady.inventario.central.view.components.QrPreviewDialog;
 import mx.uady.inventario.common.modelo.EstadoMercancia;
 import mx.uady.inventario.common.modelo.Mercancia;
 import mx.uady.inventario.common.modelo.Producto;
@@ -139,18 +136,8 @@ public final class MercanciaController {
                 .alTerminar(unidad -> {
                     vista.actualizarUnidad(unidad);
                     vista.seleccionarUnidad(unidad.numeroSerie());
-                    abrirVistaPrevia(unidad);
+                    vista.mostrarQr(unidad);
                 })
                 .ejecutar(vista);
-    }
-
-    private void abrirVistaPrevia(Mercancia unidad) {
-        try {
-            new QrPreviewDialog(SwingUtilities.getWindowAncestor(vista), unidad.numeroSerie(),
-                    unidad.idProducto(), vista.nombreProducto(unidad.idProducto()), unidad.rutaQr())
-                    .setVisible(true);
-        } catch (IllegalArgumentException e) {
-            Mensajes.mostrarError(vista, e);
-        }
     }
 }

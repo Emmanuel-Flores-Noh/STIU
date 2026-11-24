@@ -9,6 +9,24 @@ import mx.uady.inventario.cliente.util.FormateadorTexto;
 import mx.uady.inventario.cliente.util.PantallaTipo;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import mx.uady.inventario.cliente.util.ConfiguracionNetwork;
+import mx.uady.inventario.cliente.util.TraductorErrores;
+import mx.uady.inventario.cliente.view.RegistroVentaFrame;
+import mx.uady.inventario.common.contrato.EstadoRespuesta;
+import mx.uady.inventario.common.contrato.Respuesta;
+import mx.uady.inventario.common.contrato.Solicitud;
+import mx.uady.inventario.common.json.GsonFactory;
+import mx.uady.inventario.common.json.LocalDateTimeAdapter;
+import mx.uady.inventario.common.servicio.Operaciones;
+import mx.uady.inventario.common.servicio.Servicios;
+
+import javax.swing.*;
+import java.lang.reflect.Type;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Controlador encargado de coordinar la lógica de negocio para el registro de ventas
@@ -142,5 +160,23 @@ public class RegistroVentaController implements VentaOperaciones {
                 + "\nFecha: " + FormateadorTexto.fecha(fechaVenta));
         vista.limpiarFormulario();
         cargarListas();
+    }
+    /**
+     * Obtiene la fecha de venta de la confirmación del servidor con formato legible.
+     *
+     * @param resultado resultado de {@code actualizarTiendaVenta}
+     * @return fecha en formato {@code dd/MM/yyyy HH:mm}, el texto original si no se puede
+     *         interpretar, o "N/D" si no viene
+     */
+    private static String extraerFecha(JsonElement resultado) {
+        if (resultado == null || !resultado.isJsonObject() || !resultado.getAsJsonObject().has("fecha_venta")) {
+            return "N/D";
+        }
+        String texto = resultado.getAsJsonObject().get("fecha_venta").getAsString();
+        try {
+            return LocalDateTimeAdapter.parsear(texto).format(FORMATO_FECHA);
+        } catch (DateTimeParseException e) {
+            return texto;
+        }
     }
 }

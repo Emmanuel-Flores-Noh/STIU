@@ -10,6 +10,8 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import mx.uady.inventario.central.model.VentaHistorial;
@@ -22,6 +24,8 @@ class VentaHistorialPanelTest {
             "Norte", "Luis", LocalDateTime.of(2026, 2, 10, 12, 0), 8);
 
     @Test
+    @Tag("RF-14")
+    @DisplayName("RF-14 · Filtra por tienda, producto, fechas y serie")
     void filtraPorTiendaProductoFechasYSerie() throws Exception {
         MercanciaPanelTest.enEdt(() -> {
             VentaHistorialPanel panel = new VentaHistorialPanel();
@@ -51,6 +55,8 @@ class VentaHistorialPanelTest {
     }
 
     @Test
+    @Tag("RF-14")
+    @DisplayName("RF-14 · Los combos se llenan con los valores del historial y conservan la selección")
     void losCombosSeLlenanConLosValoresDelHistorialYConservanLaSeleccion() throws Exception {
         MercanciaPanelTest.enEdt(() -> {
             VentaHistorialPanel panel = new VentaHistorialPanel();
