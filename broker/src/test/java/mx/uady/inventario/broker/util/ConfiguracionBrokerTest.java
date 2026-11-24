@@ -1,5 +1,7 @@
 package mx.uady.inventario.broker.util;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -10,6 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ConfiguracionBrokerTest {
 
     @Test
+    @Tag("RF-57")
+    @Tag("RNF-05")
+    @DisplayName("RF-57, RNF-05 · Sin variables de entorno usa los valores por defecto")
     void valoresPorDefecto() {
         ConfiguracionBroker config = ConfiguracionBroker.desdeMapa(Map.of());
 
@@ -24,6 +29,9 @@ class ConfiguracionBrokerTest {
     }
 
     @Test
+    @Tag("RF-57")
+    @Tag("RNF-13")
+    @DisplayName("RF-57, RNF-13 · Lee todas las variables de entorno del broker")
     void leeTodasLasVariables() {
         ConfiguracionBroker config = ConfiguracionBroker.desdeMapa(Map.of(
                 ConfiguracionBroker.VAR_PUERTO, "0",
@@ -46,6 +54,8 @@ class ConfiguracionBrokerTest {
     }
 
     @Test
+    @Tag("RF-57")
+    @DisplayName("RF-57 · Una variable vacía usa su valor por defecto")
     void valoresVaciosUsanDefault() {
         ConfiguracionBroker config = ConfiguracionBroker.desdeMapa(Map.of(
                 ConfiguracionBroker.VAR_TIMEOUT_LECTURA, "   ",
@@ -56,6 +66,8 @@ class ConfiguracionBrokerTest {
     }
 
     @Test
+    @Tag("RF-57")
+    @DisplayName("RF-57 · Una variable no numérica se rechaza")
     void variableNoNumericaFalla() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> ConfiguracionBroker.desdeMapa(Map.of(ConfiguracionBroker.VAR_TIMEOUT_LECTURA, "abc")));
@@ -63,6 +75,8 @@ class ConfiguracionBrokerTest {
     }
 
     @Test
+    @Tag("RF-57")
+    @DisplayName("RF-57 · Valores fuera de rango en la configuración se rechazan")
     void validaciones() {
         assertThrows(IllegalArgumentException.class,
                 () -> new ConfiguracionBroker(-1, 4, 100, 100, 0, 0, 1, 0));
@@ -83,6 +97,8 @@ class ConfiguracionBrokerTest {
     }
 
     @Test
+    @Tag("RF-57")
+    @DisplayName("RF-57 · Un mapa de variables nulo se rechaza")
     void mapaNuloFalla() {
         assertThrows(NullPointerException.class, () -> ConfiguracionBroker.desdeMapa(null));
     }

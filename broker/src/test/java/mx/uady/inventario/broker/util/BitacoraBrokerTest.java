@@ -6,6 +6,8 @@ import mx.uady.inventario.common.contrato.Solicitud;
 import mx.uady.inventario.common.error.CodigoError;
 import mx.uady.inventario.common.servicio.Servicios;
 import com.google.gson.JsonPrimitive;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,8 @@ class BitacoraBrokerTest {
      * Una solicitud exitosa muestra fecha, hilo, id, servicio.operacion, proveedor, estado y tiempo.
      */
     @Test
+    @Tag("RF-55")
+    @DisplayName("RF-55 · Anota una solicitud exitosa con su proveedor y su tiempo")
     void registraUnaSolicitudExitosa() {
         Solicitud solicitud = Solicitud.crear("ev-03", Servicios.INVENTARIO, "listarInventario", null);
 
@@ -45,6 +49,8 @@ class BitacoraBrokerTest {
      * Una respuesta de error incluye el código y el mensaje, y la falta de proveedor se indica.
      */
     @Test
+    @Tag("RF-55")
+    @DisplayName("RF-55 · Anota un error de una solicitud sin proveedor")
     void registraUnErrorSinProveedor() {
         Solicitud solicitud = Solicitud.crear("ev-05", "servicioFantasma", "listar", null);
 
@@ -59,6 +65,9 @@ class BitacoraBrokerTest {
      * Si el JSON no se pudo interpretar, la línea lo indica en lugar del servicio y la operación.
      */
     @Test
+    @Tag("RF-47")
+    @Tag("RF-55")
+    @DisplayName("RF-47, RF-55 · Anota una solicitud cuyo JSON no se pudo interpretar")
     void registraUnJsonNoInterpretable() {
         bitacora.registrarSolicitud(null, Respuesta.error(null, CodigoError.PARAMETROS_INVALIDOS, "JSON malformado"),
                 null, 0);
@@ -71,6 +80,8 @@ class BitacoraBrokerTest {
      * Un intento fallido muestra el número de intento, el total, el código y el detalle.
      */
     @Test
+    @Tag("RF-56")
+    @DisplayName("RF-56 · Anota un intento fallido hacia un proveedor")
     void registraUnIntentoFallido() {
         Solicitud solicitud = Solicitud.crear("ev-09", Servicios.INVENTARIO, "listarInventario", null);
 
@@ -86,6 +97,8 @@ class BitacoraBrokerTest {
      * Los cambios del registro y la marca de no disponible usan el prefijo de registro.
      */
     @Test
+    @Tag("RF-56")
+    @DisplayName("RF-56 · Anota los cambios del registro de servicios, aplicados o sin efecto")
     void registraLosCambiosDelRegistro() {
         bitacora.registrarCambioRegistro("registrar", Servicios.INVENTARIO, PROVEEDOR, true);
         bitacora.registrarCambioRegistro("sustituir", Servicios.GESTOR_PRECIOS, PROVEEDOR, false);
@@ -104,6 +117,8 @@ class BitacoraBrokerTest {
      * Los mensajes largos o con saltos de línea se recortan a una sola línea legible.
      */
     @Test
+    @Tag("RF-55")
+    @DisplayName("RF-55 · Recorta los mensajes largos o con saltos de línea a una sola línea")
     void recortaLosMensajesLargosEnUnaSolaLinea() {
         String largo = "x".repeat(200) + "\nsegunda linea";
         Solicitud solicitud = Solicitud.crear("ev-1", Servicios.INVENTARIO, "op", null);
@@ -119,6 +134,8 @@ class BitacoraBrokerTest {
      * El destino y el reloj son obligatorios.
      */
     @Test
+    @Tag("RF-55")
+    @DisplayName("RF-55 · La bitácora exige un destino y un reloj")
     void validaSusDependencias() {
         assertThrows(NullPointerException.class, () -> new BitacoraBroker(null));
         assertThrows(NullPointerException.class, () -> new BitacoraBroker(lineas::add, null));
