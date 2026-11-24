@@ -20,6 +20,7 @@ public class MercanciaDTO {
     /**
      * Crea el DTO con todos sus datos.
      *
+     * <p>Requisito: RF-26.</p>
      * @param numeroSerie    número de serie de la unidad
      * @param idProducto     identificador del producto
      * @param nombreProducto nombre del producto
@@ -34,6 +35,7 @@ public class MercanciaDTO {
 
     /**
      * Obtiene el número de serie de la unidad.
+     *
      *
      * @return número de serie
      */
