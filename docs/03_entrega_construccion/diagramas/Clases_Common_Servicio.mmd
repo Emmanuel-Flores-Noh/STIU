@@ -1,0 +1,24 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Common, componente servicio
+    %% Paquete: mx.uady.inventario.common.servicio
+
+    class Servicios {
+        +String GESTOR_TIENDAS$
+        +String INVENTARIO$
+        +String GESTOR_PRECIOS$
+        +String BROKER$
+        -Servicios()
+    }
+    class Operaciones {
+        +String LISTAR_TIENDAS$
+        +String ACTUALIZAR_TIENDA_VENTA$
+        +String LISTAR_INVENTARIO$
+        +String OBTENER_QR$
+        +String LISTAR_PRECIOS_PRODUCTO$
+        +String REGISTRAR_PROVEEDOR$
+        +String REMOVER_PROVEEDOR$
+        +String ACTUALIZAR_PROVEEDOR$
+        +String LISTAR_USUARIOS$
+        -Operaciones()
+    }

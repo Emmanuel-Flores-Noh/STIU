@@ -1,0 +1,84 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    direction TB
+    %% Diagrama de clases general - Common (biblioteca compartida)
+    %% Paquete raíz: mx.uady.inventario.common
+    %% Muestra las clases de cada componente y las relaciones entre ellas.
+    %% Los atributos y métodos están en el diagrama de cada componente.
+
+    namespace contrato {
+        class Solicitud
+        class Respuesta
+        class EstadoRespuesta {
+            <<enumeration>>
+        }
+    }
+
+    namespace error {
+        class CodigoError {
+            <<enumeration>>
+        }
+    }
+
+    namespace json {
+        class GsonFactory
+        class LocalDateTimeAdapter
+    }
+
+    namespace servicio {
+        class Servicios
+        class Operaciones
+    }
+
+    namespace modelo {
+        class Producto {
+            <<record>>
+        }
+        class HistorialPrecio {
+            <<record>>
+        }
+        class Mercancia {
+            <<record>>
+        }
+        class EstadoMercancia {
+            <<enumeration>>
+        }
+        class TiendaAlmacen {
+            <<record>>
+        }
+        class Usuario {
+            <<record>>
+        }
+        class Rol {
+            <<record>>
+        }
+        class Venta {
+            <<record>>
+        }
+    }
+
+    %% --- contrato ---
+    Respuesta "0..*" --> "1" EstadoRespuesta : estado
+    Respuesta "0..*" --> "0..1" CodigoError : codigoError
+
+    %% --- json ---
+    GsonFactory "1" ..> "1" LocalDateTimeAdapter : registra
+    LocalDateTimeAdapter ..> Solicitud : fechaHora
+    LocalDateTimeAdapter ..> Respuesta : fechaHora
+
+    %% --- servicio ---
+    Solicitud ..> Servicios : nombreServicio
+    Solicitud ..> Operaciones : nombreOperacion
+
+    %% --- modelo ---
+    Mercancia "0..*" --> "1" EstadoMercancia : estado
+    Mercancia "0..*" ..> "1" Producto : idProducto
+    HistorialPrecio "0..*" ..> "1" Producto : idProducto
+    Venta "0..1" ..> "1" Mercancia : numeroSerie
+    Venta "0..*" ..> "1" TiendaAlmacen : idTienda
+    Venta "0..*" ..> "1" Usuario : idUsuario
+    Usuario "0..*" ..> "1" Rol : idRol

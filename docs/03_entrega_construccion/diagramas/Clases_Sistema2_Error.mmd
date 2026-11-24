@@ -1,0 +1,50 @@
+classDiagram
+    direction TB
+    %% Diagrama de clases - Sistema 2, componente error
+    %% Paquete: mx.uady.inventario.cliente.error
+
+    class ComunicacionError {
+        <<enumeration>>
+        SIN_CONEXION
+        TIEMPO_AGOTADO
+        CONEXION_INTERRUMPIDA
+        RESPUESTA_INVALIDA
+        ERROR_SERVIDOR
+    }
+    class ComunicacionException {
+        -ComunicacionError tipo
+        -CodigoError codigoError
+        +ComunicacionException(ComunicacionError tipo, String mensaje, Throwable causa)
+        -ComunicacionException(CodigoError codigoError, String mensaje)
+        +servidor(CodigoError codigoError, String mensaje)$ ComunicacionException
+        +getTipo() ComunicacionError
+        +getCodigoError() CodigoError
+    }
+    class DescripcionError {
+        <<record>>
+        -String titulo
+        -String mensaje
+        -boolean reintentable
+    }
+    class ErrorServicioException {
+        -CodigoError codigoError
+        +ErrorServicioException(CodigoError codigoError, String mensaje)
+        +getCodigoError() CodigoError
+    }
+    class TraductorErrores {
+        -String TITULO_TIEMPO$
+        -TraductorErrores()
+        +describir(Throwable error)$ DescripcionError
+        +traducir(Throwable error)$ String
+        +esReintentable(Throwable error)$ boolean
+        -describirRed(ComunicacionError tipo)$ DescripcionError
+        -describirServidor(CodigoError codigo, String mensaje)$ DescripcionError
+        -describirTimeoutDelBroker(CodigoError codigo, String mensajeBroker)$ String
+        -detalle(String mensaje)$ String
+        -desenvolver(Throwable error)$ Throwable
+    }
+
+    ComunicacionException <|-- ErrorServicioException
+    ComunicacionException "0..*" --> "1" ComunicacionError : tipo
+    TraductorErrores ..> ComunicacionException : traduce
+    TraductorErrores "1" ..> "0..*" DescripcionError : crea
